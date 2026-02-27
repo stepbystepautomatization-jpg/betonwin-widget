@@ -495,9 +495,24 @@
     return result;
   }
 
+  // Security: strip lines containing credentials or internal-only info before showing to users
+  function sanitizeForUser(text) {
+    var CRED_PATTERNS = [
+      /contrase[ñn]a/i, /password/i,
+      /usuario\s*(→|:)/i, /user\s*(→|:)/i,
+      /pass\s*(→|:)/i,
+      /merchants\./i, /atlassian\.net/i, /backoffice/i,
+      /\d{4,}Welcome/i
+    ];
+    var lines = text.split('\n').filter(function (line) {
+      return !CRED_PATTERNS.some(function (re) { return re.test(line); });
+    });
+    return lines.join('\n').trim();
+  }
+
   // Build a natural response: intro (in user's language) + relevant content + closing
   function buildResponse(articleName, content, query) {
-    var extracted = smartExtract(content, query);
+    var extracted = sanitizeForUser(smartExtract(content, query));
     var name = (articleName || '').replace(/\.[^.]+$/, '');
     var intros = {
       en: 'Here\'s what I found' + (name ? ' about **' + name + '**' : '') + ':\n\n',
