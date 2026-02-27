@@ -8,7 +8,7 @@
     N8N_BASE: 'https://n8nbeton.online',
     KB_URL:   'https://script.google.com/macros/s/AKfycbw4QH_cxD2HmW18ReyCUzo4BDPwrHeUaMwYKxXnjwSNc0yhPxCAFqZRkI6dDBD5y0ZI/exec',
     ENDPOINTS: {
-      CHAT:        '/webhook/chat',
+      CHAT:        '/webhook/884acc5b-3a84-44cc-8f44-7c1b7df3df2a',
       VERIFY:      '/webhook/verify-deposit',
       STATUS:      '/webhook/status',
       PRESIGNED:   '/webhook/presigned-url',
@@ -462,37 +462,6 @@
   }
 
   // Smart extraction: finds the most relevant paragraph for the user's query (zero AI)
-  function smartExtract(content, query) {
-    var clean = content.trim().replace(/\r\n/g, '\n').replace(/\n{3,}/g, '\n\n');
-    var blocks = clean.split(/\n\n+/).map(function (b) { return b.trim(); })
-                      .filter(function (b) { return b.length > 10; });
-
-    // Short content — return as-is
-    if (blocks.length <= 2) { return clean; }
-
-    // Score each block by how many query words appear in it
-    var words = query.toLowerCase().split(/[\s,.?!;:]+/)
-                     .filter(function (w) { return w.length > 2; });
-    var scored = blocks.map(function (block) {
-      var lower = block.toLowerCase();
-      var score = words.reduce(function (acc, w) {
-        return acc + (lower.indexOf(w) !== -1 ? 1 : 0);
-      }, 0);
-      return { block: block, score: score };
-    });
-    scored.sort(function (a, b) { return b.score - a.score; });
-
-    // No matches at all → return full content
-    if (scored[0].score === 0) { return clean; }
-
-    // Best block found — add a second block only if best is short AND second is substantial
-    var result = scored[0].block;
-    if (result.length < 220 && scored.length > 1 && scored[1].score > 0 && scored[1].block.length >= 60) {
-      result += '\n\n' + scored[1].block;
-    }
-    return result;
-  }
-
   // Security: strip lines containing credentials or internal-only info before showing to users
   function sanitizeForUser(text) {
     var CRED_PATTERNS = [
@@ -508,27 +477,8 @@
     return lines.join('\n').trim();
   }
 
-  // Build a natural response: intro (in user's language) + relevant content + closing
-  function buildResponse(articleName, content, query) {
-    var extracted = sanitizeForUser(smartExtract(content, query));
-    var name = (articleName || '').replace(/\.[^.]+$/, '');
-    var intros = {
-      en: 'Here\'s what I found' + (name ? ' about **' + name + '**' : '') + ':\n\n',
-      it: 'Ecco le informazioni' + (name ? ' su **' + name + '**' : '') + ':\n\n',
-      es: 'Aquí está la información' + (name ? ' sobre **' + name + '**' : '') + ':\n\n',
-      pt: 'Aqui estão as informações' + (name ? ' sobre **' + name + '**' : '') + ':\n\n'
-    };
-    var outros = {
-      en: '\n\nIs there anything else I can help you with?',
-      it: '\n\nPosso aiutarti con qualcos\'altro?',
-      es: '\n\n¿Puedo ayudarte con algo más?',
-      pt: '\n\nPosso ajudá-lo com mais alguma coisa?'
-    };
-    return (intros[lang] || intros.en) + extracted + (outros[lang] || outros.en);
-  }
-
   // ============================================================
-  // 9. n8n API — webhook calls (used as fallback / deposit flow)
+  // 9. n8n API — webhook calls
   // ============================================================
   function n8nCall(endpoint, body, method) {
     method = method || 'POST';
@@ -541,10 +491,7 @@
     });
   }
 
-  function apiChat(message) {
-    return n8nCall(CONFIG.ENDPOINTS.CHAT, { message: message, language: lang, history: STATE.messages.slice(-8) });
-  }
-  function apiVerify(playerId) {
+function apiVerify(playerId) {
     return n8nCall(CONFIG.ENDPOINTS.VERIFY, { player_id: playerId, language: lang });
   }
   function apiStatus(jobId) {
@@ -675,34 +622,24 @@
       return;
     }
 
-    // 2. Search knowledge base directly, extract the most relevant section
+    // 2. Search KB → send content to n8n AI for response
     searchKB(text)
       .then(function (data) {
-        showTyping(false);
+        var kbContent = '';
         if (data.results && data.results.length > 0) {
-          var r    = data.results[0];
-          var name = (r.name || '').replace(/\.[^.]+$/, '');
-          addMessage('bot', buildResponse(name, r.content || '', text));
-        } else {
-          addMessage('bot', t('no_results'));
+          kbContent = sanitizeForUser(data.results[0].content || '');
         }
+        return n8nCall(CONFIG.ENDPOINTS.CHAT, { message: text, kb_content: kbContent, lang: lang });
+      })
+      .then(function (res) {
+        showTyping(false);
+        addMessage('bot', res.message || t('err_generic'));
         setInputDisabled(false);
       })
-      .catch(function (kbErr) {
-        // 3. KB unavailable → fallback to n8n /webhook/chat
-        console.warn('[BetonBot] KB error, fallback to n8n:', kbErr.message);
-        apiChat(text)
-          .then(function (res) {
-            showTyping(false);
-            addMessage('bot', res.message || t('err_generic'));
-            if (res.action === 'START_DEPOSIT_FLOW') { startDepositFlow(); }
-            else { setInputDisabled(false); }
-          })
-          .catch(function () {
-            showTyping(false);
-            addMessage('bot', t('no_results'));
-            setInputDisabled(false);
-          });
+      .catch(function () {
+        showTyping(false);
+        addMessage('bot', t('no_results'));
+        setInputDisabled(false);
       });
   }
 
