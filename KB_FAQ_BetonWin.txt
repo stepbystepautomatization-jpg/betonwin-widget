@@ -1,0 +1,338 @@
+BetonWin — FAQ Completa para Atención al Cliente
+Versión: 1.1 | Idiomas del sitio: Español, Inglés, Italiano, Portugués | Mercados: Chile (CLP), Argentina (ARS)
+Email soporte: ayuda@beton.win | URL alternativa: https://beton691.online
+
+
+=== DEPÓSITOS ===
+
+Métodos de depósito aceptados
+Aceptamos: tarjeta Visa, Mastercard, criptomonedas (Bitcoin BTC, Ethereum ETH, Tether USDT), carteras electrónicas (Skrill, Neteller), Paysafecard, transferencia bancaria, y métodos de pago locales según tu país (Mercado Pago en Argentina, Directa24 en Chile).
+
+Tiempo de acreditación del depósito
+Tarjeta y carteras electrónicas: instantáneo. Criptomonedas: 10-30 minutos (1-3 confirmaciones en la red). Transferencia bancaria: 1-3 días hábiles.
+
+Depósito mínimo y máximo
+Depósito mínimo: 10 EUR / USD (aproximadamente $10,000 CLP o $10,000 ARS en moneda local, sujeto al tipo de cambio). Depósito máximo por transacción: 10,000 EUR. Para montos mayores contacta con soporte.
+
+Mi depósito no aparece en mi cuenta
+Si después de 30 minutos no ves el saldo, verifica que tu banco aprobó la transacción. Si fue aprobada pero no aparece, envía el comprobante de pago a ayuda@beton.win o contacta soporte por chat. Lo verificamos en menos de 24 horas.
+
+El depósito fue rechazado
+Causas frecuentes: fondos insuficientes, tarjeta no habilitada para pagos internacionales, límites del banco. Contacta con tu banco para habilitar pagos internacionales o usa otro método de pago disponible.
+
+BetonWin cobra comisiones por depósito
+No. BetonWin no cobra comisiones. Tu banco o proveedor de pago puede aplicar su propia comisión — consúltales directamente.
+
+Límites de depósito diario y mensual
+Límite diario estándar: 5,000 EUR. Límite mensual estándar: 50,000 EUR. Los jugadores VIP tienen límites personalizados más altos.
+
+Puedo depositar con criptomonedas
+Sí. Aceptamos BTC, ETH y USDT (TRC20 y ERC20). Al seleccionar criptomoneda en la sección Caja, se genera automáticamente tu dirección de depósito. El tipo de cambio se fija en el momento del depósito.
+
+Tuve un problema con un depósito por Mercado Pago o Directa24
+Si el depósito quedó pendiente o no fue acreditado, envía el comprobante de pago (captura de pantalla o PDF) a soporte por chat o a ayuda@beton.win. El equipo verificará la transacción con el proveedor de pagos.
+
+
+=== RETIROS ===
+
+Cómo retirar dinero de mi cuenta
+Ve a Mi Cuenta → Caja → Retirar. Selecciona el método, ingresa el monto y confirma. El método de retiro debe coincidir con el método de depósito utilizado (política anti-lavado de dinero).
+
+Tiempo de procesamiento de retiros
+Carteras electrónicas (Skrill, Neteller): 0-24 horas. Criptomonedas: 1-4 horas. Tarjeta de crédito/débito: 3-7 días hábiles. Transferencia bancaria: 3-5 días hábiles.
+
+Retiro mínimo y máximo
+Mínimo: 20 EUR. Máximo diario: 5,000 EUR. Máximo mensual: 30,000 EUR. Los jugadores VIP tienen límites más altos.
+
+Mi retiro está pendiente desde hace mucho tiempo
+El retiro puede estar bloqueado si: tu cuenta no está verificada (KYC incompleto), tienes un bono activo con rollover pendiente, o el monto supera el límite diario. Revisa el estado en Mi Cuenta → Mis Retiros o contacta soporte.
+
+Puedo cancelar un retiro pendiente
+Sí. Los retiros en estado "Pendiente" se pueden cancelar desde Mi Cuenta → Mis Retiros. El saldo vuelve a tu cuenta inmediatamente.
+
+Por qué no puedo retirar si tengo un bono activo
+Si tienes un bono activo, el saldo de bono está "bloqueado" hasta completar el rollover (wagering). Solo el saldo disponible (real, sin bono) puede retirarse. Para ver qué saldo puedes retirar ve a Mi Cuenta → Saldo disponible.
+
+Qué es el límite máximo de retiro con bonus (Release Limit)
+Algunos bonos tienen un límite máximo de retiro = valor del bono × multiplicador. Ejemplo: bono de 7,500 pesos con multiplicador x7 → máximo retirable: 52,500 pesos, aunque las ganancias sean mayores. Esta información aparece en los Términos y Condiciones de cada bono.
+
+
+=== BONOS Y PROMOCIONES ===
+
+Bonos de bienvenida disponibles
+BetonWin ofrece bonos automáticos en cada uno de los primeros 10 depósitos. Cada bono se activa automáticamente al realizar el depósito correspondiente:
+1er depósito: 150% de bonus + 50 giros gratis
+2do depósito: 20% de bonus + 20 giros gratis
+3er depósito: 30% de bonus + 30 giros gratis
+4to depósito: 40% de bonus + 40 giros gratis
+5to depósito: 50% de bonus + 50 giros gratis
+6to depósito: 60% de bonus + 60 giros gratis
+7mo depósito: 70% de bonus + 70 giros gratis
+8vo depósito: 80% de bonus + 80 giros gratis
+9no depósito: 90% de bonus + 90 giros gratis
+10mo depósito: 100% de bonus + 100 giros gratis
+El porcentaje se aplica sobre el monto depositado. Cada bono tiene su propio rollover y términos — revísalos en beton.win/es/promo.
+
+Cómo funciona el rollover (wagering) del bono
+El rollover es el total que debes apostar antes de poder retirar las ganancias del bono. Ejemplo: si el rollover es x30 sobre un bono de 100 EUR → debes apostar 3,000 EUR en total. El progreso se actualiza automáticamente a medida que apuestas.
+
+Cómo ver el progreso de mi bono
+Ve a beton.win/es/promo y haz clic en tu bono activo. Verás una barra de progreso (color púrpura) que muestra el avance del wagering, los requisitos, el límite de ganancias y los detalles del bono.
+
+Qué apuestas cuentan para el rollover
+Para deportes: apuestas con cuota mínima según los términos del bono. Para casino: la mayoría de las slots cuentan al 100%. Los juegos de mesa pueden contribuir con un porcentaje menor. Las apuestas anuladas o reembolsadas no cuentan. Revisa los T&C de cada bono.
+
+Estados del bono
+Offered: el bono está disponible para activar. Active: bono activo, con wagering en progreso. Completed: wagering completado, fondos disponibles. Expired: el bono venció sin completar el wagering. Canceled: el bono fue cancelado.
+
+Qué pasa si el bono expira
+Si no completas el wagering antes de la fecha límite, el bono y las ganancias generadas con él se eliminan automáticamente. El depósito real no se ve afectado.
+
+No puedo apostar con mi bono deportivo aunque tengo saldo
+Esto es normal. Los bonos deportivos requieren que cada apuesta se realice con 50% dinero real y 50% dinero de bono. Si solo tienes saldo de bono (sin dinero real), verás "Saldo 0.00". Solución: realiza un depósito para poder usar el bono deportivo.
+
+Tengo un bono activo pero no puedo jugar ni apostar
+Verifica que estás jugando en los juegos o deportes permitidos por los términos del bono. Si el bono es de casino, no puede usarse en deportes y viceversa. Lee los T&C del bono activo para ver qué productos están habilitados.
+
+El bono que quiero no está disponible en mi cuenta
+Algunos bonos no están disponibles para todos los jugadores según el historial y actividad de la cuenta. Si una promoción no aparece en tu cuenta o no puedes activarla, lamentablemente no está disponible para ti en este momento. Mantente atento a nuevas promociones en la sección Promociones y por email.
+
+Puedo cancelar un bono activo
+Sí, puedes cancelar un bono activo desde Mi Cuenta → Promociones → Cancelar bono. Atención: al cancelar el bono perderás el saldo de bono y todas las ganancias generadas con él. El dinero de tu depósito real no se ve afectado. Esta acción es irreversible.
+
+Cómo usar un código promocional
+Durante el proceso de depósito verás un campo "Código Promocional". Ingresa el código antes de confirmar el depósito. El bono asociado al código se acreditará automáticamente. Los códigos tienen fecha de vencimiento — úsalo antes de que expire.
+
+Qué son los giros gratis (Free Spins)
+Los giros gratis son apuestas gratuitas en tragamonedas (slots) incluidas en algunos bonos de bienvenida. Cada giro tiene un valor fijo (generalmente $100-500 pesos locales). Las ganancias obtenidas con giros gratis están sujetas a rollover antes de poder retirarse. Los giros gratis deben usarse en el juego específico indicado en los términos del bono y tienen fecha de vencimiento.
+
+Qué son las apuestas gratis (Free Bets)
+Las apuestas gratis son créditos para apostar en eventos deportivos sin usar tu dinero real. Si la apuesta gana, recibes las ganancias pero no el monto apostado (solo el beneficio neto). Las apuestas gratis tienen fecha de vencimiento y condiciones de cuota mínima. Revisa los T&C del bono que incluye las apuestas gratis.
+
+
+=== PROGRAMA DE FIDELIDAD (LOYALTY) ===
+
+Cómo funciona el Programa de Fidelidad
+El Programa de Fidelidad de BetonWin te permite subir de nivel a medida que apuestas con dinero real. Cada nivel desbloquea beneficios como: cashback diario y semanal, giros gratis, apuestas gratis, bonos de depósito y premios en dinero.
+
+Cómo unirme al Programa de Fidelidad
+Ve a tu perfil → Gamificación (Hero) → pulsa Confirmar → verifica tu teléfono y correo → realiza un depósito mínimo de $5,000 (moneda local) → comienza a apostar para acumular actividad y subir de nivel.
+
+Qué significa ser usuario activo
+Debes haber apostado con dinero real en los últimos 14 días. Si pasan 14 días sin apostar, pierdes acceso a los bonos del programa hasta que vuelvas a realizar una apuesta.
+
+Cómo funciona el cashback
+El programa incluye cashback diario y semanal. El porcentaje y disponibilidad dependen de tu nivel de fidelidad. Se acredita automáticamente según las condiciones del nivel.
+
+Qué son las Misiones Diarias
+Las Misiones Diarias son tareas que puedes completar cada día para ganar bonos adicionales como giros gratis, apuestas gratis o dinero real. Las misiones pueden incluir: realizar un número determinado de apuestas, depositar un monto mínimo, o jugar en juegos específicos. Las misiones están disponibles en tu perfil → Gamificación (Hero) y se renuevan diariamente.
+
+Bono de cumpleaños
+El bono de cumpleaños está disponible solo para usuarios activos durante su período de cumpleaños. Si eres usuario activo, lo recibirás automáticamente según las reglas de tu nivel.
+
+Puedo bajar de nivel
+Tu acceso a bonos se pausa si no cumples la condición de usuario activo (14 días sin apostar). Consulta tu perfil de Gamificación para ver el estado de tu nivel y requisitos vigentes.
+
+Qué son los niveles del Programa Hero
+El Programa Hero tiene múltiples niveles. Cuanto más apuestes con dinero real, más avanzas. Cada nivel superior desbloquea mejores recompensas: mayor porcentaje de cashback, más giros gratis semanales, apuestas gratis de mayor valor y bonos de depósito con mejor porcentaje. Los detalles de cada nivel se muestran en tu perfil → Gamificación.
+
+
+=== VERIFICACIÓN DE IDENTIDAD (KYC) ===
+
+Por qué debo verificar mi identidad
+La verificación KYC es obligatoria por ley en plataformas de juego con licencia. Es necesaria antes del primer retiro. Permite confirmar tu identidad y proteger tu cuenta.
+
+Qué documentos necesito para verificarme
+Documento de identidad vigente (frente y reverso): DNI, pasaporte o licencia de conducir. Más comprobante de domicilio con fecha no superior a 3 meses: factura de servicios (luz, agua, gas) o extracto bancario con nombre y dirección.
+
+Cómo enviar los documentos
+Ve a Mi Cuenta → Verificación → Subir documentos. Sube fotos o escaneos en JPG, PNG o PDF. Las imágenes deben ser nítidas, completas y sin cortes.
+
+Cuánto tiempo tarda la verificación
+Entre 24 y 48 horas en días hábiles. En períodos de alta demanda puede tardar hasta 72 horas. Recibirás una notificación por email cuando esté aprobada.
+
+Mi verificación fue rechazada
+Los motivos más comunes: documento borroso o cortado, documento vencido, nombre que no coincide con la cuenta. Recibirás un email con el motivo. Corrige el problema y vuelve a enviar los documentos.
+
+Puedo jugar sin verificarme
+Sí, puedes depositar y apostar sin verificación. La verificación es obligatoria solo para realizar retiros. Te recomendamos verificarte cuanto antes.
+
+
+=== VERIFICACIÓN DE TELÉFONO Y NÚMERO DE CONTACTO ===
+
+No puedo verificar mi número de teléfono
+Para verificar tu número de teléfono ve a Mi Cuenta → Configuración → Número de teléfono y sigue las instrucciones. Recibirás un código SMS. Si no recibes el SMS, verifica que el número ingresado sea correcto (incluye el código de país: +56 para Chile, +54 para Argentina).
+
+Ingresé mal mi número de teléfono y no puedo confirmarlo
+Si pusiste un número incorrecto, contacta soporte por chat. El equipo puede corregirlo si verificas tu identidad respondiendo la pregunta secreta de tu cuenta. Ten listo tu Player ID y número de documento (RUT/DNI).
+
+Cómo cambiar mi número de teléfono
+Para cambiar el número de teléfono tu cuenta debe estar verificada (KYC completo). Contacta soporte por chat e indica el número actual, el nuevo número y el motivo del cambio. El agente verificará tu identidad antes de realizar el cambio.
+
+Cómo cambiar mi correo electrónico
+Para cambiar el email tu cuenta debe estar verificada (KYC completo). Contacta soporte por chat con tu email actual, el nuevo email y el motivo del cambio. Para cambios a un email completamente diferente, el proceso puede requerir validación adicional y hasta 48 horas.
+
+No recuerdo la respuesta a mi pregunta secreta
+Si no recuerdas la respuesta a tu pregunta secreta, el equipo de soporte puede verificar tu identidad mediante tu documento de identidad (DNI/RUT). Contacta soporte por chat con tu Player ID y una foto de tu documento de identidad.
+
+Tengo el saldo bloqueado y no puedo jugar ni retirar
+El saldo puede estar bloqueado por: un bono activo con rollover en progreso, una restricción de riesgo en tu cuenta, o un proceso de verificación pendiente. Contacta soporte por chat indicando tu Player ID para que revisen el estado exacto de tu cuenta.
+
+=== CUENTA Y ACCESO ===
+
+Cómo crear una cuenta
+Ve a beton.win, haz clic en Registrarse, completa el formulario con tus datos (nombre, email, contraseña, país, moneda), acepta los Términos y Condiciones y confirma. Recibirás un email de activación.
+
+No recibo el email de confirmación
+Revisa la carpeta de spam. Verifica que ingresaste el email correcto. Si el problema persiste, contacta soporte por chat o a ayuda@beton.win.
+
+Olvidé mi contraseña
+En la página de acceso haz clic en "¿Olvidaste tu contraseña?", ingresa tu email y recibirás un enlace para restablecerla. El enlace es válido por 24 horas.
+
+Mi cuenta está bloqueada
+La cuenta se bloquea tras varios intentos fallidos de acceso. Usa la opción "¿Olvidaste tu contraseña?" para desbloquearla, o contacta soporte por chat.
+
+No puedo acceder al sitio
+Prueba con la URL alternativa: https://beton691.online. Si el problema persiste, borra las cookies y el caché del navegador y vuelve a intentarlo. Si sigue sin funcionar, describe el error con capturas de pantalla y contáctanos.
+
+Puedo tener más de una cuenta
+No. Cada persona puede tener solo una cuenta activa. Tener múltiples cuentas viola los Términos y Condiciones y puede resultar en la suspensión permanente de todas las cuentas.
+
+Cómo cambiar mis datos personales
+Algunos datos pueden actualizarse desde Mi Cuenta → Configuración. Para cambios importantes (nombre, email) contacta soporte con tu documento de identidad.
+
+Cómo cerrar mi cuenta o autoexcluirme
+Contacta con soporte por chat o a ayuda@beton.win para solicitar el cierre o la autoexclusión. También puedes establecer límites de depósito y tiempo de juego desde Mi Cuenta → Responsabilidad de Juego.
+
+
+=== PROBLEMAS TÉCNICOS ===
+
+El sitio no carga o muestra error
+Prueba con la URL alternativa: https://beton691.online. Borra las cookies y el caché del navegador. Prueba con otro navegador o dispositivo. Si el problema persiste, toma una captura de pantalla del error y contacta soporte.
+
+Un juego no funciona correctamente
+Recarga la página. Borra el caché del navegador. Si el problema continúa, contacta soporte indicando el nombre del juego, el error que aparece y una captura de pantalla.
+
+No puedo ver mis apuestas o historial
+Ve a Mi Cuenta → Historial de apuestas. Si el historial está vacío o incorrecto, contacta soporte con tu Player ID y las fechas del período que quieres revisar.
+
+
+=== APUESTAS DEPORTIVAS ===
+
+Cómo hacer una apuesta
+Selecciona el deporte y evento en el menú. Haz clic en la cuota deseada para añadirla al cupón. Ingresa el monto y confirma. Las ganancias se calculan automáticamente.
+
+Apuesta mínima y máxima
+La apuesta mínima es de $200 pesos (CLP/ARS) o el equivalente en tu moneda. El máximo por apuesta depende del mercado y el evento — las cuotas altas y eventos de menor nivel tienen límites más bajos. El límite se muestra en el cupón al ingresar el monto.
+
+Apuesta combinada (parlay)
+Añade varias selecciones al cupón. Las cuotas se multiplican entre sí. Si una selección falla, la apuesta combinada se pierde (salvo que uses la función Cash Out). Puedes combinar selecciones de distintos deportes y eventos.
+
+Apuestas en vivo (In-Play)
+BetonWin ofrece apuestas en tiempo real durante los eventos. Las cuotas se actualizan constantemente según el desarrollo del partido. Para apostar en vivo, ve a la sección "En Vivo" del menú. Disponible para fútbol, tenis, baloncesto, y otros deportes principales.
+
+Deportes disponibles
+Fútbol, tenis, baloncesto, béisbol, fútbol americano, hockey, rugby, voleibol, MMA/UFC, eSports y muchos más. La disponibilidad de mercados varía según el evento y la temporada.
+
+Qué pasa si un evento es cancelado o pospuesto
+Si el evento es cancelado o pospuesto más de 24 horas, las apuestas se devuelven al saldo. Si se juega dentro de las 24 horas del horario original, las apuestas se mantienen válidas.
+
+Cash Out — retirar apuesta anticipada
+La función Cash Out permite cerrar tu apuesta antes de que termine el evento. El monto ofrecido depende del resultado actual. Disponible en apuestas seleccionadas. El Cash Out parcial permite retirar solo una parte del monto apostado.
+
+Mi apuesta ganó pero no recibí el pago
+Si la apuesta aparece como ganadora pero el saldo no se actualizó, espera unos minutos (puede haber un retraso en el procesamiento). Si después de 30 minutos no ves el pago, contacta soporte con el ID de la apuesta.
+
+Cuota mínima para que una apuesta cuente para el rollover del bono
+Varía según el bono. Revisa los Términos y Condiciones del bono activo para conocer la cuota mínima requerida. Generalmente es 1.5 o 2.0 para bonos deportivos.
+
+
+=== APP MÓVIL Y PLATAFORMA ===
+
+BetonWin tiene app móvil
+BetonWin está optimizado para dispositivos móviles. Puedes acceder desde el navegador de tu teléfono (Chrome, Safari) en beton.win o beton691.online — la experiencia es idéntica a la versión escritorio. Si tienes problemas al acceder desde móvil, actualiza el navegador y borra el caché.
+
+En qué dispositivos puedo jugar
+Puedes jugar en PC, Mac, smartphones y tablets. Compatible con Windows, macOS, iOS y Android. Navegadores recomendados: Chrome, Firefox, Safari, Edge (versiones recientes).
+
+Qué idiomas tiene el sitio
+El sitio está disponible en: Español, Inglés, Italiano y Portugués. Puedes cambiar el idioma desde el menú del sitio.
+
+Qué monedas están disponibles
+Monedas disponibles: Peso Chileno (CLP), Peso Argentino (ARS), Euro (EUR), Dólar (USD) y otras según tu región. La moneda se selecciona al crear la cuenta y no puede cambiarse después. Las criptomonedas (BTC, ETH, USDT) funcionan como método de pago y se convierten automáticamente a tu moneda de cuenta.
+
+El sitio está disponible en mi país
+BetonWin opera en varios países de América Latina y Europa. Si tu país no está disponible durante el registro, significa que actualmente no operamos en esa región. Para más información escribe a ayuda@beton.win.
+
+
+=== CASINO ===
+
+Qué juegos de casino están disponibles
+Más de 3,000 juegos: tragamonedas (slots), ruleta, blackjack, baccarat, póker, casino en vivo con croupiers reales. Proveedores certificados: Pragmatic Play, Evolution, NetEnt y otros.
+
+Los juegos son justos
+Sí. Todos los juegos usan un Generador de Números Aleatorios (RNG) certificado. Las probabilidades son auditadas regularmente por entidades independientes.
+
+Puedo jugar en modo demo
+La mayoría de los juegos de casino están disponibles en modo demo (sin dinero real). Para jugar con dinero real necesitas tener saldo en tu cuenta.
+
+Casino en vivo
+El casino en vivo ofrece mesas de ruleta, blackjack, baccarat y game shows con croupiers reales en streaming HD, disponible 24/7. Las apuestas mínimas varían según la mesa.
+
+Un juego de casino muestra un error o se congela
+Recarga la página y vuelve a entrar al juego. Si el error persiste, borra el caché del navegador. Si durante una ronda el juego se interrumpió y no ves el resultado, contacta soporte indicando: nombre del juego, hora aproximada y ID de sesión. Las rondas interrumpidas son revisadas por el equipo técnico y el resultado se aplica según los registros del servidor.
+
+Qué es el RTP (Return To Player)
+El RTP es el porcentaje teórico de retorno al jugador a largo plazo. Por ejemplo, un RTP del 96% significa que, en millones de rondas, el juego devuelve el 96% de lo apostado. Es un promedio estadístico, no garantiza resultados por sesión. El RTP de cada juego se puede consultar en la información del juego (ícono "i").
+
+
+=== SALDO Y BALANCE ===
+
+Por qué mi saldo total es diferente al saldo disponible
+El saldo total incluye el dinero real + el dinero de bono. El saldo disponible es solo el dinero real que puedes retirar en este momento. El saldo de bono está bloqueado hasta completar el rollover del bono activo.
+
+Tengo ganancias pero no puedo retirar todo
+Si tienes un bono activo, las ganancias generadas con el bono están sujetas al límite máximo de retiro (Release Limit). El monto máximo retirable = valor del bono × multiplicador indicado en los T&C. El exceso de ganancias no es retirable.
+
+Por qué se me descuenta dinero al retirar
+Al retirar con un bono activo o completado, el sistema descuenta el valor del bono del monto a retirar. Solo las ganancias netas generadas con dinero real son 100% retirables sin descuento.
+
+Recibí un reembolso o cashback pero no puedo retirarlo
+El cashback y los reembolsos son saldo de bono con rollover. Debes cumplir los requisitos de apuesta indicados en los términos antes de poder retirar. El rollover del cashback suele ser bajo (x1 o x3) — revisa las condiciones.
+
+Veo "Saldo 0.00" aunque tengo bono activo
+Si solo tienes saldo de bono (sin dinero real depositado), en las apuestas deportivas verás "Saldo 0.00". Esto es porque los bonos deportivos requieren 50% de dinero real por cada apuesta. Solución: realiza un depósito y podrás usar el bono.
+
+=== JUEGO RESPONSABLE ===
+
+Cómo establecer límites de depósito
+Ve a Mi Cuenta → Responsabilidad de Juego → Límites de depósito. Puedes establecer límites diarios, semanales o mensuales. Los límites se aplican inmediatamente. Para aumentar un límite se requiere un período de enfriamiento de 24-72 horas.
+
+Cómo establecer un límite de pérdidas
+Ve a Mi Cuenta → Responsabilidad de Juego → Límite de pérdidas. Establece el máximo que puedes perder en un período determinado. Al alcanzar el límite, no podrás realizar más apuestas hasta que el período se restablezca.
+
+Cómo autoexcluirme temporalmente
+Puedes pausar tu cuenta temporalmente desde Mi Cuenta → Responsabilidad de Juego → Tiempo de descanso (1 día a 6 semanas). Durante este tiempo no podrás acceder a la plataforma ni realizar depósitos.
+
+Cómo autoexcluirme permanentemente
+Para una autoexclusión permanente contacta soporte por chat o escribe a ayuda@beton.win. La autoexclusión permanente es irreversible. Si tienes problemas con el juego, también puedes buscar ayuda en organizaciones especializadas de tu país.
+
+Mis datos personales están seguros
+Sí. BetonWin protege tus datos con encriptación SSL. Tu información personal no se comparte con terceros excepto cuando es requerido por las autoridades regulatorias o legales. Puedes solicitar una copia de tus datos o su eliminación contactando soporte.
+
+=== SOPORTE ===
+
+Cómo contactar con soporte
+Chat en vivo: disponible 24/7 en el sitio. Email: ayuda@beton.win (respuesta en menos de 4 horas en días hábiles). BetonBot: asistente automático disponible 24/7.
+
+Idiomas de atención
+Español, inglés, portugués e italiano.
+
+Qué información necesita soporte para ayudarme
+Para resolver tu caso más rápido, ten listo: tu Player ID (visible en Mi Cuenta), el email de la cuenta, descripción del problema, y capturas de pantalla del error (si aplica). Para problemas de pago: comprobante de transacción con fecha, monto y referencia.
+
+Cuánto tardan en responder
+Chat en vivo: respuesta inmediata, disponible 24/7. Email (ayuda@beton.win): menos de 4 horas en días hábiles, hasta 24 horas en fin de semana. Los casos urgentes (cuenta bloqueada, depósito perdido) tienen prioridad.
+
+Tengo un reclamo o disputa
+Si no estás satisfecho con la resolución de soporte, puedes escalar tu caso solicitando hablar con un supervisor. Indica el número de ticket de tu caso anterior. Para disputas relacionadas con apuestas o pagos, proporciona toda la documentación (capturas, comprobantes) para que el equipo de revisión pueda investigar.

@@ -169,7 +169,11 @@
     }
   };
 
-  var lang = 'en';
+  // Init lang from browser, fallback to 'en'
+  var lang = (function () {
+    var nav = (navigator.language || navigator.userLanguage || 'en').toLowerCase().slice(0, 2);
+    return LANG[nav] ? nav : 'en';
+  }());
   function t(k) { return (LANG[lang] || LANG.en)[k] || k; }
 
   // ============================================================
@@ -341,8 +345,17 @@
   // ============================================================
   // 7. UI HELPERS
   // ============================================================
+  function escapeHTML(str) {
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
   function parseMarkdown(txt) {
-    return txt
+    return escapeHTML(txt)
       .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
       .replace(/\*(.*?)\*/g, '<em>$1</em>')
       .replace(/^---$/gm, '<hr>')
@@ -416,13 +429,15 @@
   var LANG_WORDS = {
     it: ['ciao','grazie','buongiorno','buonasera','prelievo','prelevare','perché','voglio',
          'questo','questa','subito','ancora','sono','mio','mia','quanto','quando','aiuto',
-         'problema','depositi','soldi','conto','non ho ricevuto','non è arrivato'],
+         'problema','depositi','soldi','conto','non ho ricevuto','non è arrivato',
+         'posso','dove','come posso','non riesco','accedere','vedere','trovare','voglio sapere',
+         'non capisco','qual è','mi serve'],
     es: ['hola','gracias','buenos','retiro','retirar','también','quiero','cuánto','cuándo',
          'dinero','ayuda','problema','cuenta','no he recibido','no ha llegado','por favor',
-         'cómo','estoy','tengo','puedo'],
+         'cómo','estoy','tengo','puedo','dónde','puedo ver','no puedo'],
     pt: ['olá','ola','obrigado','obrigada','saque','sacar','também','quero','quanto','quando',
-         'dinheiro','ajuda','problema','conta','não recebi','não chegou','por favor',
-         'como','estou','tenho','posso']
+         'dinheiro','ajuda','não recebi','não chegou','por favor',
+         'como posso','estou','tenho','onde posso','não consigo','preciso de']
   };
 
   // Auto-detect language from user message text (overrides browser lang when confident)
@@ -617,12 +632,22 @@ function apiVerify(playerId) {
       .then(function (data) {
         var kbContent = '';
         if (data.results && data.results.length > 0) {
-          kbContent = data.results[0].content || '';
+          // Top 2 results, each truncated to 1200 chars to keep payload fast
+          kbContent = data.results.slice(0, 2).map(function (r, i) {
+            var c = (r.content || '').slice(0, 1200);
+            return '[' + (i + 1) + '] ' + (r.name || '') + ':\n' + c;
+          }).join('\n\n---\n\n');
         }
         var history = STATE.messages.slice(-6).map(function (m) {
           return { role: m.role === 'bot' ? 'assistant' : 'user', content: m.content };
         });
-        return n8nCall(CONFIG.ENDPOINTS.CHAT, { message: text, kb_content: kbContent, lang: lang, history: history });
+        var aiTimeout = new Promise(function (_, reject) {
+          setTimeout(function () { reject(new Error('timeout')); }, 12000);
+        });
+        return Promise.race([
+          n8nCall(CONFIG.ENDPOINTS.CHAT, { message: text, kb_content: kbContent, lang: lang, history: history }),
+          aiTimeout
+        ]);
       })
       .then(function (res) {
         showTyping(false);
@@ -631,7 +656,7 @@ function apiVerify(playerId) {
       })
       .catch(function () {
         showTyping(false);
-        addMessage('bot', t('no_results'));
+        addMessage('bot', t('err_generic'));
         setInputDisabled(false);
       });
   }
