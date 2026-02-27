@@ -4,11 +4,9 @@
   // ============================================================
   // 1. CONFIGURATION
   // ============================================================
-  var IS_LOCAL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
-
   var CONFIG = {
-    N8N_BASE: IS_LOCAL ? 'http://localhost:8080' : 'https://n8nbeton.online',
-    KB_URL:   IS_LOCAL ? 'http://localhost:8080/kb' : 'https://script.google.com/macros/s/AKfycbw4QH_cxD2HmW18ReyCUzo4BDPwrHeUaMwYKxXnjwSNc0yhPxCAFqZRkI6dDBD5y0ZI/exec',
+    N8N_BASE: 'https://n8nbeton.online',
+    KB_URL:   'https://script.google.com/macros/s/AKfycbw4QH_cxD2HmW18ReyCUzo4BDPwrHeUaMwYKxXnjwSNc0yhPxCAFqZRkI6dDBD5y0ZI/exec',
     ENDPOINTS: {
       CHAT:        '/webhook/chat',
       VERIFY:      '/webhook/verify-deposit',
