@@ -624,6 +624,7 @@ function apiVerify(playerId) {
 
     // 2. Search KB → send content to n8n AI for response
     searchKB(text)
+      .catch(function () { return { results: [] }; })
       .then(function (data) {
         var kbContent = '';
         if (data.results && data.results.length > 0) {
