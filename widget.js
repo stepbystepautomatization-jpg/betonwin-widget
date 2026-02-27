@@ -461,21 +461,6 @@
     return 'GENERAL';
   }
 
-  // Smart extraction: finds the most relevant paragraph for the user's query (zero AI)
-  // Security: strip lines containing credentials or internal-only info before showing to users
-  function sanitizeForUser(text) {
-    var CRED_PATTERNS = [
-      /contrase[ñn]a/i, /password/i,
-      /usuario\s*(→|:)/i, /user\s*(→|:)/i,
-      /pass\s*(→|:)/i,
-      /merchants\./i, /atlassian\.net/i, /backoffice/i,
-      /\d{4,}Welcome/i
-    ];
-    var lines = text.split('\n').filter(function (line) {
-      return !CRED_PATTERNS.some(function (re) { return re.test(line); });
-    });
-    return lines.join('\n').trim();
-  }
 
   // ============================================================
   // 9. n8n API — webhook calls
@@ -628,7 +613,7 @@ function apiVerify(playerId) {
       .then(function (data) {
         var kbContent = '';
         if (data.results && data.results.length > 0) {
-          kbContent = sanitizeForUser(data.results[0].content || '');
+          kbContent = data.results[0].content || '';
         }
         return n8nCall(CONFIG.ENDPOINTS.CHAT, { message: text, kb_content: kbContent, lang: lang });
       })
