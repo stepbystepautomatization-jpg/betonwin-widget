@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BetonWin — Sports Betting & Casino</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #0c1018;
+      color: #e2e8f0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      min-height: 100vh;
+    }
+
+    /* ── NAV ── */
+    nav {
+      background: #131923;
+      border-bottom: 1px solid rgba(57,211,83,0.15);
+      padding: 0 32px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .logo {
+      font-size: 22px;
+      font-weight: 800;
+      color: #39d353;
+      letter-spacing: -0.5px;
+    }
+    .logo span { color: #e2e8f0; }
+    .nav-links {
+      display: flex;
+      gap: 28px;
+      list-style: none;
+    }
+    .nav-links a {
+      color: #8892a4;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: color .2s;
+    }
+    .nav-links a:hover { color: #e2e8f0; }
+    .nav-btns { display: flex; gap: 10px; }
+    .btn-login {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,.15);
+      color: #e2e8f0;
+      padding: 8px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all .2s;
+    }
+    .btn-login:hover { border-color: #39d353; color: #39d353; }
+    .btn-signup {
+      background: linear-gradient(135deg, #39d353, #2aa644);
+      border: none;
+      color: #fff;
+      padding: 8px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      transition: all .2s;
+    }
+    .btn-signup:hover { opacity: .9; transform: translateY(-1px); }
+
+    /* ── HERO ── */
+    .hero {
+      padding: 80px 32px;
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 64px;
+      align-items: center;
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(57,211,83,0.1);
+      border: 1px solid rgba(57,211,83,0.25);
+      color: #39d353;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+    .hero h1 {
+      font-size: 52px;
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -1px;
+      margin-bottom: 20px;
+    }
+    .hero h1 .accent { color: #39d353; }
+    .hero p {
+      font-size: 18px;
+      color: #8892a4;
+      line-height: 1.6;
+      margin-bottom: 36px;
+    }
+    .hero-btns { display: flex; gap: 12px; }
+    .btn-primary {
+      background: linear-gradient(135deg, #39d353, #2aa644);
+      border: none;
+      color: #fff;
+      padding: 14px 32px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 700;
+      transition: all .2s;
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(57,211,83,0.3); }
+    .btn-secondary {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,.12);
+      color: #e2e8f0;
+      padding: 14px 32px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 600;
+      transition: all .2s;
+    }
+    .btn-secondary:hover { border-color: rgba(57,211,83,.4); }
+    .hero-stats {
+      display: flex;
+      gap: 32px;
+      margin-top: 48px;
+    }
+    .stat-num {
+      font-size: 28px;
+      font-weight: 800;
+      color: #39d353;
+    }
+    .stat-label {
+      font-size: 12px;
+      color: #8892a4;
+      margin-top: 2px;
+    }
+
+    /* ── HERO RIGHT (mock sports card) ── */
+    .hero-card {
+      background: #1a2535;
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,.07);
+      overflow: hidden;
+    }
+    .card-header {
+      background: linear-gradient(135deg, #1f3048, #1a2535);
+      padding: 20px 24px;
+      border-bottom: 1px solid rgba(255,255,255,.07);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .card-header .live { background: #ef4444; color: #fff; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 4px; }
+    .card-header .sport { color: #8892a4; font-size: 13px; }
+    .match { padding: 24px; }
+    .team-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; }
+    .team-name { font-weight: 600; font-size: 16px; }
+    .team-score { font-size: 28px; font-weight: 800; color: #39d353; }
+    .divider { border: none; border-top: 1px solid rgba(255,255,255,.05); }
+    .odds-row { padding: 16px 24px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+    .odd-btn {
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 10px;
+      padding: 10px;
+      text-align: center;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .odd-btn:hover { border-color: #39d353; background: rgba(57,211,83,.08); }
+    .odd-label { font-size: 11px; color: #8892a4; }
+    .odd-val { font-size: 16px; font-weight: 700; color: #e2e8f0; }
+
+    /* ── SPORTS BAR ── */
+    .sports-bar {
+      background: #131923;
+      border-top: 1px solid rgba(255,255,255,.05);
+      border-bottom: 1px solid rgba(255,255,255,.05);
+      padding: 0 32px;
+      display: flex;
+      gap: 4px;
+      overflow-x: auto;
+    }
+    .sport-tab {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 18px;
+      color: #8892a4;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      white-space: nowrap;
+      transition: all .2s;
+    }
+    .sport-tab:hover { color: #e2e8f0; }
+    .sport-tab.active { color: #39d353; border-bottom-color: #39d353; }
+
+    /* ── FEATURES ── */
+    .features {
+      max-width: 1200px;
+      margin: 64px auto;
+      padding: 0 32px;
+    }
+    .features h2 {
+      font-size: 32px;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+    .features-sub { color: #8892a4; font-size: 16px; margin-bottom: 40px; }
+    .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .feature-card {
+      background: #131923;
+      border: 1px solid rgba(255,255,255,.06);
+      border-radius: 16px;
+      padding: 28px;
+      transition: border-color .2s;
+    }
+    .feature-card:hover { border-color: rgba(57,211,83,.2); }
+    .feature-icon { font-size: 32px; margin-bottom: 16px; }
+    .feature-card h3 { font-size: 17px; font-weight: 700; margin-bottom: 8px; }
+    .feature-card p { color: #8892a4; font-size: 14px; line-height: 1.6; }
+
+    /* ── DEV BANNER ── */
+    .dev-banner {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(90deg, #1a2535, #1f3048);
+      border-bottom: 1px solid rgba(57,211,83,.3);
+      padding: 8px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 9999;
+      font-size: 12px;
+    }
+    .dev-banner .dev-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #39d353;
+      font-weight: 600;
+    }
+    .dev-banner .dev-dot {
+      width: 8px; height: 8px;
+      background: #39d353;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+    .dev-banner .dev-info { color: #8892a4; }
+    .dev-banner .dev-scenario {
+      background: rgba(57,211,83,.1);
+      border: 1px solid rgba(57,211,83,.2);
+      color: #39d353;
+      padding: 3px 10px;
+      border-radius: 6px;
+      font-weight: 600;
+    }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+    body { padding-top: 40px; } /* offset for dev banner */
+
+    @media (max-width: 768px) {
+      .hero { grid-template-columns: 1fr; padding: 40px 20px; }
+      .hero-card { display: none; }
+      .features-grid { grid-template-columns: 1fr; }
+      nav { padding: 0 16px; }
+      .nav-links { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- DEV BANNER -->
+  <div class="dev-banner">
+    <div class="dev-label">
+      <span class="dev-dot"></span>
+      🛠 LOCAL DEV — BetonBot Widget Test
+    </div>
+    <div class="dev-info">Mock Server: <strong style="color:#e2e8f0">http://localhost:8080</strong></div>
+    <div class="dev-scenario" id="scenario-badge">Loading...</div>
+  </div>
+
+  <!-- NAV -->
+  <nav>
+    <div class="logo">BETON<span>WIN</span></div>
+    <ul class="nav-links">
+      <li><a href="#">Sports</a></li>
+      <li><a href="#">Live</a></li>
+      <li><a href="#">Casino</a></li>
+      <li><a href="#">Promotions</a></li>
+      <li><a href="#">VIP</a></li>
+    </ul>
+    <div class="nav-btns">
+      <button class="btn-login">Log In</button>
+      <button class="btn-signup">Register</button>
+    </div>
+  </nav>
+
+  <!-- SPORTS BAR -->
+  <div class="sports-bar">
+    <div class="sport-tab active">⚽ Football</div>
+    <div class="sport-tab">🏀 Basketball</div>
+    <div class="sport-tab">🎾 Tennis</div>
+    <div class="sport-tab">🏒 Hockey</div>
+    <div class="sport-tab">🥊 MMA</div>
+    <div class="sport-tab">🏈 American Football</div>
+    <div class="sport-tab">⚾ Baseball</div>
+    <div class="sport-tab">🏐 Volleyball</div>
+    <div class="sport-tab">🎮 Esports</div>
+  </div>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-content">
+      <div class="hero-badge">
+        <span>🔴</span> 2,400+ Live Events Daily
+      </div>
+      <h1>Bet on Your <span class="accent">Passion.</span><br>Win Big.</h1>
+      <p>The most trusted sports betting platform. Best odds, instant payouts, and 24/7 support powered by AI.</p>
+      <div class="hero-btns">
+        <button class="btn-primary">Start Betting →</button>
+        <button class="btn-secondary">Live Events</button>
+      </div>
+      <div class="hero-stats">
+        <div>
+          <div class="stat-num">2M+</div>
+          <div class="stat-label">Active Players</div>
+        </div>
+        <div>
+          <div class="stat-num">98.2%</div>
+          <div class="stat-label">Payout Rate</div>
+        </div>
+        <div>
+          <div class="stat-num">&lt;1min</div>
+          <div class="stat-label">Avg Withdrawal</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-card">
+      <div class="card-header">
+        <span class="sport">⚽ Champions League — Group A</span>
+        <span class="live">● LIVE</span>
+      </div>
+      <div class="match">
+        <div class="team-row">
+          <span class="team-name">Real Madrid</span>
+          <span class="team-score">2</span>
+        </div>
+        <hr class="divider">
+        <div class="team-row">
+          <span class="team-name">Manchester City</span>
+          <span class="team-score">1</span>
+        </div>
+      </div>
+      <div class="odds-row">
+        <div class="odd-btn">
+          <div class="odd-label">1 (Home)</div>
+          <div class="odd-val">1.85</div>
+        </div>
+        <div class="odd-btn">
+          <div class="odd-label">X (Draw)</div>
+          <div class="odd-val">3.40</div>
+        </div>
+        <div class="odd-btn">
+          <div class="odd-label">2 (Away)</div>
+          <div class="odd-val">4.20</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FEATURES -->
+  <div class="features">
+    <h2>Why BetonWin?</h2>
+    <p class="features-sub">Built for serious bettors who demand the best.</p>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">⚡</div>
+        <h3>Instant Deposits</h3>
+        <p>All major payment methods accepted. Funds credited instantly with zero fees.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔒</div>
+        <h3>Secure & Licensed</h3>
+        <p>Licensed by Malta Gaming Authority. Your funds and data are always protected.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🤖</div>
+        <h3>24/7 AI Support</h3>
+        <p>BetonBot resolves 90% of support requests instantly — no wait times, no queues.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- BETONBOT WIDGET (embedded here — same way GR8 will do it) -->
+  <script>
+    // Auto-detect scenario from mock server
+    fetch('http://localhost:8080/webhook/status/test')
+      .then(r => r.json())
+      .then(d => {
+        document.getElementById('scenario-badge').textContent = 'Final: ' + d.status;
+      })
+      .catch(() => {
+        document.getElementById('scenario-badge').textContent = 'Server offline';
+        document.getElementById('scenario-badge').style.color = '#f87171';
+        document.getElementById('scenario-badge').style.borderColor = 'rgba(248,113,113,0.3)';
+      });
+  </script>
+
+  <!-- ↓↓↓ WIDGET INJECTION — GR8 will paste this block into their site ↓↓↓ -->
+  <div id="__beton_widget__"></div>
+  <script src="widget.js"></script>
+  <!-- ↑↑↑ END WIDGET INJECTION ↑↑↑ -->
+
+</body>
+</html>
