@@ -347,7 +347,9 @@
     return txt
       .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
       .replace(/\*(.*?)\*/g, '<em>$1</em>')
-      .replace(/^---$/gm, '<hr>');
+      .replace(/^---$/gm, '<hr>')
+      .replace(/\n\n/g, '<br><br>')
+      .replace(/\n/g, '<br>');
   }
 
   function addMessage(role, content) {
