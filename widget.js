@@ -607,15 +607,22 @@ function apiVerify(playerId) {
       return;
     }
 
-    // 2. Search KB → send content to n8n AI for response
-    searchKB(text)
+    // 2. Search KB (max 1.5s) → send content + history to n8n AI
+    var kbCall = Promise.race([
+      searchKB(text),
+      new Promise(function (resolve) { setTimeout(function () { resolve({ results: [] }); }, 1500); })
+    ]);
+    kbCall
       .catch(function () { return { results: [] }; })
       .then(function (data) {
         var kbContent = '';
         if (data.results && data.results.length > 0) {
           kbContent = data.results[0].content || '';
         }
-        return n8nCall(CONFIG.ENDPOINTS.CHAT, { message: text, kb_content: kbContent, lang: lang });
+        var history = STATE.messages.slice(-6).map(function (m) {
+          return { role: m.role === 'bot' ? 'assistant' : 'user', content: m.content };
+        });
+        return n8nCall(CONFIG.ENDPOINTS.CHAT, { message: text, kb_content: kbContent, lang: lang, history: history });
       })
       .then(function (res) {
         showTyping(false);
