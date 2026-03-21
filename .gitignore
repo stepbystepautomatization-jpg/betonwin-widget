@@ -1,0 +1,10 @@
+# Secrets — NEVER commit
+*.env
+gr8.env
+zendesk.env
+
+# OS
+.DS_Store
+
+# Analysis docs
+Analisi /

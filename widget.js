@@ -16,35 +16,35 @@
     },
     POLL_INTERVAL_MS: 3000,
     POLL_MAX:         40,
-    BOT_NAME:         'BetonBot',
+    BOT_NAME:         'BetonWin Support',
     MAX_FILE_MB:      10,
     ACCEPTED_TYPES:   ['image/jpeg', 'image/png', 'image/webp', 'application/pdf']
   };
 
   // ============================================================
-  // 2. COLORS
+  // 2. COLORS — BetonWin Brand Palette
   // ============================================================
   var C = {
-    bg:            '#0c1018',
-    widget:        '#131923',
-    header:        '#1a2535',
-    green:         '#39d353',
-    greenDark:     '#2aa644',
-    greenGlow:     'rgba(57,211,83,0.12)',
-    greenGlowB:    'rgba(57,211,83,0.25)',
-    text:          '#e2e8f0',
-    textMuted:     '#8892a4',
-    border:        'rgba(255,255,255,0.07)',
-    headerBorder:  'rgba(57,211,83,0.2)',
-    userBubble:    '#1a472a',
-    botBubble:     '#1e2535',
-    input:         '#1a2030',
-    inputBorder:   'rgba(255,255,255,0.1)',
-    scrollbar:     '#2a3548',
+    bg:            '#03242D',
+    widget:        '#042a33',
+    header:        '#03242D',
+    green:         '#2DEC76',
+    greenDark:     '#25cc65',
+    greenGlow:     'rgba(45,236,118,0.08)',
+    greenGlowB:    'rgba(45,236,118,0.18)',
+    text:          '#e8f0f2',
+    textMuted:     '#6b8f9a',
+    border:        'rgba(45,236,118,0.06)',
+    headerBorder:  'rgba(45,236,118,0.08)',
+    userBubble:    '#0a3d2a',
+    botBubble:     '#042e38',
+    input:         '#042a33',
+    inputBorder:   'rgba(45,236,118,0.1)',
+    scrollbar:     'rgba(45,236,118,0.08)',
     danger:        '#f87171',
     warning:       '#fbbf24',
-    shadow:        '0 24px 64px rgba(0,0,0,0.6), 0 4px 16px rgba(0,0,0,0.4)',
-    triggerShadow: '0 4px 24px rgba(57,211,83,0.4)'
+    shadow:        '0 0 0 1px rgba(45,236,118,0.06),0 24px 80px rgba(0,0,0,0.7),0 0 60px rgba(45,236,118,0.04)',
+    triggerShadow: '0 0 0 0 rgba(45,236,118,0.35),0 8px 32px rgba(0,0,0,0.5)'
   };
 
   // ============================================================
@@ -52,10 +52,10 @@
   // ============================================================
   var LANG = {
     en: {
-      welcome:          "Hi! I'm **BetonBot**, your 24/7 support assistant. How can I help you today?",
+      welcome:          "Hi! I'm your **BetonWin** 24/7 support assistant. How can I help you today?",
       placeholder:      'Type your message...',
       send:             'Send',
-      typing:           'BetonBot is typing...',
+      typing:           'Thinking',
       online:           'Online',
       quick_deposit:    'Check deposit status',
       deposit_ask_id:   'Sure! Please enter your **Player ID** to check your deposit:',
@@ -81,10 +81,10 @@
       close:            'Close'
     },
     es: {
-      welcome:          '¡Hola! Soy **BetonBot**, tu asistente de soporte 24/7. ¿En qué puedo ayudarte hoy?',
+      welcome:          '¡Hola! Soy tu asistente de soporte **BetonWin** 24/7. ¿En qué puedo ayudarte hoy?',
       placeholder:      'Escribe tu mensaje...',
       send:             'Enviar',
-      typing:           'BetonBot está escribiendo...',
+      typing:           'Pensando',
       online:           'En línea',
       quick_deposit:    'Verificar estado del depósito',
       deposit_ask_id:   '¡Claro! Por favor, introduce tu **ID de jugador** para verificar tu depósito:',
@@ -110,10 +110,10 @@
       close:            'Cerrar'
     },
     it: {
-      welcome:          'Ciao! Sono **BetonBot**, il tuo assistente di supporto 24/7. Come posso aiutarti oggi?',
+      welcome:          'Ciao! Sono il tuo assistente di supporto **BetonWin** 24/7. Come posso aiutarti oggi?',
       placeholder:      'Scrivi il tuo messaggio...',
       send:             'Invia',
-      typing:           'BetonBot sta scrivendo...',
+      typing:           'Pensando',
       online:           'Online',
       quick_deposit:    'Verifica stato deposito',
       deposit_ask_id:   'Certo! Inserisci il tuo **Player ID** per verificare il deposito:',
@@ -139,10 +139,10 @@
       close:            'Chiudi'
     },
     pt: {
-      welcome:          'Olá! Sou o **BetonBot**, seu assistente de suporte 24/7. Como posso ajudá-lo hoje?',
+      welcome:          'Olá! Sou seu assistente de suporte **BetonWin** 24/7. Como posso ajudá-lo hoje?',
       placeholder:      'Digite sua mensagem...',
       send:             'Enviar',
-      typing:           'BetonBot está digitando...',
+      typing:           'Pensando',
       online:           'Online',
       quick_deposit:    'Verificar status do depósito',
       deposit_ask_id:   'Claro! Por favor, insira seu **ID de jogador** para verificar seu depósito:',
@@ -169,11 +169,9 @@
     }
   };
 
-  // Init lang from browser, fallback to 'en'
-  var lang = (function () {
-    var nav = (navigator.language || navigator.userLanguage || 'en').toLowerCase().slice(0, 2);
-    return LANG[nav] ? nav : 'en';
-  }());
+  // Always start in Spanish (site is for Chile/Argentina)
+  // Language switches only when user types in another language
+  var lang = 'es';
   function t(k) { return (LANG[lang] || LANG.en)[k] || k; }
 
   // ============================================================
@@ -186,8 +184,13 @@
     jobId:      null,
     pollTimer:  null,
     pollCount:  0,
-    messages:   []
+    messages:   [],
+    busy:       false,       // prevent double-send / spam
+    lastSendTs: 0            // rate limiting
   };
+  var MAX_MSG_LENGTH = 1000; // cap user input to prevent huge payloads
+  var MAX_MESSAGES   = 100;  // cap history to prevent memory leak
+  var SEND_COOLDOWN  = 1000; // min ms between sends
 
   // ============================================================
   // 5. INJECT CSS
@@ -197,92 +200,122 @@
     var s = document.createElement('style');
     s.id = '__beton_css__';
     s.textContent = [
-      '#__beton_widget__{position:fixed;bottom:24px;right:24px;z-index:2147483647;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}',
+      /* Font */
+      "@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');",
+
+      /* Root */
+      '#__beton_widget__{position:fixed;bottom:24px;right:24px;z-index:2147483647;font-family:"Inter",-apple-system,BlinkMacSystemFont,sans-serif;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}',
       '#__beton_widget__ *{box-sizing:border-box;margin:0;padding:0}',
 
-      '#bw-trigger{width:60px;height:60px;background:linear-gradient(135deg,'+C.green+','+C.greenDark+');border:none;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:'+C.triggerShadow+';transition:all .3s cubic-bezier(.175,.885,.32,1.275);position:relative;outline:none}',
-      '#bw-trigger:hover{transform:scale(1.1)}',
-      '#bw-trigger.bw-open{transform:scale(0.85);opacity:0;pointer-events:none}',
-      '#bw-trigger svg{width:28px;height:28px;fill:#fff}',
-      '#bw-notif{position:absolute;top:-2px;right:-2px;width:14px;height:14px;background:'+C.danger+';border-radius:50%;border:2px solid '+C.bg+';display:none}',
+      /* FAB — BetonWin branded with glow */
+      '#bw-trigger{width:58px;height:58px;background:linear-gradient(135deg,'+C.green+' 0%,#1ac45e 100%);border:none;border-radius:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:'+C.triggerShadow+';transition:all .45s cubic-bezier(.22,1,.36,1);position:relative;outline:none}',
+      '#bw-trigger::after{content:"";position:absolute;inset:-6px;border-radius:20px;border:1.5px solid rgba(45,236,118,0.15);animation:bw-ring 3s ease-in-out infinite;pointer-events:none}',
+      '#bw-trigger:hover{transform:scale(1.06) translateY(-2px);box-shadow:0 0 0 8px rgba(45,236,118,0.08),0 12px 40px rgba(0,0,0,0.5),0 0 30px rgba(45,236,118,0.12)}',
+      '#bw-trigger:active{transform:scale(.94)}',
+      '#bw-trigger.bw-open{transform:scale(0) rotate(90deg);opacity:0;pointer-events:none}',
+      '#bw-trigger svg{width:24px;height:24px;fill:#fff;filter:drop-shadow(0 1px 2px rgba(0,0,0,0.2))}',
+      '#bw-notif{position:absolute;top:-4px;right:-4px;width:16px;height:16px;background:'+C.danger+';border-radius:50%;border:2.5px solid '+C.bg+';display:none;box-shadow:0 2px 8px rgba(248,113,113,0.5)}',
 
-      '#bw-window{position:absolute;bottom:76px;right:0;width:390px;height:600px;background:'+C.widget+';border-radius:20px;border:1px solid '+C.border+';box-shadow:'+C.shadow+';display:flex;flex-direction:column;overflow:hidden;transform-origin:bottom right;transition:all .35s cubic-bezier(.175,.885,.32,1.275);transform:scale(.85) translateY(16px);opacity:0;pointer-events:none}',
-      '#bw-window.bw-open{transform:scale(1) translateY(0);opacity:1;pointer-events:all}',
+      /* Window — deep teal glass */
+      '#bw-window{position:absolute;bottom:74px;right:0;width:400px;height:620px;background:rgba(3,36,45,0.92);backdrop-filter:blur(28px) saturate(1.4);-webkit-backdrop-filter:blur(28px) saturate(1.4);border-radius:20px;border:1px solid rgba(45,236,118,0.08);box-shadow:'+C.shadow+';display:flex;flex-direction:column;overflow:hidden;transform-origin:calc(100% - 28px) calc(100% + 28px);transition:transform .45s cubic-bezier(.22,1,.36,1),opacity .25s ease;transform:scale(0);opacity:0;pointer-events:none}',
+      '#bw-window.bw-open{transform:scale(1);opacity:1;pointer-events:all}',
 
-      '#bw-header{background:linear-gradient(135deg,'+C.header+','+C.widget+');border-bottom:1px solid '+C.headerBorder+';padding:14px 18px;display:flex;align-items:center;gap:12px;flex-shrink:0}',
-      '#bw-avatar{width:42px;height:42px;background:linear-gradient(135deg,'+C.green+','+C.greenDark+');border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;box-shadow:0 0 16px '+C.greenGlowB+'}',
+      /* Header — branded gradient strip */
+      '#bw-header{background:linear-gradient(135deg,rgba(3,36,45,0.95) 0%,rgba(4,46,56,0.95) 100%);border-bottom:1px solid rgba(45,236,118,0.1);padding:14px 18px;display:flex;align-items:center;gap:12px;flex-shrink:0;position:relative}',
+      '#bw-header::after{content:"";position:absolute;bottom:0;left:18px;right:18px;height:1px;background:linear-gradient(90deg,transparent,rgba(45,236,118,0.2),transparent)}',
+      '#bw-avatar{width:40px;height:40px;background:'+C.bg+';border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 0 0 1px rgba(45,236,118,0.15),0 0 16px rgba(45,236,118,0.08);position:relative;overflow:hidden;padding:6px}',
+      '#bw-avatar img{width:100%;height:auto;display:block}',
       '#bw-hinfo{flex:1;min-width:0}',
-      '#bw-botname{color:'+C.text+';font-weight:700;font-size:15px;line-height:1.2}',
-      '#bw-status{color:'+C.green+';font-size:12px;display:flex;align-items:center;gap:5px;margin-top:2px}',
-      '#bw-statusdot{width:6px;height:6px;background:'+C.green+';border-radius:50%;animation:bw-pulse 2s infinite;flex-shrink:0}',
-      '#bw-hbtns{display:flex;gap:4px}',
-      '.bw-hbtn{width:32px;height:32px;background:transparent;border:none;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:'+C.textMuted+';transition:all .2s;outline:none}',
-      '.bw-hbtn:hover{background:rgba(255,255,255,.06);color:'+C.text+'}',
-      '.bw-hbtn svg{width:16px;height:16px;fill:currentColor}',
+      '#bw-botname{color:'+C.text+';font-weight:700;font-size:14px;line-height:1.2;letter-spacing:-0.3px}',
+      '#bw-status{color:'+C.green+';font-size:11px;display:flex;align-items:center;gap:5px;margin-top:3px;font-weight:500;opacity:.8}',
+      '#bw-statusdot{width:6px;height:6px;background:'+C.green+';border-radius:50%;animation:bw-pulse 2.5s ease-in-out infinite;flex-shrink:0;box-shadow:0 0 8px rgba(45,236,118,0.5)}',
+      '#bw-hbtns{display:flex;gap:2px}',
+      '.bw-hbtn{width:32px;height:32px;background:transparent;border:none;border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:'+C.textMuted+';transition:all .2s;outline:none}',
+      '.bw-hbtn:hover{background:rgba(45,236,118,.06);color:'+C.green+'}',
+      '.bw-hbtn svg{width:14px;height:14px;fill:currentColor}',
 
-      '#bw-msgs{flex:1;overflow-y:auto;padding:18px 14px;display:flex;flex-direction:column;gap:10px;scroll-behavior:smooth}',
-      '#bw-msgs::-webkit-scrollbar{width:4px}',
+      /* Messages area */
+      '#bw-msgs{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;scroll-behavior:smooth;overscroll-behavior:contain}',
+      '#bw-msgs::-webkit-scrollbar{width:3px}',
       '#bw-msgs::-webkit-scrollbar-track{background:transparent}',
-      '#bw-msgs::-webkit-scrollbar-thumb{background:'+C.scrollbar+';border-radius:4px}',
+      '#bw-msgs::-webkit-scrollbar-thumb{background:rgba(45,236,118,0.12);border-radius:3px}',
 
-      '.bw-msg{display:flex;gap:8px;max-width:86%;animation:bw-up .28s ease}',
+      /* Message rows */
+      '.bw-msg{display:flex;gap:8px;max-width:85%;animation:bw-up .35s cubic-bezier(.22,1,.36,1)}',
       '.bw-msg.user{margin-left:auto;flex-direction:row-reverse}',
-      '.bw-mavatar{width:28px;height:28px;background:linear-gradient(135deg,'+C.green+','+C.greenDark+');border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;align-self:flex-end}',
-      '.bw-bubble{padding:10px 14px;border-radius:18px;font-size:14px;line-height:1.55;word-break:break-word;white-space:pre-line}',
-      '.bw-msg.bot .bw-bubble{background:'+C.botBubble+';border:1px solid rgba(255,255,255,.05);color:'+C.text+';border-bottom-left-radius:4px}',
-      '.bw-msg.user .bw-bubble{background:linear-gradient(135deg,'+C.green+','+C.greenDark+');color:#fff;border-bottom-right-radius:4px}',
-      '.bw-bubble b,.bw-bubble strong{font-weight:700}',
+      '.bw-mavatar{width:26px;height:26px;background:'+C.bg+';border:1px solid rgba(45,236,118,0.15);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;align-self:flex-end;overflow:hidden;padding:3px}',
+      '.bw-mavatar svg{width:100%;height:auto}',
+
+      /* Bubbles */
+      '.bw-bubble{padding:10px 14px;border-radius:16px;font-size:13.5px;line-height:1.65;word-break:break-word;white-space:pre-line;letter-spacing:-0.01em}',
+      '.bw-msg.bot .bw-bubble{background:rgba(45,236,118,0.03);border:1px solid rgba(45,236,118,0.08);color:rgba(232,240,242,0.85);border-bottom-left-radius:4px}',
+      '.bw-msg.user .bw-bubble{background:linear-gradient(135deg,'+C.green+' 0%,#1ac45e 100%);color:#fff;border-bottom-right-radius:4px;box-shadow:0 4px 16px rgba(45,236,118,0.2)}',
+      '.bw-bubble b,.bw-bubble strong{font-weight:600;color:#fff}',
+      '.bw-msg.bot .bw-bubble strong{color:'+C.green+'}',
       '.bw-bubble em,.bw-bubble i{font-style:italic}',
-      '.bw-bubble hr{border:none;border-top:1px solid rgba(255,255,255,.1);margin:8px 0}',
+      '.bw-bubble hr{border:none;border-top:1px solid rgba(45,236,118,.08);margin:8px 0}',
 
-      '#bw-typing{display:none;align-items:center;gap:8px;animation:bw-up .28s ease;padding:2px 0}',
+      /* Typing indicator — AI pulse wave */
+      '#bw-typing{display:none;align-items:center;gap:10px;animation:bw-up .28s ease;padding:2px 0}',
       '#bw-typing.show{display:flex}',
-      '#bw-tdots{display:flex;gap:4px}',
-      '.bw-dot{width:6px;height:6px;background:'+C.green+';border-radius:50%;animation:bw-bounce 1.2s infinite}',
-      '.bw-dot:nth-child(2){animation-delay:.2s}',
-      '.bw-dot:nth-child(3){animation-delay:.4s}',
-      '#bw-tlabel{color:'+C.textMuted+';font-size:12px}',
+      '#bw-tdots{background:rgba(45,236,118,0.04);border:1px solid rgba(45,236,118,0.1);border-radius:4px 14px 14px 14px;padding:9px 16px;display:flex;gap:3px;align-items:center}',
+      '.bw-dot{width:3px;height:12px;background:'+C.green+';border-radius:2px;animation:bw-wave 1.2s ease-in-out infinite;opacity:.4}',
+      '.bw-dot:nth-child(2){animation-delay:.1s;height:18px}',
+      '.bw-dot:nth-child(3){animation-delay:.2s;height:10px}',
+      '#bw-tlabel{color:rgba(45,236,118,0.55);font-size:11px;font-weight:500;letter-spacing:.3px}',
+      '#bw-tlabel::after{content:"";display:inline-block;animation:bw-ellipsis 1.5s steps(4,end) infinite;width:0;overflow:hidden;vertical-align:bottom}',
 
-      '#bw-qactions{padding:0 14px 10px;display:flex;flex-wrap:wrap;gap:8px;flex-shrink:0}',
-      '.bw-qbtn{background:transparent;border:1px solid '+C.green+';color:'+C.green+';border-radius:20px;padding:7px 15px;font-size:13px;cursor:pointer;transition:all .2s;font-family:inherit;outline:none;white-space:nowrap}',
-      '.bw-qbtn:hover{background:'+C.greenGlow+';transform:translateY(-1px)}',
+      /* Quick actions */
+      '#bw-qactions{padding:4px 16px 12px;display:flex;flex-wrap:wrap;gap:8px;flex-shrink:0}',
+      '.bw-qbtn{background:rgba(45,236,118,0.05);border:1px solid rgba(45,236,118,0.12);color:'+C.green+';border-radius:100px;padding:8px 16px;font-size:12.5px;font-weight:500;cursor:pointer;transition:all .25s cubic-bezier(.22,1,.36,1);font-family:inherit;outline:none;white-space:nowrap}',
+      '.bw-qbtn:hover{background:rgba(45,236,118,0.1);border-color:rgba(45,236,118,0.25);transform:translateY(-1px);box-shadow:0 4px 16px rgba(45,236,118,0.1)}',
+      '.bw-qbtn:active{transform:translateY(0) scale(.97)}',
 
-      '#bw-idform{padding:0 14px 10px;display:none;gap:8px;flex-shrink:0;align-items:center}',
+      /* ID form */
+      '#bw-idform{padding:4px 16px 12px;display:none;gap:8px;flex-shrink:0;align-items:center}',
       '#bw-idform.show{display:flex}',
-      '#bw-idinput{flex:1;background:'+C.input+';border:1px solid '+C.inputBorder+';color:'+C.text+';border-radius:10px;padding:10px 13px;font-size:14px;outline:none;transition:border-color .2s;font-family:inherit}',
-      '#bw-idinput:focus{border-color:'+C.green+'}',
+      '#bw-idinput{flex:1;background:'+C.input+';border:1px solid '+C.inputBorder+';color:'+C.text+';border-radius:12px;padding:10px 13px;font-size:13px;outline:none;transition:all .2s;font-family:inherit}',
+      '#bw-idinput:focus{border-color:rgba(45,236,118,0.3);box-shadow:0 0 0 3px rgba(45,236,118,0.06)}',
       '#bw-idinput::placeholder{color:'+C.textMuted+'}',
-      '#bw-idconfirm{background:linear-gradient(135deg,'+C.green+','+C.greenDark+');border:none;color:#fff;border-radius:10px;padding:10px 16px;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap;font-family:inherit;outline:none}',
-      '#bw-idconfirm:hover{opacity:.9;transform:translateY(-1px)}',
+      '#bw-idconfirm{background:linear-gradient(135deg,'+C.green+',#1ac45e);border:none;color:#fff;border-radius:12px;padding:10px 18px;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap;font-family:inherit;outline:none}',
+      '#bw-idconfirm:hover{opacity:.9;transform:translateY(-1px);box-shadow:0 4px 12px rgba(45,236,118,0.2)}',
 
-      '#bw-upload{margin:0 14px 10px;border:2px dashed '+C.inputBorder+';border-radius:14px;padding:22px 16px;text-align:center;cursor:pointer;transition:all .3s;display:none;flex-shrink:0}',
+      /* Upload area */
+      '#bw-upload{margin:4px 16px 12px;border:1.5px dashed rgba(45,236,118,0.12);border-radius:14px;padding:22px 16px;text-align:center;cursor:pointer;transition:all .25s;display:none;flex-shrink:0}',
       '#bw-upload.show{display:block}',
-      '#bw-upload.drag{border-color:'+C.green+';background:'+C.greenGlow+'}',
+      '#bw-upload.drag{border-color:'+C.green+';background:rgba(45,236,118,0.04)}',
       '#bw-upload.busy{opacity:.55;pointer-events:none}',
-      '#bw-uico{font-size:34px;margin-bottom:8px}',
-      '#bw-utxt{color:'+C.text+';font-size:14px;font-weight:500}',
-      '#bw-uhint{color:'+C.textMuted+';font-size:12px;margin-top:4px}',
+      '#bw-uico{font-size:28px;margin-bottom:6px}',
+      '#bw-utxt{color:rgba(232,240,242,0.5);font-size:13px;font-weight:500}',
+      '#bw-uhint{color:'+C.textMuted+';font-size:11px;margin-top:3px}',
       '#bw-ufile{display:none}',
-      '#bw-uprog{margin-top:12px;background:'+C.border+';border-radius:4px;height:4px;overflow:hidden;display:none}',
+      '#bw-uprog{margin-top:10px;background:rgba(45,236,118,0.06);border-radius:4px;height:3px;overflow:hidden;display:none}',
       '#bw-uprog.show{display:block}',
-      '#bw-uprogbar{height:100%;background:linear-gradient(90deg,'+C.green+','+C.greenDark+');border-radius:4px;width:0%;transition:width .3s}',
+      '#bw-uprogbar{height:100%;background:linear-gradient(90deg,'+C.green+',#1ac45e);border-radius:3px;width:0%;transition:width .3s}',
 
-      '#bw-inputarea{padding:12px 14px;border-top:1px solid '+C.border+';display:flex;gap:8px;align-items:flex-end;background:'+C.widget+';flex-shrink:0}',
-      '#bw-input{flex:1;background:'+C.input+';border:1px solid '+C.inputBorder+';color:'+C.text+';border-radius:12px;padding:10px 13px;font-size:14px;resize:none;outline:none;min-height:42px;max-height:120px;line-height:1.45;font-family:inherit;transition:border-color .2s}',
-      '#bw-input:focus{border-color:'+C.green+'}',
-      '#bw-input::placeholder{color:'+C.textMuted+'}',
-      '#bw-send{width:42px;height:42px;background:linear-gradient(135deg,'+C.green+','+C.greenDark+');border:none;border-radius:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;outline:none}',
-      '#bw-send:hover{transform:translateY(-1px);box-shadow:0 4px 14px '+C.greenGlowB+'}',
-      '#bw-send:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}',
-      '#bw-send svg{width:18px;height:18px;fill:#fff}',
+      /* Chat input */
+      '#bw-inputarea{padding:12px 16px 16px;border-top:1px solid rgba(45,236,118,0.06);display:flex;gap:8px;align-items:flex-end;background:transparent;flex-shrink:0}',
+      '#bw-input{flex:1;background:rgba(45,236,118,0.03);border:1px solid rgba(45,236,118,0.08);color:'+C.text+';border-radius:14px;padding:10px 14px;font-size:13.5px;resize:none;outline:none;min-height:42px;max-height:120px;line-height:1.5;font-family:inherit;transition:all .25s cubic-bezier(.22,1,.36,1)}',
+      '#bw-input:focus{border-color:rgba(45,236,118,0.25);box-shadow:0 0 0 3px rgba(45,236,118,0.06),0 0 24px -8px rgba(45,236,118,0.1)}',
+      '#bw-input::placeholder{color:rgba(232,240,242,0.2)}',
+      '#bw-send{width:40px;height:40px;background:linear-gradient(135deg,'+C.green+',#1ac45e);border:none;border-radius:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s cubic-bezier(.22,1,.36,1);flex-shrink:0;outline:none;box-shadow:0 2px 12px rgba(45,236,118,0.25)}',
+      '#bw-send:hover{transform:translateY(-1px);box-shadow:0 4px 20px rgba(45,236,118,0.35)}',
+      '#bw-send:active{transform:scale(.93)}',
+      '#bw-send:disabled{opacity:.15;cursor:default;transform:none;box-shadow:none}',
+      '#bw-send svg{width:16px;height:16px;fill:#fff}',
 
-      '#bw-footer{text-align:center;padding:6px;color:'+C.textMuted+';font-size:10px;border-top:1px solid '+C.border+';flex-shrink:0;letter-spacing:.3px}',
+      /* Footer */
+      '#bw-footer{text-align:center;padding:8px;color:rgba(45,236,118,0.12);font-size:10px;border-top:1px solid rgba(45,236,118,0.04);flex-shrink:0;letter-spacing:.3px;font-weight:500}',
 
-      '@keyframes bw-up{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}',
-      '@keyframes bw-pulse{0%,100%{opacity:1}50%{opacity:.35}}',
-      '@keyframes bw-bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-5px)}}',
+      /* Animations */
+      '@keyframes bw-up{from{opacity:0;transform:translateY(8px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}',
+      '@keyframes bw-pulse{0%,100%{opacity:1}50%{opacity:.3}}',
+      '@keyframes bw-wave{0%,100%{transform:scaleY(.4);opacity:.3}50%{transform:scaleY(1);opacity:1}}',
+      '@keyframes bw-ellipsis{0%{content:"";width:0}25%{content:".";width:5px}50%{content:"..";width:10px}75%{content:"...";width:15px}}',
+      '@keyframes bw-ring{0%,100%{transform:scale(1);opacity:.4}50%{transform:scale(1.15);opacity:0}}',
 
-      '@media(max-width:440px){#__beton_widget__{bottom:16px;right:16px;left:16px}#bw-window{width:100%;right:0;left:0;bottom:76px;height:calc(100vh - 100px);max-height:600px}}'
+      /* Mobile */
+      '@media(max-width:440px){#__beton_widget__{bottom:16px;right:12px;left:12px}#bw-window{width:100%;right:0;left:0;bottom:74px;height:calc(100dvh - 94px);max-height:620px;border-radius:18px;transform-origin:bottom center}#bw-trigger{width:52px;height:52px;border-radius:14px}#bw-trigger svg{width:22px;height:22px}}'
     ].join('');
     document.head.appendChild(s);
   }
@@ -296,9 +329,9 @@
         '<span id="bw-notif"></span>' +
         '<svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.17L4 17.17V4h16v12z"/></svg>' +
       '</button>' +
-      '<div id="bw-window" role="dialog" aria-label="BetonBot">' +
+      '<div id="bw-window" role="dialog" aria-label="BetonWin Support">' +
         '<div id="bw-header">' +
-          '<div id="bw-avatar">🎯</div>' +
+          '<div id="bw-avatar"><svg viewBox="0 0 140 20" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto"><path d="M8.25 5.24H6.5L5.9 8.72H7.62C9.11 8.72 9.86 8.06 9.86 6.76C9.86 6.31 9.72 5.94 9.45 5.66C9.18 5.38 8.78 5.24 8.25 5.24ZM7.62 11.54H5.41L4.85 14.75H7.15C7.87 14.75 8.44 14.58 8.86 14.25C9.28 13.92 9.49 13.51 9.49 13.03C9.49 12.03 8.86 11.54 7.62 11.54ZM9.72 1.61C11.49 1.61 12.75 2 13.49 2.77C14.05 3.36 14.33 4.11 14.33 5.01C14.33 5.32 14.3 5.65 14.24 5.99L14.03 7.11C13.86 7.99 13.53 8.68 13.04 9.18C12.55 9.68 12.12 9.93 11.75 9.93L11.72 10.11C12.16 10.11 12.6 10.36 13.05 10.84C13.5 11.32 13.73 11.89 13.73 12.54C13.73 12.8 13.7 13.08 13.63 13.38L13.49 14.1C13.24 15.44 12.65 16.48 11.71 17.25C10.77 18.01 9.46 18.39 7.78 18.39H0L2.96 1.61H9.72Z" fill="#2DEC76"/><path d="M27.01 18.39H15.31L18.27 1.61H28.54C29.29 1.61 29.85 2.28 29.72 3.01L29.32 5.24H21.81L21.28 8.39H27.48L26.82 12.02H20.63L20.16 14.75H27.66L27.01 18.39Z" fill="#2DEC76"/><path d="M46.31 5.24H40.57L38.27 18.39H34.05L36.36 5.24H30.6L31.25 1.61H45.53C46.28 1.61 46.84 2.28 46.71 3.01L46.31 5.24Z" fill="#2DEC76"/><path d="M73.66 9.98C72.99 13.81 69.33 16.93 65.5 16.93C61.67 16.93 59.11 13.81 59.78 9.98C60.45 6.15 64.11 3.04 67.94 3.04C71.78 3.04 74.34 6.15 73.66 9.98ZM68.2 1.6H56.12C51.51 1.61 47.1 5.37 46.28 9.98C45.47 14.6 48.56 18.36 53.16 18.37H65.24C69.86 18.37 74.29 14.61 75.11 9.98C75.92 5.36 72.82 1.6 68.2 1.6Z" fill="white"/><path d="M91.37 3.01L88.68 18.39H84.46L81.52 9.2L79.94 18.39H75.72L78.68 1.61H82.15C82.67 1.61 83.12 1.93 83.29 2.42L85.9 10.18L87.42 1.61H90.19C90.93 1.61 91.49 2.28 91.37 3.01Z" fill="white"/><path d="M108.7 2.84L108.35 14.31H108.88L112.94 1.61H115.83C116.65 1.61 117.23 2.41 116.96 3.19L111.75 18.39H104.76L105.39 7.64L102.26 18.39H95.27L95.43 1.61H98.77C99.44 1.61 99.98 2.17 99.96 2.84L99.58 14.31H100.12L104.2 1.61H107.51C108.18 1.61 108.72 2.17 108.7 2.84Z" fill="#2DEC76"/><path d="M123.74 3.01L121.05 18.39H116.83L119.79 1.61H122.56C123.3 1.61 123.87 2.28 123.74 3.01Z" fill="#2DEC76"/><path d="M139.98 3.01L137.29 18.39H133.07L130.14 9.2L128.55 18.39H124.33L127.29 1.61H130.77C131.28 1.61 131.74 1.93 131.9 2.42L134.52 10.18L136.03 1.61H138.81C139.55 1.61 140.11 2.28 139.98 3.01Z" fill="#2DEC76"/><circle cx="92.12" cy="16.4" r="1.97" fill="white"/></svg></div>' +
           '<div id="bw-hinfo">' +
             '<div id="bw-botname">' + CONFIG.BOT_NAME + '</div>' +
             '<div id="bw-status"><span id="bw-statusdot"></span><span>' + t('online') + '</span></div>' +
@@ -318,16 +351,14 @@
             '<span id="bw-tlabel">' + t('typing') + '</span>' +
           '</div>' +
         '</div>' +
-        '<div id="bw-qactions">' +
-          '<button class="bw-qbtn" id="bw-qa-deposit">💳 ' + t('quick_deposit') + '</button>' +
-        '</div>' +
+        '<div id="bw-qactions" style="display:none"></div>' +
         '<div id="bw-idform">' +
           '<input type="text" id="bw-idinput" placeholder="' + t('player_id_ph') + '" autocomplete="off" maxlength="50">' +
           '<button id="bw-idconfirm">' + t('confirm') + '</button>' +
         '</div>' +
         '<div id="bw-upload">' +
           '<input type="file" id="bw-ufile" accept=".jpg,.jpeg,.png,.webp,.pdf">' +
-          '<div id="bw-uico">📎</div>' +
+          '<div id="bw-uico"><svg viewBox="0 0 24 24" width="28" height="28" fill="'+C.textMuted+'"><path d="M9 16h6v-6h4l-7-7-7 7h4v6zm-4 2h14v2H5v-2z"/></svg></div>' +
           '<div id="bw-utxt">' + t('upload_drag') + '</div>' +
           '<div id="bw-uhint">' + t('upload_hint') + '</div>' +
           '<div id="bw-uprog"><div id="bw-uprogbar"></div></div>' +
@@ -338,7 +369,7 @@
             '<svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>' +
           '</button>' +
         '</div>' +
-        '<div id="bw-footer">Powered by BetonBot AI</div>' +
+        '<div id="bw-footer">Powered by BetonWin Support AI</div>' +
       '</div>';
   }
 
@@ -355,12 +386,27 @@
   }
 
   function parseMarkdown(txt) {
-    return escapeHTML(txt)
+    // Extract links BEFORE escaping so URLs keep their & chars intact
+    var links = [];
+    txt = txt.replace(/\[(.*?)\]\((https?:\/\/[^\s)]+)\)/g, function (_, text, url) {
+      var idx = links.length;
+      links.push({ text: text, url: url });
+      return '%%LINK' + idx + '%%';
+    });
+    var out = escapeHTML(txt)
       .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      // Bullet lists: lines starting with * or - followed by space → bullet
+      .replace(/^[*\-]\s+(.+)$/gm, '• $1')
+      // Numbered lists: lines starting with 1. 2. etc → keep number with dot
+      .replace(/^(\d+)\.\s+(.+)$/gm, '$1. $2')
       .replace(/\*(.*?)\*/g, '<em>$1</em>')
-      .replace(/^---$/gm, '<hr>')
-      .replace(/\n\n/g, '<br><br>')
-      .replace(/\n/g, '<br>');
+      .replace(/^---$/gm, '<hr>');
+    // Restore links with safe escaped text but raw URL
+    links.forEach(function (link, i) {
+      out = out.replace('%%LINK' + i + '%%',
+        '<a href="' + link.url + '" target="_blank" rel="noopener" style="color:' + C.green + ';text-decoration:underline">' + escapeHTML(link.text) + '</a>');
+    });
+    return out;
   }
 
   function addMessage(role, content) {
@@ -370,13 +416,17 @@
     div.className = 'bw-msg ' + role;
     var html = parseMarkdown(content);
     if (role === 'bot') {
-      div.innerHTML = '<div class="bw-mavatar">🎯</div><div class="bw-bubble">' + html + '</div>';
+      div.innerHTML = '<div class="bw-mavatar"><svg viewBox="0 0 140 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8.25 5.24H6.5L5.9 8.72H7.62C9.11 8.72 9.86 8.06 9.86 6.76C9.86 6.31 9.72 5.94 9.45 5.66C9.18 5.38 8.78 5.24 8.25 5.24ZM7.62 11.54H5.41L4.85 14.75H7.15C7.87 14.75 8.44 14.58 8.86 14.25C9.28 13.92 9.49 13.51 9.49 13.03C9.49 12.03 8.86 11.54 7.62 11.54ZM9.72 1.61C11.49 1.61 12.75 2 13.49 2.77C14.05 3.36 14.33 4.11 14.33 5.01C14.33 5.32 14.3 5.65 14.24 5.99L14.03 7.11C13.86 7.99 13.53 8.68 13.04 9.18C12.55 9.68 12.12 9.93 11.75 9.93L11.72 10.11C12.16 10.11 12.6 10.36 13.05 10.84C13.5 11.32 13.73 11.89 13.73 12.54C13.73 12.8 13.7 13.08 13.63 13.38L13.49 14.1C13.24 15.44 12.65 16.48 11.71 17.25C10.77 18.01 9.46 18.39 7.78 18.39H0L2.96 1.61H9.72Z" fill="#2DEC76"/><path d="M27.01 18.39H15.31L18.27 1.61H28.54C29.29 1.61 29.85 2.28 29.72 3.01L29.32 5.24H21.81L21.28 8.39H27.48L26.82 12.02H20.63L20.16 14.75H27.66L27.01 18.39Z" fill="#2DEC76"/><path d="M46.31 5.24H40.57L38.27 18.39H34.05L36.36 5.24H30.6L31.25 1.61H45.53C46.28 1.61 46.84 2.28 46.71 3.01L46.31 5.24Z" fill="#2DEC76"/><path d="M73.66 9.98C72.99 13.81 69.33 16.93 65.5 16.93C61.67 16.93 59.11 13.81 59.78 9.98C60.45 6.15 64.11 3.04 67.94 3.04C71.78 3.04 74.34 6.15 73.66 9.98ZM68.2 1.6H56.12C51.51 1.61 47.1 5.37 46.28 9.98C45.47 14.6 48.56 18.36 53.16 18.37H65.24C69.86 18.37 74.29 14.61 75.11 9.98C75.92 5.36 72.82 1.6 68.2 1.6Z" fill="white"/><circle cx="92.12" cy="16.4" r="1.97" fill="white"/></svg></div><div class="bw-bubble">' + html + '</div>';
     } else {
       div.innerHTML = '<div class="bw-bubble">' + html + '</div>';
     }
     msgs.insertBefore(div, typing);
     msgs.scrollTop = msgs.scrollHeight;
     STATE.messages.push({ role: role, content: content, ts: Date.now() });
+    // Prevent unbounded memory growth — keep only last MAX_MESSAGES
+    if (STATE.messages.length > MAX_MESSAGES) {
+      STATE.messages = STATE.messages.slice(-MAX_MESSAGES);
+    }
     return div;
   }
 
@@ -426,18 +476,20 @@
   }
 
   // Language words for auto-detecting language from typed text
+  // IMPORTANT: avoid shared words between languages to prevent false positives
   var LANG_WORDS = {
     it: ['ciao','grazie','buongiorno','buonasera','prelievo','prelevare','perché','voglio',
-         'questo','questa','subito','ancora','sono','mio','mia','quanto','quando','aiuto',
-         'problema','depositi','soldi','conto','non ho ricevuto','non è arrivato',
-         'posso','dove','come posso','non riesco','accedere','vedere','trovare','voglio sapere',
-         'non capisco','qual è','mi serve'],
+         'questo','questa','subito','ancora','sono','mia','aiuto',
+         'depositi','soldi','conto','non ho ricevuto','non è arrivato',
+         'dove','come posso','non riesco','accedere','vedere','trovare','voglio sapere',
+         'non capisco','qual è','mi serve','il mio','la mia','ho bisogno','vorrei'],
     es: ['hola','gracias','buenos','retiro','retirar','también','quiero','cuánto','cuándo',
-         'dinero','ayuda','problema','cuenta','no he recibido','no ha llegado','por favor',
-         'cómo','estoy','tengo','puedo','dónde','puedo ver','no puedo'],
-    pt: ['olá','ola','obrigado','obrigada','saque','sacar','também','quero','quanto','quando',
-         'dinheiro','ajuda','não recebi','não chegou','por favor',
-         'como posso','estou','tenho','onde posso','não consigo','preciso de']
+         'dinero','ayuda','cuenta','no he recibido','no ha llegado','por favor',
+         'cómo','estoy','tengo','puedo','dónde','puedo ver','no puedo','necesito','quisiera'],
+    pt: ['olá','ola','obrigado','obrigada','saque','sacar','também','quero','quanto',
+         'dinheiro','não recebi','não chegou',
+         'como posso','estou','tenho','onde posso','não consigo','preciso de',
+         'meu','minha','gostaria','verificar']
   };
 
   // Auto-detect language from user message text (overrides browser lang when confident)
@@ -449,11 +501,14 @@
         if (lower.indexOf(w) !== -1) { scores[l]++; }
       });
     });
-    var best = null, bestScore = 0; // require at least 1 match
+    var best = null, bestScore = 0, tied = false;
     Object.keys(scores).forEach(function (l) {
-      if (scores[l] > bestScore) { best = l; bestScore = scores[l]; }
+      if (scores[l] > bestScore) { best = l; bestScore = scores[l]; tied = false; }
+      else if (scores[l] === bestScore && scores[l] > 0) { tied = true; }
     });
-    return best; // null if no confident match → keep current lang
+    // Require at least 2 matches AND no tie to switch language confidently
+    if (tied || bestScore < 2) { return null; }
+    return best;
   }
 
   // Keywords that signal a deposit PROBLEM (triggers verification flow)
@@ -495,7 +550,9 @@ function apiVerify(playerId) {
     return n8nCall(CONFIG.ENDPOINTS.VERIFY, { player_id: playerId, language: lang });
   }
   function apiStatus(jobId) {
-    return n8nCall(CONFIG.ENDPOINTS.STATUS + '/' + jobId, null, 'GET');
+    // Sanitize jobId to prevent path traversal
+    var safeId = (jobId || '').replace(/[^a-zA-Z0-9_\-]/g, '');
+    return n8nCall(CONFIG.ENDPOINTS.STATUS + '/' + safeId, null, 'GET');
   }
   function apiPresignedUrl(playerId, fileName, fileType) {
     return n8nCall(CONFIG.ENDPOINTS.PRESIGNED, { player_id: playerId, file_name: fileName, file_type: fileType });
@@ -523,7 +580,7 @@ function apiVerify(playerId) {
           clearInterval(STATE.pollTimer);
           onDone(res);
         }
-      }).catch(function (e) { console.warn('[BetonBot] poll:', e); });
+      }).catch(function (e) { console.warn('[BetonWin Support] poll:', e); });
     }, CONFIG.POLL_INTERVAL_MS);
   }
 
@@ -536,6 +593,9 @@ function apiVerify(playerId) {
   // 11. FILE UPLOAD — presigned URL → direct S3
   // ============================================================
   function handleFile(file) {
+    if (STATE.phase !== 'UPLOAD_REQUIRED') return; // only accept during upload phase
+    if (!STATE.playerId) return; // need player ID
+    if (!file || file.size === 0) { addMessage('bot', t('err_file_type')); return; }
     if (file.size > CONFIG.MAX_FILE_MB * 1024 * 1024) { addMessage('bot', t('err_file_size')); return; }
     if (CONFIG.ACCEPTED_TYPES.indexOf(file.type) === -1) { addMessage('bot', t('err_file_type')); return; }
 
@@ -558,7 +618,7 @@ function apiVerify(playerId) {
         else { handleFinalResult(res); }
       })
       .catch(function (e) {
-        console.error('[BetonBot] upload:', e);
+        console.error('[BetonWin Support] upload:', e);
         addMessage('bot', t('err_generic'));
         STATE.phase = 'CHAT';
         setInputDisabled(false);
@@ -568,6 +628,7 @@ function apiVerify(playerId) {
   function uploadToS3(url, file, onProgress) {
     return new Promise(function (resolve, reject) {
       var xhr = new XMLHttpRequest();
+      xhr.timeout = 60000; // 60s timeout
       xhr.upload.addEventListener('progress', function (e) {
         if (e.lengthComputable) { onProgress(Math.round(e.loaded / e.total * 100)); }
       });
@@ -576,6 +637,7 @@ function apiVerify(playerId) {
         else { reject(new Error('S3 ' + xhr.status)); }
       });
       xhr.addEventListener('error', reject);
+      xhr.addEventListener('timeout', function () { reject(new Error('Upload timeout')); });
       xhr.open('PUT', url);
       xhr.setRequestHeader('Content-Type', file.type);
       xhr.send(file);
@@ -603,9 +665,24 @@ function apiVerify(playerId) {
     text = (text || '').trim();
     if (!text) return;
 
-    // Auto-detect language from what the user typed (update global lang)
+    // Rate limit + prevent double-send
+    var now = Date.now();
+    if (STATE.busy || (now - STATE.lastSendTs) < SEND_COOLDOWN) return;
+    STATE.busy = true;
+    STATE.lastSendTs = now;
+
+    // Cap message length to prevent huge payloads
+    if (text.length > MAX_MSG_LENGTH) { text = text.slice(0, MAX_MSG_LENGTH); }
+
+    // Auto-detect language from what the user typed (update global lang + UI)
     var detected = detectLangFromText(text);
-    if (detected && LANG[detected]) { lang = detected; }
+    if (detected && LANG[detected] && detected !== lang) {
+      lang = detected;
+      // Update UI elements to match new language
+      document.getElementById('bw-input').placeholder = t('placeholder');
+      document.getElementById('bw-idinput').placeholder = t('player_id_ph');
+      document.getElementById('bw-idconfirm').textContent = t('confirm');
+    }
 
     addMessage('user', text);
     document.getElementById('bw-input').value = '';
@@ -613,11 +690,27 @@ function apiVerify(playerId) {
     showTyping(true);
     setInputDisabled(true);
 
+    // Safety: auto-recover if stuck for 30s (network hang, unhandled error)
+    var safetyTimer = setTimeout(function () {
+      if (STATE.busy) {
+        showTyping(false);
+        setInputDisabled(false);
+        STATE.busy = false;
+      }
+    }, 30000);
+
+    // Helper: reset busy state + clear safety timer
+    function unlockInput() {
+      clearTimeout(safetyTimer);
+      setInputDisabled(false);
+      STATE.busy = false;
+    }
+
     // 1. Detect deposit problem → start verification flow
     if (detectIntent(text) === 'DEPOSIT') {
       showTyping(false);
       addMessage('bot', t('deposit_intent'));
-      setInputDisabled(false);
+      unlockInput();
       startDepositFlow();
       return;
     }
@@ -630,10 +723,15 @@ function apiVerify(playerId) {
     kbCall
       .catch(function () { return { results: [] }; })
       .then(function (data) {
+        // Guard against malformed KB response (e.g. empty query returns {status, message})
+        if (!data.results || !Array.isArray(data.results)) { data = { results: [] }; }
         var kbContent = '';
         if (data.results && data.results.length > 0) {
-          // Top 2 results, each truncated to 1200 chars to keep payload fast
-          kbContent = data.results.slice(0, 2).map(function (r, i) {
+          // Filter out PDFs (no useful text content) and take top 2
+          var useful = data.results.filter(function (r) {
+            return r.type !== 'application/pdf' && (r.content || '').length > 50;
+          });
+          kbContent = useful.slice(0, 2).map(function (r, i) {
             var c = (r.content || '').slice(0, 1200);
             return '[' + (i + 1) + '] ' + (r.name || '') + ':\n' + c;
           }).join('\n\n---\n\n');
@@ -644,20 +742,57 @@ function apiVerify(playerId) {
         var aiTimeout = new Promise(function (_, reject) {
           setTimeout(function () { reject(new Error('timeout')); }, 12000);
         });
+        // Add language instruction to kb_content so AI knows to respond in the right language
+        var LANG_NAMES = { en: 'English', es: 'Spanish', it: 'Italian', pt: 'Portuguese' };
+        var langInstruction = '';
+        if (lang !== 'es') {
+          langInstruction = 'IMPORTANT: The user is writing in ' + (LANG_NAMES[lang] || 'Spanish') +
+            '. You MUST respond in ' + (LANG_NAMES[lang] || 'Spanish') + '. Do NOT refuse or redirect to another language.\n\n';
+        }
+        var payload = { message: text, kb_content: langInstruction + kbContent, lang: lang, history: history };
         return Promise.race([
-          n8nCall(CONFIG.ENDPOINTS.CHAT, { message: text, kb_content: kbContent, lang: lang, history: history }),
+          n8nCall(CONFIG.ENDPOINTS.CHAT, payload),
           aiTimeout
         ]);
       })
       .then(function (res) {
         showTyping(false);
-        addMessage('bot', res.message || t('err_generic'));
-        setInputDisabled(false);
+        var raw = res.response || res.message || t('err_generic');
+        // Strip <!--lang:XX--> tag and update language
+        var langMatch = raw.match(/<!--lang:([a-z]{2})-->/);
+        if (langMatch && LANG[langMatch[1]]) { lang = langMatch[1]; }
+        raw = raw.replace(/<!--lang:[a-z]{2}-->\s*/g, '').trim();
+        // Detect language rejection from n8n and retry in Spanish as fallback
+        var rejectPatterns = ['non offriamo supporto', 'no ofrecemos soporte', 'no ofrezco soporte',
+          'do not offer support', 'não oferecemos suporte', 'riformulare', 'reformule',
+          'not offer assistance', 'currently not available in', 'parlo solo'];
+        var isRejected = rejectPatterns.some(function (p) { return raw.toLowerCase().indexOf(p) !== -1; });
+        if (isRejected) {
+          // Retry with Spanish-wrapped message so n8n AI accepts it
+          var wrappedMsg = 'Pregunta del cliente (responde en español): ' + text;
+          var retryPayload = { message: wrappedMsg, kb_content: kbContent, lang: 'es', history: history };
+          n8nCall(CONFIG.ENDPOINTS.CHAT, retryPayload)
+            .then(function (r2) {
+              var retryRaw = r2.response || r2.message || t('err_generic');
+              retryRaw = retryRaw.replace(/<!--lang:[a-z]{2}-->\s*/g, '').trim();
+              // Check if retry was also rejected
+              var retryRejected = rejectPatterns.some(function (p) { return retryRaw.toLowerCase().indexOf(p) !== -1; });
+              addMessage('bot', retryRejected ? t('no_results') : retryRaw);
+              unlockInput();
+            })
+            .catch(function () {
+              addMessage('bot', t('no_results'));
+              unlockInput();
+            });
+          return;
+        }
+        addMessage('bot', raw);
+        unlockInput();
       })
       .catch(function () {
         showTyping(false);
         addMessage('bot', t('err_generic'));
-        setInputDisabled(false);
+        unlockInput();
       });
   }
 
@@ -672,6 +807,10 @@ function apiVerify(playerId) {
 
   function handlePlayerIdSubmit(id) {
     id = (id || '').trim();
+    if (!id) return;
+    if (STATE.phase !== 'DEPOSIT_ASK_ID') return; // only accept during deposit flow
+    // Sanitize: alphanumeric + dash/underscore only, max 50 chars
+    id = id.replace(/[^a-zA-Z0-9_\-]/g, '').slice(0, 50);
     if (!id) return;
     STATE.playerId = id;
     showPlayerIdForm(false);
@@ -727,7 +866,10 @@ function apiVerify(playerId) {
       this.style.height = Math.min(this.scrollHeight, 120) + 'px';
     });
 
-    document.getElementById('bw-qa-deposit').addEventListener('click', function () {
+    // Quick deposit button
+    document.getElementById('bw-qactions').innerHTML =
+      '<button class="bw-qbtn" id="bw-qdep">' + t('quick_deposit') + '</button>';
+    document.getElementById('bw-qdep').addEventListener('click', function () {
       showQuickActions(false);
       startDepositFlow();
     });
@@ -767,12 +909,21 @@ function apiVerify(playerId) {
   function resetChat() {
     stopPolling();
     STATE.messages = []; STATE.jobId = null; STATE.playerId = null; STATE.phase = 'CHAT';
+    STATE.busy = false; STATE.lastSendTs = 0;
     document.getElementById('bw-msgs').innerHTML =
       '<div id="bw-typing">' +
         '<div id="bw-tdots"><div class="bw-dot"></div><div class="bw-dot"></div><div class="bw-dot"></div></div>' +
         '<span id="bw-tlabel">' + t('typing') + '</span>' +
       '</div>';
-    showPlayerIdForm(false); showUpload(false); showQuickActions(true);
+    showPlayerIdForm(false); showUpload(false);
+    // Re-create quick deposit button and show
+    document.getElementById('bw-qactions').innerHTML =
+      '<button class="bw-qbtn" id="bw-qdep">' + t('quick_deposit') + '</button>';
+    document.getElementById('bw-qdep').addEventListener('click', function () {
+      showQuickActions(false);
+      startDepositFlow();
+    });
+    showQuickActions(true);
     setInputDisabled(false); setProgress(0);
     document.getElementById('bw-idinput').value = '';
     document.getElementById('bw-input').value   = '';
@@ -788,7 +939,7 @@ function apiVerify(playerId) {
     buildHTML();
     bindEvents();
     setTimeout(function () { addMessage('bot', t('welcome')); }, 500);
-    console.log('[BetonBot] v1.1.0 ready — lang:', lang);
+    console.log('[BetonWin Support] v2.1.0 ready — lang:', lang);
   }
 
   if (document.readyState === 'loading') {
