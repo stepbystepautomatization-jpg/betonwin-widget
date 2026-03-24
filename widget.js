@@ -88,7 +88,12 @@
       live_agent:       'Live Agent',
       agent_closed:     'The agent has closed this conversation.\nClick **New chat** to start a new one.',
       human_noted:      "I understand you'd like to speak with a human agent. Let me try to help you first — if I can't resolve your issue, I'll connect you with an agent.",
-      human_escalate:   "I'm connecting you with a live agent now."
+      human_escalate:   "I'm connecting you with a live agent now.",
+      proactive:        'Hi! Need any help? I can assist you with deposits, withdrawals, bonuses, and more.',
+      csat_ask:         'How was your experience?',
+      csat_thanks:      'Thank you for your feedback!',
+      send_file_agent:  'Send a file to the agent',
+      file_sent:        'File sent to agent.'
     },
     es: {
       welcome:          '¡Hola! Soy tu asistente de soporte **BetonWin** 24/7. ¿En qué puedo ayudarte hoy?',
@@ -124,7 +129,12 @@
       live_agent:       'Agente',
       agent_closed:     'El agente ha cerrado esta conversación.\nHaz clic en **Nueva conversación** para iniciar una nueva.',
       human_noted:      'Entiendo que quieres hablar con un agente. Déjame intentar ayudarte primero — si no puedo resolver tu problema, te conecto con un agente.',
-      human_escalate:   'Te estoy conectando con un agente ahora.'
+      human_escalate:   'Te estoy conectando con un agente ahora.',
+      proactive:        '¡Hola! ¿Necesitas ayuda? Puedo ayudarte con depósitos, retiros, bonos y más.',
+      csat_ask:         '¿Cómo fue tu experiencia?',
+      csat_thanks:      '¡Gracias por tu opinión!',
+      send_file_agent:  'Enviar archivo al agente',
+      file_sent:        'Archivo enviado al agente.'
     },
     it: {
       welcome:          'Ciao! Sono il tuo assistente di supporto **BetonWin** 24/7. Come posso aiutarti oggi?',
@@ -160,7 +170,12 @@
       live_agent:       'Agente',
       agent_closed:     "L'agente ha chiuso questa conversazione.\nClicca su **Nuova conversazione** per iniziarne una nuova.",
       human_noted:      'Capisco che vorresti parlare con un operatore. Lasciami provare ad aiutarti prima — se non riesco a risolvere, ti collego con un agente.',
-      human_escalate:   'Ti sto collegando con un agente ora.'
+      human_escalate:   'Ti sto collegando con un agente ora.',
+      proactive:        'Ciao! Hai bisogno di aiuto? Posso assisterti con depositi, prelievi, bonus e altro.',
+      csat_ask:         "Com'è stata la tua esperienza?",
+      csat_thanks:      'Grazie per il tuo feedback!',
+      send_file_agent:  "Invia file all'agente",
+      file_sent:        "File inviato all'agente."
     },
     pt: {
       welcome:          'Olá! Sou seu assistente de suporte **BetonWin** 24/7. Como posso ajudá-lo hoje?',
@@ -196,7 +211,12 @@
       live_agent:       'Agente',
       agent_closed:     'O agente encerrou esta conversa.\nClique em **Nova conversa** para iniciar uma nova.',
       human_noted:      'Entendo que você quer falar com um agente. Deixa-me tentar ajudar primeiro — se não conseguir resolver, te conecto com um agente.',
-      human_escalate:   'Estou conectando você com um agente agora.'
+      human_escalate:   'Estou conectando você com um agente agora.',
+      proactive:        'Olá! Precisa de ajuda? Posso ajudá-lo com depósitos, saques, bônus e mais.',
+      csat_ask:         'Como foi sua experiência?',
+      csat_thanks:      'Obrigado pelo seu feedback!',
+      send_file_agent:  'Enviar arquivo ao agente',
+      file_sent:        'Arquivo enviado ao agente.'
     }
   };
 
@@ -226,8 +246,87 @@
   var MAX_MESSAGES   = 100;
   var SEND_COOLDOWN  = 1000;
   var HUMAN_REQUEST_THRESHOLD = 3;
-  var AGENT_POLL_INTERVAL = 5000; // poll Zendesk every 5s for agent replies
-  var AGENT_POLL_MAX = 360;       // stop after 30 min (360 × 5s)
+  var AGENT_POLL_INTERVAL = 5000;
+  var AGENT_POLL_MAX = 360;
+  var PROACTIVE_DELAY = 30000;    // show proactive message after 30s
+  var STORAGE_KEY = '__beton_chat__'; // localStorage key for persistence
+  var NOTIF_SOUND_URL = 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1bZ3N9gnqEi46Oj4uFfnRoW1BFQkVOXG53goqRlZeSjIOAd21kXFhYXWRveoaOk5aXlI6HgXpya2VfXWBka3aBipKXmZiVkIqEfnhybGhjY2dsdoGKkpiamJaTjoiCfHZwamZlZ2tygIqSmJqYlpKNh4F8dnBqZmVnaHCBi5OYmpeTkI2Kh4N+eXRua2lrbXN+iJCWmJaTkI2KiIWBfHdybm1sb3R7hIySlZaTkI6MioiFgnx4dHFvcHJ2fIWNkpWUk5COjIqIhYJ/e3d0cnF0eH2EjJGUlJKQjouKiIaEgn55dnRzdHd7gIaPk5WUkpCOjIqJh4WCf3x5d3Z2eXyBh42Sk5OSkI6MioiGhIF+e3l3dnd5fIKHjZGTkpKQjo2LiYeFgn98enl4eXt+goiNkZOSkI+NjIuJh4WDgH17enl5e32Bg4iNkJKRkI6NjIuJh4WDgH58e3p6e32AhIiNkJGRj46NjIqJh4aDgX98fHt7fH6BhYmNkJGQj46NjIqIh4WDgX9+fHx8fX+ChomMj5CQj46NjIqIhoWDgYB+fXx9fn+ChomMj5CQj46Mi4qIhoWDgX9+fXx9fn+Bg4eLjo+Pj46NjIqIhoWDgX9+fXx8fX6AgoWIi46Pj4+OjYuKiIaFg4GAfn18fH1+gIKFiIuOj4+Pjo2LioiGhYOBgH5+fX1+f4GDhomLjo+Pj46Ni4qIhoWDgYB+fn19fn+BgoWIi42Oj4+OjYuKiIaFg4F/fn19fX5/gYOFiIuNjo6Ojo2LioiGhIOBf35+fX1+f4GDhYiLjY6Ojo2Mi4mIhoSDgX9+fn19fn+BgoSHioyNjo6NjYuKiIaEg4F/fn59fX5/gIKEh4qMjY6OjY2LioiGhIOBf35+fX1+f4CCBIeKjI2NjY2Ni4qIhoSDgX9+fn19fn+AgoSHioyNjY2NjIuJiIaEg4GAf35+fX5/gIKEh4qMjY2NjIyLiYiGhIOBgH9+fn1+f4CCBIeKjI2NjYyMi4mIhoSDgYB/fn5+fn+AgoSHiouNjY2MjIuJiIaEg4GAfn5+fn5/gIKEhomLjI2NjIyLiYiGhIOBgH5+fn5+f4CChIaJi4yNjYyMi4mIhoSDgYB+fn5+fn+AgoSGiYuMjI2MjIuJiIaEg4GAfn5+fn5/gIKEhomLjIyNjIuLiYiGhIOBgH5+fn5+f4CChIaJi4yMjIyLi4mIhoSEgYB/fn5+fn+AgoSGiYuMjIyMi4uJiIaEg4GAfn5+fn5/gIKEhomLjIyMi4uLiYiGhISDgYB/fn5+f3+AgoSGiYuMjIyLi4uJiIaFhIKBf35+fn5/gIGDhYiKi4yMjIuLi4mIhoWEgoF/fn5+fn9/gYOFiIqLjIyMi4uLiYiHhYSCgX9+fn5+f4CBg4WIiouMjIyLi4qJiIeFhIKBf35+fn5/f4GDhYeKi4uMjIuLi4mIh4WEgoF/fn5+fn9/gYOFh4qLi4yLi4uKiYeGhYSCgX9+fn5+f3+Bg4WHiouLjIuLi4qJh4aFhIKBf39+fn5/f4GDhYeJi4uLi4uLiomHhoWEgoGAf35+fn9/gIKDhYeJi4uLi4uLiomHhoWEgoGAf35+fn9/gIKDhYeJi4uLi4uLiomIhoWEgoGAf39+fn9/gIKDhYeJiouLi4uKiomIhoWEgoGAf39+fn9/gIKDhYeJiouLi4uKiomIhoWEg4KBf39+fn9/gIKDhYeJiouLi4uKiomIhoaFg4KBf39+fn9/gIGDBQ==';
+
+  // ============================================================
+  // PERSISTENCE — save/restore chat from localStorage
+  // ============================================================
+  function saveChat() {
+    try {
+      var data = {
+        messages: STATE.messages.slice(-50), // save last 50 messages
+        phase: STATE.phase,
+        lang: lang,
+        ticketId: STATE.ticketId,
+        humanRequestCount: STATE.humanRequestCount,
+        ts: Date.now()
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    } catch (e) { /* localStorage full or disabled */ }
+  }
+
+  function loadChat() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return null;
+      var data = JSON.parse(raw);
+      // Expire after 1 hour
+      if (Date.now() - (data.ts || 0) > 3600000) {
+        localStorage.removeItem(STORAGE_KEY);
+        return null;
+      }
+      return data;
+    } catch (e) { return null; }
+  }
+
+  function clearSavedChat() {
+    try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+  }
+
+  // ============================================================
+  // NOTIFICATION SOUND
+  // ============================================================
+  var notifAudio = null;
+  function playNotifSound() {
+    try {
+      if (!notifAudio) { notifAudio = new Audio(NOTIF_SOUND_URL); notifAudio.volume = 0.3; }
+      notifAudio.currentTime = 0;
+      notifAudio.play().catch(function () {});
+    } catch (e) {}
+  }
+
+  // ============================================================
+  // UNREAD BADGE
+  // ============================================================
+  var unreadCount = 0;
+  function updateBadge() {
+    var badge = document.getElementById('bw-notif');
+    if (!badge) return;
+    if (unreadCount > 0 && !STATE.isOpen) {
+      badge.style.display = 'block';
+      badge.textContent = unreadCount > 9 ? '9+' : unreadCount;
+      badge.style.fontSize = '9px';
+      badge.style.color = '#fff';
+      badge.style.lineHeight = '16px';
+      badge.style.textAlign = 'center';
+      badge.style.fontWeight = '700';
+    } else {
+      badge.style.display = 'none';
+      unreadCount = 0;
+    }
+  }
+
+  function notifyNewMessage() {
+    if (!STATE.isOpen) {
+      unreadCount++;
+      updateBadge();
+      playNotifSound();
+    }
+  }
 
   // ============================================================
   // ESCALATION KEYWORDS
@@ -560,6 +659,8 @@
     if (STATE.messages.length > MAX_MESSAGES) {
       STATE.messages = STATE.messages.slice(-MAX_MESSAGES);
     }
+    saveChat();
+    if (role === 'bot') { notifyNewMessage(); }
     return div;
   }
 
@@ -582,6 +683,8 @@
     if (STATE.messages.length > MAX_MESSAGES) {
       STATE.messages = STATE.messages.slice(-MAX_MESSAGES);
     }
+    saveChat();
+    notifyNewMessage();
     return div;
   }
 
@@ -832,6 +935,7 @@ function apiVerify(playerId) {
     showQuickActions(false);
     addMessage('bot', t('escalating'));
     showTyping(true);
+    trackEvent('escalation', { reason: reason });
     setInputDisabled(true);
 
     var history = STATE.messages.map(function (m) {
@@ -936,6 +1040,8 @@ function apiVerify(playerId) {
             // Restore bot header
             document.getElementById('bw-botname').textContent = CONFIG.BOT_NAME;
             document.getElementById('bw-statusdot').style.background = C.green;
+            // Show CSAT rating
+            setTimeout(function () { showCSAT(); }, 1000);
           }
         })
         .catch(function () { /* silently retry next interval */ });
@@ -984,6 +1090,7 @@ function apiVerify(playerId) {
     }
 
     addMessage('user', text);
+    trackEvent('message_sent', { length: text.length });
     document.getElementById('bw-input').value = '';
     document.getElementById('bw-input').style.height = 'auto';
     showTyping(true);
@@ -1219,7 +1326,11 @@ function apiVerify(playerId) {
     STATE.isOpen = open;
     document.getElementById('bw-trigger').classList.toggle('bw-open', open);
     document.getElementById('bw-window').classList.toggle('bw-open', open);
-    if (open) { document.getElementById('bw-input').focus(); }
+    if (open) {
+      document.getElementById('bw-input').focus();
+      unreadCount = 0;
+      updateBadge();
+    }
     // If user closes widget during live agent session → notify agent on Zendesk
     if (!open && STATE.phase === 'LIVE_AGENT' && STATE.ticketId) {
       n8nCall(CONFIG.ENDPOINTS.AGENT_REPLY, {
@@ -1235,6 +1346,7 @@ function apiVerify(playerId) {
     STATE.messages = []; STATE.jobId = null; STATE.playerId = null; STATE.phase = 'CHAT';
     STATE.busy = false; STATE.lastSendTs = 0;
     STATE.humanRequestCount = 0; STATE.ticketId = null;
+    clearSavedChat();
     // Restore bot header
     document.getElementById('bw-botname').textContent = CONFIG.BOT_NAME;
     document.getElementById('bw-statusdot').style.background = C.green;
@@ -1262,12 +1374,183 @@ function apiVerify(playerId) {
   // ============================================================
   // 15. INIT
   // ============================================================
+  // ============================================================
+  // CSAT RATING
+  // ============================================================
+  function showCSAT() {
+    var msgs = document.getElementById('bw-msgs');
+    var typing = document.getElementById('bw-typing');
+    var div = document.createElement('div');
+    div.className = 'bw-msg bot';
+    div.innerHTML =
+      '<div class="bw-mavatar">' + BOT_AVATAR_SVG + '</div>' +
+      '<div class="bw-bubble">' +
+        '<div>' + t('csat_ask') + '</div>' +
+        '<div id="bw-csat" style="display:flex;gap:4px;margin-top:8px;cursor:pointer">' +
+          '<span class="bw-star" data-r="1" style="font-size:22px;opacity:0.4">★</span>' +
+          '<span class="bw-star" data-r="2" style="font-size:22px;opacity:0.4">★</span>' +
+          '<span class="bw-star" data-r="3" style="font-size:22px;opacity:0.4">★</span>' +
+          '<span class="bw-star" data-r="4" style="font-size:22px;opacity:0.4">★</span>' +
+          '<span class="bw-star" data-r="5" style="font-size:22px;opacity:0.4">★</span>' +
+        '</div>' +
+      '</div>';
+    msgs.insertBefore(div, typing);
+    msgs.scrollTop = msgs.scrollHeight;
+
+    var csatEl = document.getElementById('bw-csat');
+    if (csatEl) {
+      csatEl.addEventListener('click', function (e) {
+        var star = e.target.closest('.bw-star');
+        if (!star) return;
+        var rating = parseInt(star.getAttribute('data-r'));
+        // Highlight stars
+        var stars = csatEl.querySelectorAll('.bw-star');
+        stars.forEach(function (s) {
+          s.style.opacity = parseInt(s.getAttribute('data-r')) <= rating ? '1' : '0.4';
+          s.style.color = parseInt(s.getAttribute('data-r')) <= rating ? C.warning : C.textMuted;
+        });
+        // Send rating
+        csatEl.style.pointerEvents = 'none';
+        addMessage('bot', t('csat_thanks') + ' (' + rating + '/5)');
+        // Track analytics
+        trackEvent('csat_rating', { rating: rating, ticketId: STATE.ticketId });
+        // Send to n8n if there's a ticket
+        if (STATE.ticketId) {
+          n8nCall(CONFIG.ENDPOINTS.AGENT_REPLY, {
+            ticket_id: STATE.ticketId,
+            message: '⭐ Customer rated experience: ' + rating + '/5'
+          }).catch(function () {});
+        }
+      });
+    }
+  }
+
+  // ============================================================
+  // ANALYTICS TRACKING
+  // ============================================================
+  var analytics = { conversations: 0, messages: 0, escalations: 0, csatTotal: 0, csatCount: 0 };
+
+  function trackEvent(event, data) {
+    data = data || {};
+    data.event = event;
+    data.timestamp = Date.now();
+    data.lang = lang;
+
+    // Push to dataLayer for GTM/GA4
+    if (window.dataLayer) {
+      window.dataLayer.push({
+        event: 'betonbot_' + event,
+        betonbot_data: data
+      });
+    }
+    // Update local analytics
+    switch (event) {
+      case 'conversation_start': analytics.conversations++; break;
+      case 'message_sent': analytics.messages++; break;
+      case 'escalation': analytics.escalations++; break;
+      case 'csat_rating':
+        analytics.csatTotal += (data.rating || 0);
+        analytics.csatCount++;
+        break;
+    }
+    console.log('[BetonWin Support] event:', event, data);
+  }
+
+  // ============================================================
+  // FILE SHARE IN LIVE AGENT MODE
+  // ============================================================
+  function sendFileToAgent(file) {
+    if (STATE.phase !== 'LIVE_AGENT' || !STATE.ticketId) return;
+    if (!file || file.size === 0) return;
+    if (file.size > CONFIG.MAX_FILE_MB * 1024 * 1024) { addMessage('bot', t('err_file_size')); return; }
+
+    addMessage('user', '📎 ' + file.name);
+    showTyping(true);
+
+    // Upload via presigned URL then notify agent
+    n8nCall(CONFIG.ENDPOINTS.PRESIGNED, {
+      player_id: STATE.playerId || 'live_agent',
+      file_name: file.name,
+      file_type: file.type
+    })
+    .then(function (data) {
+      return uploadToS3(data.presigned_url, file, function () {}).then(function () { return data.s3_url; });
+    })
+    .then(function (s3Url) {
+      // Send file URL as comment on Zendesk ticket
+      return n8nCall(CONFIG.ENDPOINTS.AGENT_REPLY, {
+        ticket_id: STATE.ticketId,
+        message: '📎 Customer shared a file: ' + file.name + '\nURL: ' + s3Url
+      });
+    })
+    .then(function () {
+      showTyping(false);
+      addMessage('bot', t('file_sent'));
+    })
+    .catch(function () {
+      showTyping(false);
+      addMessage('bot', t('err_generic'));
+    });
+  }
+
+  // ============================================================
+  // INIT
+  // ============================================================
   function init() {
     injectCSS();
     buildHTML();
     bindEvents();
-    setTimeout(function () { addMessage('bot', t('welcome')); }, 500);
-    console.log('[BetonWin Support] v2.1.0 ready — lang:', lang);
+
+    // Restore previous conversation from localStorage
+    var saved = loadChat();
+    if (saved && saved.messages && saved.messages.length > 0) {
+      lang = saved.lang || 'es';
+      STATE.phase = saved.phase || 'CHAT';
+      STATE.ticketId = saved.ticketId || null;
+      STATE.humanRequestCount = saved.humanRequestCount || 0;
+      // Re-render saved messages
+      saved.messages.forEach(function (m) {
+        if (m.role === 'agent') {
+          var parts = m.content.split(': ');
+          var name = parts.shift();
+          addAgentMessage(name, parts.join(': '));
+        } else {
+          addMessage(m.role, m.content);
+        }
+      });
+      // If was in live agent mode, resume polling
+      if (STATE.phase === 'LIVE_AGENT' && STATE.ticketId) {
+        document.getElementById('bw-botname').textContent = t('live_agent');
+        document.getElementById('bw-statusdot').style.background = C.warning;
+        startAgentPolling(STATE.ticketId);
+      }
+    } else {
+      setTimeout(function () { addMessage('bot', t('welcome')); }, 500);
+    }
+
+    // Proactive message after 30s if user hasn't interacted
+    setTimeout(function () {
+      if (STATE.messages.length <= 1 && !STATE.isOpen) {
+        notifyNewMessage();
+      }
+    }, PROACTIVE_DELAY);
+
+    // Track conversation start
+    trackEvent('conversation_start');
+
+    // Add file input for live agent mode
+    var fileBtn = document.createElement('input');
+    fileBtn.type = 'file';
+    fileBtn.id = 'bw-agent-file';
+    fileBtn.style.display = 'none';
+    fileBtn.accept = '.jpg,.jpeg,.png,.webp,.pdf';
+    fileBtn.addEventListener('change', function (e) {
+      if (e.target.files[0]) { sendFileToAgent(e.target.files[0]); }
+      e.target.value = '';
+    });
+    document.getElementById('__beton_widget__').appendChild(fileBtn);
+
+    console.log('[BetonWin Support] v3.0.0 ready — lang:', lang);
   }
 
   if (document.readyState === 'loading') {
