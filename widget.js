@@ -478,18 +478,22 @@
   // Language words for auto-detecting language from typed text
   // IMPORTANT: avoid shared words between languages to prevent false positives
   var LANG_WORDS = {
-    it: ['ciao','grazie','buongiorno','buonasera','prelievo','prelevare','perché','voglio',
+    it: ['ciao','grazie','buongiorno','buonasera','prelievo','prelevare','perché','perche','voglio',
          'questo','questa','subito','ancora','sono','mia','aiuto',
          'depositi','soldi','conto','non ho ricevuto','non è arrivato',
          'dove','come posso','non riesco','accedere','vedere','trovare','voglio sapere',
-         'non capisco','qual è','mi serve','il mio','la mia','ho bisogno','vorrei'],
+         'non capisco','qual è','mi serve','il mio','la mia','ho bisogno','vorrei',
+         'quale','quanti','quante','ricevere','rispondi','scrivo','registrarmi','registrare',
+         'minima','minimo','posso ricevere','come faccio','come si fa','non riesco a',
+         'il bonus','il deposito','la password','il conto','cosa devo'],
     es: ['hola','gracias','buenos','retiro','retirar','también','quiero','cuánto','cuándo',
          'dinero','ayuda','cuenta','no he recibido','no ha llegado','por favor',
-         'cómo','estoy','tengo','puedo','dónde','puedo ver','no puedo','necesito','quisiera'],
+         'cómo','estoy','tengo','puedo','dónde','puedo ver','no puedo','necesito','quisiera',
+         'como funciona','cuanto tarda','cuanto cuesta','como hago','que es','quiero saber'],
     pt: ['olá','ola','obrigado','obrigada','saque','sacar','também','quero','quanto',
          'dinheiro','não recebi','não chegou',
          'como posso','estou','tenho','onde posso','não consigo','preciso de',
-         'meu','minha','gostaria','verificar']
+         'meu','minha','gostaria','verificar','retirada','depositar']
   };
 
   // Auto-detect language from user message text (overrides browser lang when confident)
@@ -506,8 +510,11 @@
       if (scores[l] > bestScore) { best = l; bestScore = scores[l]; tied = false; }
       else if (scores[l] === bestScore && scores[l] > 0) { tied = true; }
     });
-    // Require at least 2 matches AND no tie to switch language confidently
-    if (tied || bestScore < 2) { return null; }
+    if (tied) { return null; }
+    // If already in a non-Spanish language, 1 match is enough to stay
+    // If switching TO a new language, require 2 matches
+    var minScore = (lang !== 'es' && best === lang) ? 1 : 2;
+    if (bestScore < minScore) { return null; }
     return best;
   }
 
