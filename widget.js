@@ -249,43 +249,13 @@
   var AGENT_POLL_INTERVAL = 5000;
   var AGENT_POLL_MAX = 360;
   var PROACTIVE_DELAY = 30000;    // show proactive message after 30s
-  var STORAGE_KEY = '__beton_chat__'; // localStorage key for persistence
   var NOTIF_SOUND_URL = 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1bZ3N9gnqEi46Oj4uFfnRoW1BFQkVOXG53goqRlZeSjIOAd21kXFhYXWRveoaOk5aXlI6HgXpya2VfXWBka3aBipKXmZiVkIqEfnhybGhjY2dsdoGKkpiamJaTjoiCfHZwamZlZ2tygIqSmJqYlpKNh4F8dnBqZmVnaHCBi5OYmpeTkI2Kh4N+eXRua2lrbXN+iJCWmJaTkI2KiIWBfHdybm1sb3R7hIySlZaTkI6MioiFgnx4dHFvcHJ2fIWNkpWUk5COjIqIhYJ/e3d0cnF0eH2EjJGUlJKQjouKiIaEgn55dnRzdHd7gIaPk5WUkpCOjIqJh4WCf3x5d3Z2eXyBh42Sk5OSkI6MioiGhIF+e3l3dnd5fIKHjZGTkpKQjo2LiYeFgn98enl4eXt+goiNkZOSkI+NjIuJh4WDgH17enl5e32Bg4iNkJKRkI6NjIuJh4WDgH58e3p6e32AhIiNkJGRj46NjIqJh4aDgX98fHt7fH6BhYmNkJGQj46NjIqIh4WDgX9+fHx8fX+ChomMj5CQj46NjIqIhoWDgYB+fXx9fn+ChomMj5CQj46Mi4qIhoWDgX9+fXx9fn+Bg4eLjo+Pj46NjIqIhoWDgX9+fXx8fX6AgoWIi46Pj4+OjYuKiIaFg4GAfn18fH1+gIKFiIuOj4+Pjo2LioiGhYOBgH5+fX1+f4GDhomLjo+Pj46Ni4qIhoWDgYB+fn19fn+BgoWIi42Oj4+OjYuKiIaFg4F/fn19fX5/gYOFiIuNjo6Ojo2LioiGhIOBf35+fX1+f4GDhYiLjY6Ojo2Mi4mIhoSDgX9+fn19fn+BgoSHioyNjo6NjYuKiIaEg4F/fn59fX5/gIKEh4qMjY6OjY2LioiGhIOBf35+fX1+f4CCBIeKjI2NjY2Ni4qIhoSDgX9+fn19fn+AgoSHioyNjY2NjIuJiIaEg4GAf35+fX5/gIKEh4qMjY2NjIyLiYiGhIOBgH9+fn1+f4CCBIeKjI2NjYyMi4mIhoSDgYB/fn5+fn+AgoSHiouNjY2MjIuJiIaEg4GAfn5+fn5/gIKEhomLjI2NjIyLiYiGhIOBgH5+fn5+f4CChIaJi4yNjYyMi4mIhoSDgYB+fn5+fn+AgoSGiYuMjI2MjIuJiIaEg4GAfn5+fn5/gIKEhomLjIyNjIuLiYiGhIOBgH5+fn5+f4CChIaJi4yMjIyLi4mIhoSEgYB/fn5+fn+AgoSGiYuMjIyMi4uJiIaEg4GAfn5+fn5/gIKEhomLjIyMi4uLiYiGhISDgYB/fn5+f3+AgoSGiYuMjIyLi4uJiIaFhIKBf35+fn5/gIGDhYiKi4yMjIuLi4mIhoWEgoF/fn5+fn9/gYOFiIqLjIyMi4uLiYiHhYSCgX9+fn5+f4CBg4WIiouMjIyLi4qJiIeFhIKBf35+fn5/f4GDhYeKi4uMjIuLi4mIh4WEgoF/fn5+fn9/gYOFh4qLi4yLi4uKiYeGhYSCgX9+fn5+f3+Bg4WHiouLjIuLi4qJh4aFhIKBf39+fn5/f4GDhYeJi4uLi4uLiomHhoWEgoGAf35+fn9/gIKDhYeJi4uLi4uLiomHhoWEgoGAf35+fn9/gIKDhYeJi4uLi4uLiomIhoWEgoGAf39+fn9/gIKDhYeJiouLi4uKiomIhoWEgoGAf39+fn9/gIKDhYeJiouLi4uKiomIhoWEg4KBf39+fn9/gIKDhYeJiouLi4uKiomIhoaFg4KBf39+fn9/gIGDBQ==';
 
-  // ============================================================
-  // PERSISTENCE — save/restore chat from localStorage
-  // ============================================================
-  function saveChat() {
-    try {
-      var data = {
-        messages: STATE.messages.slice(-50), // save last 50 messages
-        phase: STATE.phase,
-        lang: lang,
-        ticketId: STATE.ticketId,
-        humanRequestCount: STATE.humanRequestCount,
-        ts: Date.now()
-      };
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-    } catch (e) { /* localStorage full or disabled */ }
-  }
-
-  function loadChat() {
-    try {
-      var raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return null;
-      var data = JSON.parse(raw);
-      // Expire after 1 hour
-      if (Date.now() - (data.ts || 0) > 3600000) {
-        localStorage.removeItem(STORAGE_KEY);
-        return null;
-      }
-      return data;
-    } catch (e) { return null; }
-  }
-
-  function clearSavedChat() {
-    try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
-  }
+  // Stubs for removed features (persistence/analytics)
+  function saveChat() {}
+  function loadChat() { return null; }
+  function clearSavedChat() {}
+  function trackEvent() {}
 
   // ============================================================
   // NOTIFICATION SOUND
@@ -1426,37 +1396,6 @@ function apiVerify(playerId) {
   }
 
   // ============================================================
-  // ANALYTICS TRACKING
-  // ============================================================
-  var analytics = { conversations: 0, messages: 0, escalations: 0, csatTotal: 0, csatCount: 0 };
-
-  function trackEvent(event, data) {
-    data = data || {};
-    data.event = event;
-    data.timestamp = Date.now();
-    data.lang = lang;
-
-    // Push to dataLayer for GTM/GA4
-    if (window.dataLayer) {
-      window.dataLayer.push({
-        event: 'betonbot_' + event,
-        betonbot_data: data
-      });
-    }
-    // Update local analytics
-    switch (event) {
-      case 'conversation_start': analytics.conversations++; break;
-      case 'message_sent': analytics.messages++; break;
-      case 'escalation': analytics.escalations++; break;
-      case 'csat_rating':
-        analytics.csatTotal += (data.rating || 0);
-        analytics.csatCount++;
-        break;
-    }
-    console.log('[BetonWin Support] event:', event, data);
-  }
-
-  // ============================================================
   // FILE SHARE IN LIVE AGENT MODE
   // ============================================================
   function sendFileToAgent(file) {
@@ -1501,32 +1440,7 @@ function apiVerify(playerId) {
     buildHTML();
     bindEvents();
 
-    // Restore previous conversation from localStorage
-    var saved = loadChat();
-    if (saved && saved.messages && saved.messages.length > 0) {
-      lang = saved.lang || 'es';
-      STATE.phase = saved.phase || 'CHAT';
-      STATE.ticketId = saved.ticketId || null;
-      STATE.humanRequestCount = saved.humanRequestCount || 0;
-      // Re-render saved messages
-      saved.messages.forEach(function (m) {
-        if (m.role === 'agent') {
-          var parts = m.content.split(': ');
-          var name = parts.shift();
-          addAgentMessage(name, parts.join(': '));
-        } else {
-          addMessage(m.role, m.content);
-        }
-      });
-      // If was in live agent mode, resume polling
-      if (STATE.phase === 'LIVE_AGENT' && STATE.ticketId) {
-        document.getElementById('bw-botname').textContent = t('live_agent');
-        document.getElementById('bw-statusdot').style.background = C.warning;
-        startAgentPolling(STATE.ticketId);
-      }
-    } else {
-      setTimeout(function () { addMessage('bot', t('welcome')); }, 500);
-    }
+    setTimeout(function () { addMessage('bot', t('welcome')); }, 500);
 
     // Proactive message after 30s if user hasn't interacted
     setTimeout(function () {
@@ -1534,9 +1448,6 @@ function apiVerify(playerId) {
         notifyNewMessage();
       }
     }, PROACTIVE_DELAY);
-
-    // Track conversation start
-    trackEvent('conversation_start');
 
     // Add file input for live agent mode
     var fileBtn = document.createElement('input');
