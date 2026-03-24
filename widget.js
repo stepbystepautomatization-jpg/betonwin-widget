@@ -12,7 +12,10 @@
       VERIFY:      '/webhook/verify-deposit',
       STATUS:      '/webhook/status',
       PRESIGNED:   '/webhook/presigned-url',
-      ANALYZE:     '/webhook/analyze'
+      ANALYZE:     '/webhook/analyze',
+      ESCALATE:    '/webhook/escalate',
+      AGENT_POLL:  '/webhook/agent-poll',
+      AGENT_REPLY: '/webhook/agent-reply'
     },
     POLL_INTERVAL_MS: 3000,
     POLL_MAX:         40,
@@ -78,7 +81,14 @@
       err_file_size:    'File is too large. Maximum size is 10MB.',
       err_file_type:    'File type not supported. Please upload JPG, PNG, or PDF.',
       new_chat:         'New chat',
-      close:            'Close'
+      close:            'Close',
+      escalating:       'Connecting you to a live agent... 🔄',
+      escalated:        '🧑‍💼 You are now connected with our support team.\nAn agent will review your conversation and reply here shortly.',
+      escalate_ticket:  'Ticket **#{{id}}** created.',
+      live_agent:       'Live Agent',
+      agent_closed:     'The agent has closed this conversation.\nClick **New chat** to start a new one.',
+      human_noted:      "I understand you'd like to speak with a human agent. Let me try to help you first — if I can't resolve your issue, I'll connect you with an agent.",
+      human_escalate:   "I'm connecting you with a live agent now."
     },
     es: {
       welcome:          '¡Hola! Soy tu asistente de soporte **BetonWin** 24/7. ¿En qué puedo ayudarte hoy?',
@@ -107,7 +117,14 @@
       err_file_size:    'El archivo es demasiado grande. El tamaño máximo es 10MB.',
       err_file_type:    'Tipo de archivo no compatible. Sube JPG, PNG o PDF.',
       new_chat:         'Nueva conversación',
-      close:            'Cerrar'
+      close:            'Cerrar',
+      escalating:       'Conectándote con un agente... 🔄',
+      escalated:        '🧑‍💼 Estás conectado con nuestro equipo de soporte.\nUn agente revisará tu conversación y te responderá aquí en breve.',
+      escalate_ticket:  'Ticket **#{{id}}** creado.',
+      live_agent:       'Agente',
+      agent_closed:     'El agente ha cerrado esta conversación.\nHaz clic en **Nueva conversación** para iniciar una nueva.',
+      human_noted:      'Entiendo que quieres hablar con un agente. Déjame intentar ayudarte primero — si no puedo resolver tu problema, te conecto con un agente.',
+      human_escalate:   'Te estoy conectando con un agente ahora.'
     },
     it: {
       welcome:          'Ciao! Sono il tuo assistente di supporto **BetonWin** 24/7. Come posso aiutarti oggi?',
@@ -136,7 +153,14 @@
       err_file_size:    'File troppo grande. Massimo 10MB.',
       err_file_type:    'Tipo file non supportato. Carica JPG, PNG o PDF.',
       new_chat:         'Nuova conversazione',
-      close:            'Chiudi'
+      close:            'Chiudi',
+      escalating:       'Ti sto collegando con un agente... 🔄',
+      escalated:        '🧑‍💼 Sei connesso con il nostro team di supporto.\nUn agente esaminerà la conversazione e ti risponderà qui a breve.',
+      escalate_ticket:  'Ticket **#{{id}}** creato.',
+      live_agent:       'Agente',
+      agent_closed:     "L'agente ha chiuso questa conversazione.\nClicca su **Nuova conversazione** per iniziarne una nuova.",
+      human_noted:      'Capisco che vorresti parlare con un operatore. Lasciami provare ad aiutarti prima — se non riesco a risolvere, ti collego con un agente.',
+      human_escalate:   'Ti sto collegando con un agente ora.'
     },
     pt: {
       welcome:          'Olá! Sou seu assistente de suporte **BetonWin** 24/7. Como posso ajudá-lo hoje?',
@@ -165,7 +189,14 @@
       err_file_size:    'Arquivo muito grande. Tamanho máximo é 10MB.',
       err_file_type:    'Tipo de arquivo não suportado. Envie JPG, PNG ou PDF.',
       new_chat:         'Nova conversa',
-      close:            'Fechar'
+      close:            'Fechar',
+      escalating:       'Conectando você com um agente... 🔄',
+      escalated:        '🧑‍💼 Você está conectado com nossa equipe de suporte.\nUm agente revisará sua conversa e responderá aqui em breve.',
+      escalate_ticket:  'Ticket **#{{id}}** criado.',
+      live_agent:       'Agente',
+      agent_closed:     'O agente encerrou esta conversa.\nClique em **Nova conversa** para iniciar uma nova.',
+      human_noted:      'Entendo que você quer falar com um agente. Deixa-me tentar ajudar primeiro — se não conseguir resolver, te conecto com um agente.',
+      human_escalate:   'Estou conectando você com um agente agora.'
     }
   };
 
@@ -179,18 +210,58 @@
   // ============================================================
   var STATE = {
     isOpen:     false,
-    phase:      'CHAT',
+    phase:      'CHAT',       // CHAT | DEPOSIT_ASK_ID | ... | LIVE_AGENT | AGENT_CLOSED
     playerId:   null,
     jobId:      null,
     pollTimer:  null,
     pollCount:  0,
     messages:   [],
-    busy:       false,       // prevent double-send / spam
-    lastSendTs: 0            // rate limiting
+    busy:       false,
+    lastSendTs: 0,
+    humanRequestCount: 0,     // track "talk to human" requests
+    ticketId:   null,         // Zendesk ticket ID for live agent
+    agentPollTimer: null      // polling for agent replies
   };
-  var MAX_MSG_LENGTH = 1000; // cap user input to prevent huge payloads
-  var MAX_MESSAGES   = 100;  // cap history to prevent memory leak
-  var SEND_COOLDOWN  = 1000; // min ms between sends
+  var MAX_MSG_LENGTH = 1000;
+  var MAX_MESSAGES   = 100;
+  var SEND_COOLDOWN  = 1000;
+  var HUMAN_REQUEST_THRESHOLD = 3;
+  var AGENT_POLL_INTERVAL = 5000; // poll Zendesk every 5s for agent replies
+  var AGENT_POLL_MAX = 360;       // stop after 30 min (360 × 5s)
+
+  // ============================================================
+  // ESCALATION KEYWORDS
+  // ============================================================
+  var HUMAN_KEYWORDS = [
+    'hablar con agente','hablar con humano','hablar con persona','operador real','agente real',
+    'persona real','agente humano','quiero un humano','quiero hablar con',
+    'talk to human','talk to agent','real person','real agent','human agent','speak to someone',
+    'parlare con operatore','parlare con persona','operatore reale','persona reale','voglio un umano',
+    'parlare con un umano','voglio parlare con',
+    'falar com agente','falar com humano','pessoa real','quero um humano','falar com pessoa'
+  ];
+
+  var LEGAL_KEYWORDS = [
+    'denuncio','denunciar','denuncia','vie legali','abogado','abogados','demanda judicial',
+    'demanda legal','accion legal','acción legal','los voy a demandar',
+    'lawyer','legal action','sue you','take legal','court','lawsuit','attorney',
+    'avvocato','tribunale','querela','azione legale','vi denuncio',
+    'advogado','tribunal','processo judicial','ação legal','vou processar'
+  ];
+
+  function detectEscalation(text) {
+    var lower = text.toLowerCase();
+    for (var i = 0; i < LEGAL_KEYWORDS.length; i++) {
+      if (lower.indexOf(LEGAL_KEYWORDS[i]) !== -1) { return 'LEGAL'; }
+    }
+    for (var j = 0; j < HUMAN_KEYWORDS.length; j++) {
+      if (lower.indexOf(HUMAN_KEYWORDS[j]) !== -1) {
+        STATE.humanRequestCount++;
+        return STATE.humanRequestCount >= HUMAN_REQUEST_THRESHOLD ? 'HUMAN_THRESHOLD' : 'HUMAN_REQUEST';
+      }
+    }
+    return null;
+  }
 
   // ============================================================
   // 5. INJECT CSS
@@ -667,6 +738,120 @@ function apiVerify(playerId) {
     showQuickActions(true);
   }
 
+  // ============================================================
+  // 12b. ESCALATION — Live Agent via Zendesk
+  // ============================================================
+
+  // Start escalation: create Zendesk ticket with conversation history
+  function startEscalation(reason) {
+    STATE.phase = 'ESCALATING';
+    showQuickActions(false);
+    addMessage('bot', t('escalating'));
+    showTyping(true);
+    setInputDisabled(true);
+
+    var history = STATE.messages.map(function (m) {
+      return { role: m.role, content: m.content, ts: m.ts };
+    });
+
+    n8nCall(CONFIG.ENDPOINTS.ESCALATE, {
+      reason: reason,
+      language: lang,
+      conversation_history: history,
+      player_id: STATE.playerId || null
+    })
+    .then(function (res) {
+      showTyping(false);
+      if (res.ticket_id) {
+        STATE.ticketId = res.ticket_id;
+        STATE.phase = 'LIVE_AGENT';
+        var ticketMsg = t('escalate_ticket').replace('{{id}}', res.ticket_id);
+        addMessage('bot', ticketMsg);
+        addMessage('bot', t('escalated'));
+        setInputDisabled(false);
+        // Update header to show "Live Agent" mode
+        document.getElementById('bw-botname').textContent = t('live_agent');
+        document.getElementById('bw-statusdot').style.background = '#fbbf24';
+        // Start polling for agent replies
+        startAgentPolling(res.ticket_id);
+      } else {
+        addMessage('bot', t('err_generic'));
+        STATE.phase = 'CHAT';
+        setInputDisabled(false);
+      }
+    })
+    .catch(function () {
+      showTyping(false);
+      addMessage('bot', t('err_generic') + '\n\nEmail: **ayuda@beton.win**');
+      STATE.phase = 'CHAT';
+      setInputDisabled(false);
+    });
+  }
+
+  // In LIVE_AGENT mode: send user messages to Zendesk as ticket comments
+  function sendToAgent(text) {
+    if (!STATE.ticketId) return;
+    addMessage('user', text);
+    document.getElementById('bw-input').value = '';
+    document.getElementById('bw-input').style.height = 'auto';
+    showTyping(true);
+    setInputDisabled(true);
+
+    n8nCall(CONFIG.ENDPOINTS.AGENT_REPLY, {
+      ticket_id: STATE.ticketId,
+      message: text,
+      language: lang
+    })
+    .then(function () {
+      showTyping(false);
+      setInputDisabled(false);
+    })
+    .catch(function () {
+      showTyping(false);
+      addMessage('bot', t('err_generic'));
+      setInputDisabled(false);
+    });
+  }
+
+  // Poll Zendesk for new agent replies
+  function startAgentPolling(ticketId) {
+    var pollCount = 0;
+    var lastCommentTs = Date.now();
+    clearInterval(STATE.agentPollTimer);
+
+    STATE.agentPollTimer = setInterval(function () {
+      pollCount++;
+      if (pollCount > AGENT_POLL_MAX) {
+        stopAgentPolling();
+        addMessage('bot', t('agent_closed'));
+        STATE.phase = 'AGENT_CLOSED';
+        setInputDisabled(true);
+        return;
+      }
+      n8nCall(CONFIG.ENDPOINTS.AGENT_POLL, { ticket_id: ticketId, since: lastCommentTs })
+        .then(function (res) {
+          if (res.comments && res.comments.length > 0) {
+            res.comments.forEach(function (c) {
+              addMessage('bot', '**' + (c.author || t('live_agent')) + ':** ' + c.body);
+            });
+            lastCommentTs = Date.now();
+          }
+          if (res.status === 'closed' || res.status === 'solved') {
+            stopAgentPolling();
+            addMessage('bot', t('agent_closed'));
+            STATE.phase = 'AGENT_CLOSED';
+            setInputDisabled(true);
+          }
+        })
+        .catch(function () { /* silently retry next interval */ });
+    }, AGENT_POLL_INTERVAL);
+  }
+
+  function stopAgentPolling() {
+    clearInterval(STATE.agentPollTimer);
+    STATE.agentPollTimer = null;
+  }
+
   // Main chat handler — KB first, n8n fallback
   function handleChatMessage(text) {
     text = (text || '').trim();
@@ -691,6 +876,18 @@ function apiVerify(playerId) {
       document.getElementById('bw-idconfirm').textContent = t('confirm');
     }
 
+    // If in LIVE_AGENT mode, send directly to Zendesk (not to AI)
+    if (STATE.phase === 'LIVE_AGENT') {
+      STATE.busy = false;
+      sendToAgent(text);
+      return;
+    }
+    // If agent closed, only allow new chat
+    if (STATE.phase === 'AGENT_CLOSED') {
+      STATE.busy = false;
+      return;
+    }
+
     addMessage('user', text);
     document.getElementById('bw-input').value = '';
     document.getElementById('bw-input').style.height = 'auto';
@@ -711,6 +908,23 @@ function apiVerify(playerId) {
       clearTimeout(safetyTimer);
       setInputDisabled(false);
       STATE.busy = false;
+    }
+
+    // 0. Detect escalation (legal threat or repeated human request)
+    var escalation = detectEscalation(text);
+    if (escalation === 'LEGAL' || escalation === 'HUMAN_THRESHOLD') {
+      showTyping(false);
+      addMessage('bot', t('human_escalate'));
+      unlockInput();
+      startEscalation(escalation === 'LEGAL' ? 'legal_threat' : 'human_request');
+      return;
+    }
+    if (escalation === 'HUMAN_REQUEST') {
+      // Not at threshold yet — acknowledge but continue with AI
+      showTyping(false);
+      addMessage('bot', t('human_noted') + ' (' + STATE.humanRequestCount + '/' + HUMAN_REQUEST_THRESHOLD + ')');
+      unlockInput();
+      return;
     }
 
     // 1. Detect deposit problem → start verification flow
@@ -915,8 +1129,13 @@ function apiVerify(playerId) {
 
   function resetChat() {
     stopPolling();
+    stopAgentPolling();
     STATE.messages = []; STATE.jobId = null; STATE.playerId = null; STATE.phase = 'CHAT';
     STATE.busy = false; STATE.lastSendTs = 0;
+    STATE.humanRequestCount = 0; STATE.ticketId = null;
+    // Restore bot header
+    document.getElementById('bw-botname').textContent = CONFIG.BOT_NAME;
+    document.getElementById('bw-statusdot').style.background = C.green;
     document.getElementById('bw-msgs').innerHTML =
       '<div id="bw-typing">' +
         '<div id="bw-tdots"><div class="bw-dot"></div><div class="bw-dot"></div><div class="bw-dot"></div></div>' +
