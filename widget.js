@@ -264,6 +264,57 @@
   }
 
   // ============================================================
+  // AUTO-DETECT PLAYER INFO from site (GR8/Modulor platform)
+  // ============================================================
+  function getPlayerInfo() {
+    var info = { playerId: null, username: null, email: null };
+    try {
+      // Method 1: Check localStorage for user/auth data
+      for (var i = 0; i < localStorage.length; i++) {
+        var key = localStorage.key(i);
+        if (!key) continue;
+        var keyLow = key.toLowerCase();
+        if (keyLow.indexOf('user') !== -1 || keyLow.indexOf('auth') !== -1 || keyLow.indexOf('session') !== -1 || keyLow.indexOf('account') !== -1) {
+          try {
+            var val = JSON.parse(localStorage.getItem(key));
+            if (val && typeof val === 'object') {
+              info.playerId = info.playerId || val.id || val.userId || val.user_id || val.playerId || val.player_id || val.accountId || null;
+              info.username = info.username || val.username || val.login || val.name || val.displayName || null;
+              info.email = info.email || val.email || val.mail || null;
+            }
+          } catch (e) { /* not JSON, skip */ }
+        }
+      }
+      // Method 2: Check window objects
+      if (window.__USER__) {
+        info.playerId = info.playerId || window.__USER__.id || window.__USER__.playerId;
+        info.username = info.username || window.__USER__.username;
+        info.email = info.email || window.__USER__.email;
+      }
+      // Method 3: Check DOM for player ID / username in account area
+      var accountEl = document.querySelector('[data-testid*="user"], [class*="user-name"], [class*="username"], [class*="player-id"], [class*="account-id"], [class*="userBox"]');
+      if (accountEl && accountEl.textContent) {
+        var text = accountEl.textContent.trim();
+        if (text && text.length < 50) {
+          info.username = info.username || text;
+        }
+      }
+      // Method 4: Check cookies for user ID
+      var cookies = document.cookie.split(';');
+      for (var j = 0; j < cookies.length; j++) {
+        var parts = cookies[j].trim().split('=');
+        var cname = (parts[0] || '').toLowerCase();
+        if (cname.indexOf('userid') !== -1 || cname.indexOf('player') !== -1 || cname === 'uid') {
+          info.playerId = info.playerId || decodeURIComponent(parts[1] || '');
+        }
+      }
+    } catch (e) { console.warn('[BetonWin Support] getPlayerInfo:', e); }
+    // Convert any numeric ID to string
+    if (info.playerId) { info.playerId = String(info.playerId); }
+    return info;
+  }
+
+  // ============================================================
   // 5. INJECT CSS
   // ============================================================
   function injectCSS() {
@@ -787,11 +838,19 @@ function apiVerify(playerId) {
       return { role: m.role, content: m.content, ts: m.ts };
     });
 
+    // Auto-detect player info from site
+    var playerInfo = getPlayerInfo();
+    var playerId = STATE.playerId || playerInfo.playerId || 'unknown';
+    var playerName = playerInfo.username || null;
+    var playerEmail = playerInfo.email || null;
+
     n8nCall(CONFIG.ENDPOINTS.ESCALATE, {
       reason: reason,
       language: lang,
       conversation_history: history,
-      player_id: STATE.playerId || null
+      player_id: playerId,
+      player_name: playerName,
+      player_email: playerEmail
     })
     .then(function (res) {
       showTyping(false);
