@@ -326,6 +326,12 @@
       '.bw-bubble em,.bw-bubble i{font-style:italic}',
       '.bw-bubble hr{border:none;border-top:1px solid rgba(45,236,118,.08);margin:8px 0}',
 
+      /* Agent messages — distinct style from bot */
+      '.bw-msg.agent .bw-bubble{background:rgba(251,191,36,0.06);border:1px solid rgba(251,191,36,0.15);color:rgba(232,240,242,0.9);border-bottom-left-radius:4px}',
+      '.bw-msg.agent .bw-bubble strong{color:'+C.warning+'}',
+      '.bw-msg.agent .bw-mavatar{border-color:rgba(251,191,36,0.3);background:rgba(251,191,36,0.08)}',
+      '.bw-agent-name{font-size:10px;color:'+C.warning+';font-weight:600;margin-bottom:2px;letter-spacing:0.3px}',
+
       /* Typing indicator — AI pulse wave */
       '#bw-typing{display:none;align-items:center;gap:10px;animation:bw-up .28s ease;padding:2px 0}',
       '#bw-typing.show{display:flex}',
@@ -480,6 +486,9 @@
     return out;
   }
 
+  var BOT_AVATAR_SVG = '<svg viewBox="0 0 140 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8.25 5.24H6.5L5.9 8.72H7.62C9.11 8.72 9.86 8.06 9.86 6.76C9.86 6.31 9.72 5.94 9.45 5.66C9.18 5.38 8.78 5.24 8.25 5.24ZM7.62 11.54H5.41L4.85 14.75H7.15C7.87 14.75 8.44 14.58 8.86 14.25C9.28 13.92 9.49 13.51 9.49 13.03C9.49 12.03 8.86 11.54 7.62 11.54ZM9.72 1.61C11.49 1.61 12.75 2 13.49 2.77C14.05 3.36 14.33 4.11 14.33 5.01C14.33 5.32 14.3 5.65 14.24 5.99L14.03 7.11C13.86 7.99 13.53 8.68 13.04 9.18C12.55 9.68 12.12 9.93 11.75 9.93L11.72 10.11C12.16 10.11 12.6 10.36 13.05 10.84C13.5 11.32 13.73 11.89 13.73 12.54C13.73 12.8 13.7 13.08 13.63 13.38L13.49 14.1C13.24 15.44 12.65 16.48 11.71 17.25C10.77 18.01 9.46 18.39 7.78 18.39H0L2.96 1.61H9.72Z" fill="#2DEC76"/><path d="M27.01 18.39H15.31L18.27 1.61H28.54C29.29 1.61 29.85 2.28 29.72 3.01L29.32 5.24H21.81L21.28 8.39H27.48L26.82 12.02H20.63L20.16 14.75H27.66L27.01 18.39Z" fill="#2DEC76"/><path d="M46.31 5.24H40.57L38.27 18.39H34.05L36.36 5.24H30.6L31.25 1.61H45.53C46.28 1.61 46.84 2.28 46.71 3.01L46.31 5.24Z" fill="#2DEC76"/><path d="M73.66 9.98C72.99 13.81 69.33 16.93 65.5 16.93C61.67 16.93 59.11 13.81 59.78 9.98C60.45 6.15 64.11 3.04 67.94 3.04C71.78 3.04 74.34 6.15 73.66 9.98ZM68.2 1.6H56.12C51.51 1.61 47.1 5.37 46.28 9.98C45.47 14.6 48.56 18.36 53.16 18.37H65.24C69.86 18.37 74.29 14.61 75.11 9.98C75.92 5.36 72.82 1.6 68.2 1.6Z" fill="white"/><circle cx="92.12" cy="16.4" r="1.97" fill="white"/></svg>';
+  var AGENT_AVATAR_SVG = '<svg viewBox="0 0 24 24" fill="' + C.warning + '"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>';
+
   function addMessage(role, content) {
     var msgs   = document.getElementById('bw-msgs');
     var typing = document.getElementById('bw-typing');
@@ -487,14 +496,38 @@
     div.className = 'bw-msg ' + role;
     var html = parseMarkdown(content);
     if (role === 'bot') {
-      div.innerHTML = '<div class="bw-mavatar"><svg viewBox="0 0 140 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8.25 5.24H6.5L5.9 8.72H7.62C9.11 8.72 9.86 8.06 9.86 6.76C9.86 6.31 9.72 5.94 9.45 5.66C9.18 5.38 8.78 5.24 8.25 5.24ZM7.62 11.54H5.41L4.85 14.75H7.15C7.87 14.75 8.44 14.58 8.86 14.25C9.28 13.92 9.49 13.51 9.49 13.03C9.49 12.03 8.86 11.54 7.62 11.54ZM9.72 1.61C11.49 1.61 12.75 2 13.49 2.77C14.05 3.36 14.33 4.11 14.33 5.01C14.33 5.32 14.3 5.65 14.24 5.99L14.03 7.11C13.86 7.99 13.53 8.68 13.04 9.18C12.55 9.68 12.12 9.93 11.75 9.93L11.72 10.11C12.16 10.11 12.6 10.36 13.05 10.84C13.5 11.32 13.73 11.89 13.73 12.54C13.73 12.8 13.7 13.08 13.63 13.38L13.49 14.1C13.24 15.44 12.65 16.48 11.71 17.25C10.77 18.01 9.46 18.39 7.78 18.39H0L2.96 1.61H9.72Z" fill="#2DEC76"/><path d="M27.01 18.39H15.31L18.27 1.61H28.54C29.29 1.61 29.85 2.28 29.72 3.01L29.32 5.24H21.81L21.28 8.39H27.48L26.82 12.02H20.63L20.16 14.75H27.66L27.01 18.39Z" fill="#2DEC76"/><path d="M46.31 5.24H40.57L38.27 18.39H34.05L36.36 5.24H30.6L31.25 1.61H45.53C46.28 1.61 46.84 2.28 46.71 3.01L46.31 5.24Z" fill="#2DEC76"/><path d="M73.66 9.98C72.99 13.81 69.33 16.93 65.5 16.93C61.67 16.93 59.11 13.81 59.78 9.98C60.45 6.15 64.11 3.04 67.94 3.04C71.78 3.04 74.34 6.15 73.66 9.98ZM68.2 1.6H56.12C51.51 1.61 47.1 5.37 46.28 9.98C45.47 14.6 48.56 18.36 53.16 18.37H65.24C69.86 18.37 74.29 14.61 75.11 9.98C75.92 5.36 72.82 1.6 68.2 1.6Z" fill="white"/><circle cx="92.12" cy="16.4" r="1.97" fill="white"/></svg></div><div class="bw-bubble">' + html + '</div>';
+      div.innerHTML = '<div class="bw-mavatar">' + BOT_AVATAR_SVG + '</div><div class="bw-bubble">' + html + '</div>';
+    } else if (role === 'agent') {
+      // Do nothing here — use addAgentMessage instead
+      div.innerHTML = '<div class="bw-bubble">' + html + '</div>';
     } else {
       div.innerHTML = '<div class="bw-bubble">' + html + '</div>';
     }
     msgs.insertBefore(div, typing);
     msgs.scrollTop = msgs.scrollHeight;
     STATE.messages.push({ role: role, content: content, ts: Date.now() });
-    // Prevent unbounded memory growth — keep only last MAX_MESSAGES
+    if (STATE.messages.length > MAX_MESSAGES) {
+      STATE.messages = STATE.messages.slice(-MAX_MESSAGES);
+    }
+    return div;
+  }
+
+  // Agent message with name badge and distinct style
+  function addAgentMessage(agentName, content) {
+    var msgs   = document.getElementById('bw-msgs');
+    var typing = document.getElementById('bw-typing');
+    var div    = document.createElement('div');
+    div.className = 'bw-msg agent';
+    var html = parseMarkdown(content);
+    div.innerHTML =
+      '<div class="bw-mavatar">' + AGENT_AVATAR_SVG + '</div>' +
+      '<div>' +
+        '<div class="bw-agent-name">' + escapeHTML(agentName) + '</div>' +
+        '<div class="bw-bubble">' + html + '</div>' +
+      '</div>';
+    msgs.insertBefore(div, typing);
+    msgs.scrollTop = msgs.scrollHeight;
+    STATE.messages.push({ role: 'agent', content: agentName + ': ' + content, ts: Date.now() });
     if (STATE.messages.length > MAX_MESSAGES) {
       STATE.messages = STATE.messages.slice(-MAX_MESSAGES);
     }
@@ -832,15 +865,18 @@ function apiVerify(playerId) {
         .then(function (res) {
           if (res.comments && res.comments.length > 0) {
             res.comments.forEach(function (c) {
-              addMessage('bot', '**' + (c.author || t('live_agent')) + ':** ' + c.body);
+              addAgentMessage(c.author || t('live_agent'), c.body);
             });
             lastCommentTs = Date.now();
           }
           if (res.status === 'closed' || res.status === 'solved') {
             stopAgentPolling();
-            addMessage('bot', t('agent_closed'));
+            addAgentMessage(t('live_agent'), t('agent_closed'));
             STATE.phase = 'AGENT_CLOSED';
             setInputDisabled(true);
+            // Restore bot header
+            document.getElementById('bw-botname').textContent = CONFIG.BOT_NAME;
+            document.getElementById('bw-statusdot').style.background = C.green;
           }
         })
         .catch(function () { /* silently retry next interval */ });
@@ -1125,6 +1161,13 @@ function apiVerify(playerId) {
     document.getElementById('bw-trigger').classList.toggle('bw-open', open);
     document.getElementById('bw-window').classList.toggle('bw-open', open);
     if (open) { document.getElementById('bw-input').focus(); }
+    // If user closes widget during live agent session → notify agent on Zendesk
+    if (!open && STATE.phase === 'LIVE_AGENT' && STATE.ticketId) {
+      n8nCall(CONFIG.ENDPOINTS.AGENT_REPLY, {
+        ticket_id: STATE.ticketId,
+        message: '⚠️ The customer has closed the chat widget.'
+      }).catch(function () {});
+    }
   }
 
   function resetChat() {
