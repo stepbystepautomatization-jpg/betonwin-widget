@@ -1094,7 +1094,7 @@ function apiVerify(playerId) {
     if (escalation === 'HUMAN_REQUEST') {
       // Not at threshold yet — acknowledge but continue with AI
       showTyping(false);
-      addMessage('bot', t('human_noted') + ' (' + STATE.humanRequestCount + '/' + HUMAN_REQUEST_THRESHOLD + ')');
+      addMessage('bot', t('human_noted'));
       unlockInput();
       return;
     }
