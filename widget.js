@@ -1062,9 +1062,7 @@ function apiVerify(playerId) {
   // Poll Zendesk for new agent replies
   function startAgentPolling(ticketId) {
     var pollCount = 0;
-    // Start with 0 to catch all agent replies, then use server timestamps
-    var lastCommentTs = 0;
-    var seenIds = {};
+    var shownBodies = [];
     clearInterval(STATE.agentPollTimer);
 
     STATE.agentPollTimer = setInterval(function () {
@@ -1076,24 +1074,19 @@ function apiVerify(playerId) {
         setInputDisabled(true);
         return;
       }
-      n8nCall(CONFIG.ENDPOINTS.AGENT_POLL, { ticket_id: ticketId, since: lastCommentTs })
+      n8nCall(CONFIG.ENDPOINTS.AGENT_POLL, { ticket_id: ticketId, since: 0 })
         .then(function (res) {
-          console.log('[BetonWin] poll #' + pollCount + ':', res.status, 'comments:', (res.comments||[]).length);
           if (res.comments && res.comments.length > 0) {
             showTyping(false);
             res.comments.forEach(function (c) {
-              // Skip duplicates using timestamp as ID
-              var cKey = (c.ts || '') + (c.body || '').slice(0, 20);
-              if (seenIds[cKey]) return;
-              seenIds[cKey] = true;
+              var key = c.body + '|' + c.ts;
+              if (shownBodies.indexOf(key) !== -1) return;
+              shownBodies.push(key);
               var agentName = c.author || t('live_agent');
               addAgentMessage(agentName, c.body);
               document.getElementById('bw-botname').textContent = agentName;
               STATE._agentName = agentName;
             });
-            // Use server timestamp from last comment, not Date.now()
-            var lastTs = res.comments[res.comments.length - 1].ts;
-            if (lastTs) { lastCommentTs = new Date(lastTs).getTime(); }
           }
           // Only close on truly closed — NOT on pending/solved/open
           if (res.status === 'closed') {
