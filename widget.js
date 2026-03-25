@@ -80,7 +80,6 @@
       err_generic:      'Something went wrong. Please try again.',
       err_file_size:    'File is too large. Maximum size is 10MB.',
       err_file_type:    'File type not supported. Please upload JPG, PNG, or PDF.',
-      err_timeout:      'The verification is taking longer than expected. Please try again later.',
       new_chat:         'New chat',
       close:            'Close',
       escalating:       'Connecting you to a live agent... 🔄',
@@ -94,11 +93,7 @@
       csat_ask:         'How was your experience?',
       csat_thanks:      'Thank you for your feedback!',
       send_file_agent:  'Send a file to the agent',
-      file_sent:        'File sent to agent.',
-      agent_typing:     'Agent is typing',
-      confirm_close:    'You have an active conversation with an agent. Are you sure you want to close?',
-      expand:           'Expand',
-      collapse:         'Collapse'
+      file_sent:        'File sent to agent.'
     },
     es: {
       welcome:          '¡Hola! Soy tu asistente de soporte **BetonWin** 24/7. ¿En qué puedo ayudarte hoy?',
@@ -126,7 +121,6 @@
       err_generic:      'Algo salió mal. Por favor, inténtalo de nuevo.',
       err_file_size:    'El archivo es demasiado grande. El tamaño máximo es 10MB.',
       err_file_type:    'Tipo de archivo no compatible. Sube JPG, PNG o PDF.',
-      err_timeout:      'La verificación está tardando más de lo esperado. Inténtalo de nuevo más tarde.',
       new_chat:         'Nueva conversación',
       close:            'Cerrar',
       escalating:       'Conectándote con un agente... 🔄',
@@ -140,11 +134,7 @@
       csat_ask:         '¿Cómo fue tu experiencia?',
       csat_thanks:      '¡Gracias por tu opinión!',
       send_file_agent:  'Enviar archivo al agente',
-      file_sent:        'Archivo enviado al agente.',
-      agent_typing:     'El agente está escribiendo',
-      confirm_close:    'Tienes una conversación activa con un agente. ¿Seguro que quieres cerrar?',
-      expand:           'Expandir',
-      collapse:         'Contraer'
+      file_sent:        'Archivo enviado al agente.'
     },
     it: {
       welcome:          'Ciao! Sono il tuo assistente di supporto **BetonWin** 24/7. Come posso aiutarti oggi?',
@@ -172,7 +162,6 @@
       err_generic:      'Si è verificato un errore. Riprova.',
       err_file_size:    'File troppo grande. Massimo 10MB.',
       err_file_type:    'Tipo file non supportato. Carica JPG, PNG o PDF.',
-      err_timeout:      'La verifica sta richiedendo più tempo del previsto. Riprova più tardi.',
       new_chat:         'Nuova conversazione',
       close:            'Chiudi',
       escalating:       'Ti sto collegando con un agente... 🔄',
@@ -186,11 +175,7 @@
       csat_ask:         "Com'è stata la tua esperienza?",
       csat_thanks:      'Grazie per il tuo feedback!',
       send_file_agent:  "Invia file all'agente",
-      file_sent:        "File inviato all'agente.",
-      agent_typing:     "L'agente sta scrivendo",
-      confirm_close:    'Hai una conversazione attiva con un agente. Sei sicuro di voler chiudere?',
-      expand:           'Espandi',
-      collapse:         'Comprimi'
+      file_sent:        "File inviato all'agente."
     },
     pt: {
       welcome:          'Olá! Sou seu assistente de suporte **BetonWin** 24/7. Como posso ajudá-lo hoje?',
@@ -218,7 +203,6 @@
       err_generic:      'Algo deu errado. Por favor, tente novamente.',
       err_file_size:    'Arquivo muito grande. Tamanho máximo é 10MB.',
       err_file_type:    'Tipo de arquivo não suportado. Envie JPG, PNG ou PDF.',
-      err_timeout:      'A verificação está demorando mais do que o esperado. Tente novamente mais tarde.',
       new_chat:         'Nova conversa',
       close:            'Fechar',
       escalating:       'Conectando você com um agente... 🔄',
@@ -232,11 +216,7 @@
       csat_ask:         'Como foi sua experiência?',
       csat_thanks:      'Obrigado pelo seu feedback!',
       send_file_agent:  'Enviar arquivo ao agente',
-      file_sent:        'Arquivo enviado ao agente.',
-      agent_typing:     'O agente está digitando',
-      confirm_close:    'Você tem uma conversa ativa com um agente. Tem certeza de que deseja fechar?',
-      expand:           'Expandir',
-      collapse:         'Recolher'
+      file_sent:        'Arquivo enviado ao agente.'
     }
   };
 
@@ -260,21 +240,8 @@
     lastSendTs: 0,
     humanRequestCount: 0,     // track "talk to human" requests
     ticketId:   null,         // Zendesk ticket ID for live agent
-    agentPollTimer: null,     // polling for agent replies
-    hasInteracted: false,     // true once user opens widget or sends message
-    sessionId: null,          // UUID for session correlation
-    isExpanded: false,        // widget expanded mode
-    typingDebounce: null      // debounce timer for typing indicator
+    agentPollTimer: null      // polling for agent replies
   };
-
-  // Generate UUID v4
-  function generateUUID() {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-      var r = Math.random() * 16 | 0;
-      return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
-    });
-  }
-
   var MAX_MSG_LENGTH = 1000;
   var MAX_MESSAGES   = 100;
   var SEND_COOLDOWN  = 1000;
@@ -345,9 +312,17 @@
   }
 
   // ============================================================
-  // ESCALATION — Legal keywords (local safety net, immediate)
-  // Human agent requests are detected by n8n AI via action: "WANTS_HUMAN"
+  // ESCALATION KEYWORDS
   // ============================================================
+  var HUMAN_KEYWORDS = [
+    'hablar con agente','hablar con humano','hablar con persona','operador real','agente real',
+    'persona real','agente humano','quiero un humano','quiero hablar con',
+    'talk to human','talk to agent','real person','real agent','human agent','speak to someone',
+    'parlare con operatore','parlare con persona','operatore reale','persona reale','voglio un umano',
+    'parlare con un umano','voglio parlare con',
+    'falar com agente','falar com humano','pessoa real','quero um humano','falar com pessoa'
+  ];
+
   var LEGAL_KEYWORDS = [
     'denuncio','denunciar','denuncia','vie legali','abogado','abogados','demanda judicial',
     'demanda legal','accion legal','acción legal','los voy a demandar',
@@ -356,59 +331,18 @@
     'advogado','tribunal','processo judicial','ação legal','vou processar'
   ];
 
-  function detectLegalThreat(text) {
+  function detectEscalation(text) {
     var lower = text.toLowerCase();
     for (var i = 0; i < LEGAL_KEYWORDS.length; i++) {
-      if (lower.indexOf(LEGAL_KEYWORDS[i]) !== -1) { return true; }
+      if (lower.indexOf(LEGAL_KEYWORDS[i]) !== -1) { return 'LEGAL'; }
     }
-    return false;
-  }
-
-  // Detect if user message is asking for a human (intent-based, not keyword-exact)
-  var HUMAN_INTENT_WORDS = [
-    'human','humano','umano','agente','agent','operatore','operator','persona real',
-    'persona reale','pessoa real','real person','live agent','live support',
-    'hablar con','parlare con','falar com','talk to','speak to','connect me',
-    'basta','enough','no puedes','non puoi','no me ayudas','non mi aiuti'
-  ];
-
-  function isHumanRequest(userText) {
-    var lower = userText.toLowerCase();
-    for (var i = 0; i < HUMAN_INTENT_WORDS.length; i++) {
-      if (lower.indexOf(HUMAN_INTENT_WORDS[i]) !== -1) return true;
+    for (var j = 0; j < HUMAN_KEYWORDS.length; j++) {
+      if (lower.indexOf(HUMAN_KEYWORDS[j]) !== -1) {
+        STATE.humanRequestCount++;
+        return STATE.humanRequestCount >= HUMAN_REQUEST_THRESHOLD ? 'HUMAN_THRESHOLD' : 'HUMAN_REQUEST';
+      }
     }
-    return false;
-  }
-
-  // Detect if AI response acknowledges the human request (confirms intent)
-  var HUMAN_RESPONSE_SIGNALS = [
-    'prefer to speak','preferisca parlare','prefer hablar','prefere falar',
-    'human agent','agente humano','operatore','persona real',
-    'not available','non disponibile','no disponible','não disponível',
-    'non posso metterti','no puedo conectarte','cannot connect',
-    'understand you','capisco che','entiendo que','entendo que',
-    'parlare con una persona','hablar con una persona','falar com uma pessoa',
-    'speak with someone','talk to someone'
-  ];
-
-  function aiConfirmsHumanRequest(aiResponse) {
-    var lower = aiResponse.toLowerCase();
-    for (var i = 0; i < HUMAN_RESPONSE_SIGNALS.length; i++) {
-      if (lower.indexOf(HUMAN_RESPONSE_SIGNALS[i]) !== -1) return true;
-    }
-    return false;
-  }
-
-  // Called when we detect user wants human (from action tag OR intent analysis)
-  function handleWantsHuman(botMessage) {
-    STATE.humanRequestCount++;
-    if (STATE.humanRequestCount >= HUMAN_REQUEST_THRESHOLD) {
-      addMessage('bot', t('human_escalate'));
-      startEscalation('human_request');
-    } else {
-      // Show AI response + our note that we understood
-      addMessage('bot', botMessage || t('human_noted'));
-    }
+    return null;
   }
 
   // ============================================================
@@ -474,10 +408,6 @@
     fontLink.href = 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap';
     fontLink.onload = function () { this.rel = 'stylesheet'; };
     document.head.appendChild(fontLink);
-    // Fallback for browsers that don't support preload
-    var fontFallback = document.createElement('noscript');
-    fontFallback.innerHTML = '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">';
-    document.head.appendChild(fontFallback);
 
     var s = document.createElement('style');
     s.id = '__beton_css__';
@@ -527,7 +457,7 @@
       '.bw-mavatar svg{width:100%;height:auto}',
 
       /* Bubbles */
-      '.bw-bubble{padding:10px 14px;border-radius:16px;font-size:14.5px;line-height:1.65;word-break:break-word;white-space:pre-line;letter-spacing:-0.01em}',
+      '.bw-bubble{padding:10px 14px;border-radius:16px;font-size:13.5px;line-height:1.65;word-break:break-word;white-space:pre-line;letter-spacing:-0.01em}',
       '.bw-msg.bot .bw-bubble{background:rgba(45,236,118,0.03);border:1px solid rgba(45,236,118,0.08);color:rgba(232,240,242,0.85);border-bottom-left-radius:4px}',
       '.bw-msg.user .bw-bubble{background:linear-gradient(135deg,'+C.green+' 0%,#1ac45e 100%);color:#fff;border-bottom-right-radius:4px;box-shadow:0 4px 16px rgba(45,236,118,0.2)}',
       '.bw-bubble b,.bw-bubble strong{font-weight:600;color:#fff}',
@@ -600,36 +530,8 @@
       '@keyframes bw-ellipsis{0%{content:"";width:0}25%{content:".";width:5px}50%{content:"..";width:10px}75%{content:"...";width:15px}}',
       '@keyframes bw-ring{0%,100%{transform:scale(1);opacity:.4}50%{transform:scale(1.15);opacity:0}}',
 
-      /* Expand mode */
-      '#bw-window.bw-expanded{width:560px;height:80vh;max-height:800px}',
-
-      /* Emoji picker */
-      '#bw-emoji-btn{width:40px;height:40px;background:transparent;border:1px solid rgba(45,236,118,0.08);border-radius:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;outline:none;font-size:18px;color:'+C.textMuted+'}',
-      '#bw-emoji-btn:hover{background:rgba(45,236,118,0.06);border-color:rgba(45,236,118,0.2);color:'+C.green+'}',
-      '#bw-emoji-panel{display:none;position:absolute;bottom:70px;left:16px;right:16px;background:'+C.bg+';border:1px solid rgba(45,236,118,0.12);border-radius:14px;padding:10px;max-height:180px;overflow-y:auto;z-index:10;box-shadow:0 -8px 32px rgba(0,0,0,0.5)}',
-      '#bw-emoji-panel.show{display:grid;grid-template-columns:repeat(8,1fr);gap:4px}',
-      '.bw-emo{width:100%;aspect-ratio:1;border:none;background:transparent;border-radius:8px;cursor:pointer;font-size:20px;display:flex;align-items:center;justify-content:center;transition:all .15s}',
-      '.bw-emo:hover{background:rgba(45,236,118,0.08);transform:scale(1.15)}',
-
-      /* File button in agent mode */
-      '#bw-attach-btn{width:40px;height:40px;background:transparent;border:1px solid rgba(45,236,118,0.08);border-radius:12px;cursor:pointer;display:none;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;outline:none;color:'+C.textMuted+'}',
-      '#bw-attach-btn:hover{background:rgba(45,236,118,0.06);border-color:rgba(45,236,118,0.2);color:'+C.green+'}',
-      '#bw-attach-btn svg{width:16px;height:16px;fill:currentColor}',
-      '#bw-attach-btn.show{display:flex}',
-
-      /* Confirm overlay */
-      '#bw-confirm{display:none;position:absolute;inset:0;background:rgba(3,36,45,0.95);z-index:20;align-items:center;justify-content:center;border-radius:20px;flex-direction:column;gap:16px;padding:32px}',
-      '#bw-confirm.show{display:flex}',
-      '#bw-confirm-text{color:'+C.text+';font-size:14px;text-align:center;line-height:1.6;max-width:280px}',
-      '#bw-confirm-btns{display:flex;gap:10px}',
-      '.bw-cbtn{padding:10px 24px;border-radius:12px;font-size:13px;font-weight:600;cursor:pointer;border:none;font-family:inherit;transition:all .2s;outline:none}',
-      '.bw-cbtn-yes{background:'+C.danger+';color:#fff}',
-      '.bw-cbtn-yes:hover{opacity:.85}',
-      '.bw-cbtn-no{background:rgba(45,236,118,0.1);color:'+C.green+';border:1px solid rgba(45,236,118,0.2)}',
-      '.bw-cbtn-no:hover{background:rgba(45,236,118,0.15)}',
-
       /* Mobile */
-      '@media(max-width:440px){#__beton_widget__{bottom:16px;right:12px;left:12px}#bw-window{width:100%;right:0;left:0;bottom:74px;height:calc(100dvh - 94px);max-height:620px;border-radius:18px;transform-origin:bottom center}#bw-trigger{width:52px;height:52px;border-radius:14px}#bw-trigger svg{width:22px;height:22px}#bw-window.bw-expanded{width:100%;height:calc(100dvh - 94px);max-height:none}#bw-emoji-panel.show{grid-template-columns:repeat(7,1fr)}}'
+      '@media(max-width:440px){#__beton_widget__{bottom:16px;right:12px;left:12px}#bw-window{width:100%;right:0;left:0;bottom:74px;height:calc(100dvh - 94px);max-height:620px;border-radius:18px;transform-origin:bottom center}#bw-trigger{width:52px;height:52px;border-radius:14px}#bw-trigger svg{width:22px;height:22px}}'
     ].join('');
     document.head.appendChild(s);
   }
@@ -657,9 +559,6 @@
             '<div id="bw-status"><span id="bw-statusdot"></span><span>' + t('online') + '</span></div>' +
           '</div>' +
           '<div id="bw-hbtns">' +
-            '<button class="bw-hbtn" id="bw-expand" title="' + t('expand') + '">' +
-              '<svg viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>' +
-            '</button>' +
             '<button class="bw-hbtn" id="bw-newchat" title="' + t('new_chat') + '">' +
               '<svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>' +
             '</button>' +
@@ -686,25 +585,13 @@
           '<div id="bw-uhint">' + t('upload_hint') + '</div>' +
           '<div id="bw-uprog"><div id="bw-uprogbar"></div></div>' +
         '</div>' +
-        '<div id="bw-emoji-panel"></div>' +
         '<div id="bw-inputarea">' +
-          '<button id="bw-emoji-btn" title="Emoji">😊</button>' +
-          '<button id="bw-attach-btn" title="' + t('send_file_agent') + '">' +
-            '<svg viewBox="0 0 24 24"><path d="M16.5 6v11.5c0 2.21-1.79 4-4 4s-4-1.79-4-4V5c0-1.38 1.12-2.5 2.5-2.5s2.5 1.12 2.5 2.5v10.5c0 .55-.45 1-1 1s-1-.45-1-1V6H10v9.5c0 1.38 1.12 2.5 2.5 2.5s2.5-1.12 2.5-2.5V5c0-2.21-1.79-4-4-4S7 2.79 7 5v12.5c0 3.04 2.46 5.5 5.5 5.5s5.5-2.46 5.5-5.5V6h-1.5z"/></svg>' +
-          '</button>' +
           '<textarea id="bw-input" placeholder="' + t('placeholder') + '" rows="1"></textarea>' +
           '<button id="bw-send">' +
             '<svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>' +
           '</button>' +
         '</div>' +
         '<div id="bw-footer">Powered by BetonWin Support AI</div>' +
-        '<div id="bw-confirm">' +
-          '<div id="bw-confirm-text"></div>' +
-          '<div id="bw-confirm-btns">' +
-            '<button class="bw-cbtn bw-cbtn-no" id="bw-confirm-no">' + t('close') + ' — No</button>' +
-            '<button class="bw-cbtn bw-cbtn-yes" id="bw-confirm-yes">' + t('close') + ' — ' + (lang === 'es' ? 'Sí' : lang === 'it' ? 'Sì' : lang === 'pt' ? 'Sim' : 'Yes') + '</button>' +
-          '</div>' +
-        '</div>' +
       '</div>';
   }
 
@@ -746,7 +633,7 @@
   }
 
   var BOT_AVATAR_SVG = '<svg viewBox="0 0 140 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8.25 5.24H6.5L5.9 8.72H7.62C9.11 8.72 9.86 8.06 9.86 6.76C9.86 6.31 9.72 5.94 9.45 5.66C9.18 5.38 8.78 5.24 8.25 5.24ZM7.62 11.54H5.41L4.85 14.75H7.15C7.87 14.75 8.44 14.58 8.86 14.25C9.28 13.92 9.49 13.51 9.49 13.03C9.49 12.03 8.86 11.54 7.62 11.54ZM9.72 1.61C11.49 1.61 12.75 2 13.49 2.77C14.05 3.36 14.33 4.11 14.33 5.01C14.33 5.32 14.3 5.65 14.24 5.99L14.03 7.11C13.86 7.99 13.53 8.68 13.04 9.18C12.55 9.68 12.12 9.93 11.75 9.93L11.72 10.11C12.16 10.11 12.6 10.36 13.05 10.84C13.5 11.32 13.73 11.89 13.73 12.54C13.73 12.8 13.7 13.08 13.63 13.38L13.49 14.1C13.24 15.44 12.65 16.48 11.71 17.25C10.77 18.01 9.46 18.39 7.78 18.39H0L2.96 1.61H9.72Z" fill="#2DEC76"/><path d="M27.01 18.39H15.31L18.27 1.61H28.54C29.29 1.61 29.85 2.28 29.72 3.01L29.32 5.24H21.81L21.28 8.39H27.48L26.82 12.02H20.63L20.16 14.75H27.66L27.01 18.39Z" fill="#2DEC76"/><path d="M46.31 5.24H40.57L38.27 18.39H34.05L36.36 5.24H30.6L31.25 1.61H45.53C46.28 1.61 46.84 2.28 46.71 3.01L46.31 5.24Z" fill="#2DEC76"/><path d="M73.66 9.98C72.99 13.81 69.33 16.93 65.5 16.93C61.67 16.93 59.11 13.81 59.78 9.98C60.45 6.15 64.11 3.04 67.94 3.04C71.78 3.04 74.34 6.15 73.66 9.98ZM68.2 1.6H56.12C51.51 1.61 47.1 5.37 46.28 9.98C45.47 14.6 48.56 18.36 53.16 18.37H65.24C69.86 18.37 74.29 14.61 75.11 9.98C75.92 5.36 72.82 1.6 68.2 1.6Z" fill="white"/><circle cx="92.12" cy="16.4" r="1.97" fill="white"/></svg>';
-  var AGENT_AVATAR_SVG = '<svg viewBox="0 0 24 24" fill="' + C.warning + '"><path d="M12 1c-4.97 0-9 3.19-9 7.14 0 1.48.56 2.85 1.5 3.97V16l2.4-1.2c1.06.37 2.2.57 3.4.57.28 0 .56-.01.84-.04C12.05 16.41 13.94 17 16 17c.6 0 1.18-.07 1.74-.18L20 18v-2.96C21.41 13.7 22 12.15 22 10.5 22 6.36 18.42 3 14 3c-.52 0-1.04.05-1.54.13C11.13 1.78 9.33 1 7.38 1H12zM7 7.5c-.83 0-1.5.67-1.5 1.5S6.17 10.5 7 10.5 8.5 9.83 8.5 9 7.83 7.5 7 7.5zm5 0c-.83 0-1.5.67-1.5 1.5s.67 1.5 1.5 1.5 1.5-.67 1.5-1.5-.67-1.5-1.5-1.5z"/></svg>';
+  var AGENT_AVATAR_SVG = '<svg viewBox="0 0 24 24" fill="' + C.warning + '"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>';
 
   function addMessage(role, content) {
     var msgs   = document.getElementById('bw-msgs');
@@ -796,14 +683,10 @@
     return div;
   }
 
-  function showTyping(show, isAgent) {
+  function showTyping(show) {
     var el = document.getElementById('bw-typing');
-    var label = document.getElementById('bw-tlabel');
     el.classList.toggle('show', show);
-    if (show) {
-      label.textContent = isAgent ? t('agent_typing') : t('typing');
-      var m = document.getElementById('bw-msgs'); m.scrollTop = m.scrollHeight;
-    }
+    if (show) { var m = document.getElementById('bw-msgs'); m.scrollTop = m.scrollHeight; }
   }
 
   function showPlayerIdForm(show) {
@@ -849,7 +732,7 @@
   // IMPORTANT: avoid shared words between languages to prevent false positives
   var LANG_WORDS = {
     it: ['ciao','grazie','buongiorno','buonasera','prelievo','prelevare','perché','perche','voglio',
-         'parlare','umano','operatore','questo','questa','subito','ancora','sono','mia','aiuto',
+         'questo','questa','subito','ancora','sono','mia','aiuto',
          'depositi','soldi','conto','non ho ricevuto','non è arrivato',
          'dove','come posso','non riesco','accedere','vedere','trovare','voglio sapere',
          'non capisco','qual è','mi serve','il mio','la mia','ho bisogno','vorrei',
@@ -912,32 +795,14 @@
   // ============================================================
   // 9. n8n API — webhook calls
   // ============================================================
-  var N8N_MAX_RETRIES = 2;
-  function n8nCall(endpoint, body, method, _retryCount) {
+  function n8nCall(endpoint, body, method) {
     method = method || 'POST';
-    _retryCount = _retryCount || 0;
     var url  = CONFIG.N8N_BASE + endpoint;
     var opts = { method: method, headers: { 'Content-Type': 'application/json' } };
-    if (method !== 'GET') {
-      var payload = body || {};
-      // Attach session ID to every request
-      if (STATE.sessionId) { payload.session_id = STATE.sessionId; }
-      opts.body = JSON.stringify(payload);
-    }
+    if (method !== 'GET') { opts.body = JSON.stringify(body); }
     return fetch(url, opts).then(function (r) {
       if (!r.ok) { throw new Error('n8n HTTP ' + r.status); }
       return r.json();
-    }).catch(function (err) {
-      // Retry with exponential backoff on network errors (not on 4xx)
-      if (_retryCount < N8N_MAX_RETRIES && !/4\d{2}/.test(err.message)) {
-        var delay = Math.pow(2, _retryCount) * 1000; // 1s, 2s
-        return new Promise(function (resolve) {
-          setTimeout(resolve, delay);
-        }).then(function () {
-          return n8nCall(endpoint, body, method, _retryCount + 1);
-        });
-      }
-      throw err;
     });
   }
 
@@ -1050,7 +915,7 @@ function apiVerify(playerId) {
       case 'APPROVED':       addMessage('bot', t('result_approved')); break;
       case 'REJECTED':       addMessage('bot', t('result_rejected')); break;
       case 'PENDING_REVIEW': addMessage('bot', t('result_pending'));  break;
-      case 'TIMEOUT':        addMessage('bot', t('err_timeout'));     break;
+      case 'TIMEOUT':        addMessage('bot', t('err_generic'));     break;
       default:               addMessage('bot', t('err_generic'));
     }
     STATE.phase = 'RESULT';
@@ -1070,7 +935,6 @@ function apiVerify(playerId) {
     trackEvent('escalation', { reason: reason });
     setInputDisabled(true);
 
-    // Send conversation as array of objects (required by n8n Format Ticket node)
     var history = STATE.messages.map(function (m) {
       return { role: m.role, content: m.content, ts: m.ts };
     });
@@ -1101,7 +965,6 @@ function apiVerify(playerId) {
         // Update header to show "Live Agent" mode
         document.getElementById('bw-botname').textContent = t('live_agent');
         document.getElementById('bw-statusdot').style.background = '#fbbf24';
-        updateAttachButton();
         // Start polling for agent replies
         startAgentPolling(res.ticket_id);
       } else {
@@ -1114,7 +977,6 @@ function apiVerify(playerId) {
       showTyping(false);
       addMessage('bot', t('err_generic') + '\n\nEmail: **ayuda@beton.win**');
       STATE.phase = 'CHAT';
-      STATE.humanRequestCount = 0; // reset so user isn't stuck in escalation loop
       setInputDisabled(false);
     });
   }
@@ -1161,14 +1023,7 @@ function apiVerify(playerId) {
       }
       n8nCall(CONFIG.ENDPOINTS.AGENT_POLL, { ticket_id: ticketId, since: lastCommentTs })
         .then(function (res) {
-          // Show/hide agent typing indicator
-          if (res.agent_typing) {
-            showTyping(true, true);
-          } else {
-            showTyping(false);
-          }
           if (res.comments && res.comments.length > 0) {
-            showTyping(false);
             res.comments.forEach(function (c) {
               addAgentMessage(c.author || t('live_agent'), c.body);
             });
@@ -1176,11 +1031,9 @@ function apiVerify(playerId) {
           }
           if (res.status === 'closed' || res.status === 'solved') {
             stopAgentPolling();
-            showTyping(false);
             addAgentMessage(t('live_agent'), t('agent_closed'));
             STATE.phase = 'AGENT_CLOSED';
             setInputDisabled(true);
-            updateAttachButton();
             // Restore bot header
             document.getElementById('bw-botname').textContent = CONFIG.BOT_NAME;
             document.getElementById('bw-statusdot').style.background = C.green;
@@ -1256,13 +1109,21 @@ function apiVerify(playerId) {
       STATE.busy = false;
     }
 
-    // 0. Detect legal threats locally (immediate escalation, no AI needed)
-    if (detectLegalThreat(text)) {
+    // 0. Detect escalation (legal threat or repeated human request)
+    var escalation = detectEscalation(text);
+    if (escalation === 'LEGAL' || escalation === 'HUMAN_THRESHOLD') {
       showTyping(false);
       addMessage('bot', t('human_escalate'));
       clearTimeout(safetyTimer);
       STATE.busy = false;
-      startEscalation('legal_threat');
+      startEscalation(escalation === 'LEGAL' ? 'legal_threat' : 'human_request');
+      return;
+    }
+    if (escalation === 'HUMAN_REQUEST') {
+      // Not at threshold yet — acknowledge but continue with AI
+      showTyping(false);
+      addMessage('bot', t('human_noted'));
+      unlockInput();
       return;
     }
 
@@ -1309,15 +1170,7 @@ function apiVerify(playerId) {
           langInstruction = 'IMPORTANT: The user is writing in ' + (LANG_NAMES[lang] || 'Spanish') +
             '. You MUST respond in ' + (LANG_NAMES[lang] || 'Spanish') + '. Do NOT refuse or redirect to another language.\n\n';
         }
-        // Instruct AI to tag actions in response
-        var actionInstruction = 'IMPORTANT RULES FOR ACTIONS:\n' +
-          '- If the user wants to talk to a human agent, real person, operator, or live support, ' +
-          'add the tag <!--action:WANTS_HUMAN--> at the END of your response. Still respond helpfully.\n' +
-          '- If the user has a deposit problem (missing, not received, failed), ' +
-          'add <!--action:START_DEPOSIT_FLOW--> at the END of your response.\n' +
-          '- NEVER refuse to help. NEVER say it is not possible to talk to a human.\n' +
-          '- These tags are invisible to the user and used by the system only.\n\n';
-        var payload = { message: text, kb_content: actionInstruction + langInstruction + kbContent, lang: lang, history: history };
+        var payload = { message: text, kb_content: langInstruction + kbContent, lang: lang, history: history };
         return Promise.race([
           n8nCall(CONFIG.ENDPOINTS.CHAT, payload),
           aiTimeout
@@ -1352,31 +1205,6 @@ function apiVerify(playerId) {
               addMessage('bot', t('no_results'));
               unlockInput();
             });
-          return;
-        }
-        // Check AI action: from res.action field OR <!--action:XXX--> tag in response
-        var action = res.action || null;
-        var actionMatch = raw.match(/<!--action:(\w+)-->/);
-        if (actionMatch) {
-          action = actionMatch[1];
-          raw = raw.replace(/<!--action:\w+-->\s*/g, '').trim();
-        }
-        if (action === 'WANTS_HUMAN') {
-          handleWantsHuman(raw);
-          unlockInput();
-          return;
-        }
-        if (action === 'START_DEPOSIT_FLOW') {
-          addMessage('bot', raw);
-          unlockInput();
-          startDepositFlow();
-          return;
-        }
-        // Fallback: detect human request from user text + AI response analysis
-        // (works even if AI doesn't add action tags)
-        if (!action && isHumanRequest(text) && aiConfirmsHumanRequest(raw)) {
-          handleWantsHuman(raw);
-          unlockInput();
           return;
         }
         addMessage('bot', raw);
@@ -1457,16 +1285,6 @@ function apiVerify(playerId) {
     document.getElementById('bw-input').addEventListener('input', function () {
       this.style.height = 'auto';
       this.style.height = Math.min(this.scrollHeight, 120) + 'px';
-      // Send typing indicator to agent (debounced)
-      if (STATE.phase === 'LIVE_AGENT' && STATE.ticketId) {
-        clearTimeout(STATE.typingDebounce);
-        STATE.typingDebounce = setTimeout(function () {
-          n8nCall(CONFIG.ENDPOINTS.AGENT_REPLY, {
-            ticket_id: STATE.ticketId,
-            typing: true
-          }).catch(function () {});
-        }, 2000);
-      }
     });
 
     // Quick deposit button
@@ -1497,77 +1315,19 @@ function apiVerify(playerId) {
       this.classList.remove('drag');
       if (e.dataTransfer.files[0]) { handleFile(e.dataTransfer.files[0]); }
     });
-
-    // Expand/collapse button
-    document.getElementById('bw-expand').addEventListener('click', function () {
-      STATE.isExpanded = !STATE.isExpanded;
-      document.getElementById('bw-window').classList.toggle('bw-expanded', STATE.isExpanded);
-      this.title = STATE.isExpanded ? t('collapse') : t('expand');
-      // Swap icon: collapse = inward arrows, expand = outward arrows
-      this.innerHTML = STATE.isExpanded
-        ? '<svg viewBox="0 0 24 24"><path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"/></svg>'
-        : '<svg viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>';
-    });
-
-    // Emoji picker
-    var emojiPanel = document.getElementById('bw-emoji-panel');
-    var EMOJIS = ['👍','👎','😊','😂','😢','😡','🙏','❤️','🔥','⭐','✅','❌','💰','🎰','🎲','💳','🏦','📧','📞','⏳','🤔','👋','🎁','🍀'];
-    emojiPanel.innerHTML = EMOJIS.map(function (e) {
-      return '<button class="bw-emo" data-e="' + e + '">' + e + '</button>';
-    }).join('');
-    document.getElementById('bw-emoji-btn').addEventListener('click', function () {
-      emojiPanel.classList.toggle('show');
-    });
-    emojiPanel.addEventListener('click', function (e) {
-      var btn = e.target.closest('.bw-emo');
-      if (!btn) return;
-      var input = document.getElementById('bw-input');
-      input.value += btn.getAttribute('data-e');
-      input.focus();
-      emojiPanel.classList.remove('show');
-    });
-    // Close emoji on outside click
-    document.addEventListener('click', function (e) {
-      if (!e.target.closest('#bw-emoji-panel') && !e.target.closest('#bw-emoji-btn')) {
-        emojiPanel.classList.remove('show');
-      }
-    });
-
-    // Attach file button (visible only in LIVE_AGENT mode)
-    document.getElementById('bw-attach-btn').addEventListener('click', function () {
-      document.getElementById('bw-agent-file').click();
-    });
-
-    // Confirm dialog buttons
-    document.getElementById('bw-confirm-no').addEventListener('click', function () {
-      document.getElementById('bw-confirm').classList.remove('show');
-    });
-    document.getElementById('bw-confirm-yes').addEventListener('click', function () {
-      document.getElementById('bw-confirm').classList.remove('show');
-      toggleOpen(false, true); // force close
-    });
   }
 
   // ============================================================
   // 14. WIDGET CONTROL
   // ============================================================
-  function toggleOpen(open, force) {
-    // Show confirm dialog if closing during active agent session (unless forced)
-    if (!open && !force && STATE.phase === 'LIVE_AGENT' && STATE.ticketId) {
-      document.getElementById('bw-confirm-text').textContent = t('confirm_close');
-      document.getElementById('bw-confirm').classList.add('show');
-      return;
-    }
+  function toggleOpen(open) {
     STATE.isOpen = open;
     document.getElementById('bw-trigger').classList.toggle('bw-open', open);
     document.getElementById('bw-window').classList.toggle('bw-open', open);
     if (open) {
-      STATE.hasInteracted = true;
       document.getElementById('bw-input').focus();
       unreadCount = 0;
       updateBadge();
-      // Show/hide attach button based on phase
-      updateAttachButton();
     }
     // If user closes widget during live agent session → notify agent on Zendesk
     if (!open && STATE.phase === 'LIVE_AGENT' && STATE.ticketId) {
@@ -1575,13 +1335,6 @@ function apiVerify(playerId) {
         ticket_id: STATE.ticketId,
         message: '⚠️ The customer has closed the chat widget.'
       }).catch(function () {});
-    }
-  }
-
-  function updateAttachButton() {
-    var btn = document.getElementById('bw-attach-btn');
-    if (btn) {
-      btn.classList.toggle('show', STATE.phase === 'LIVE_AGENT');
     }
   }
 
@@ -1713,37 +1466,23 @@ function apiVerify(playerId) {
   // INIT
   // ============================================================
   function init() {
-    // Generate session ID for correlation
-    STATE.sessionId = generateUUID();
-
     injectCSS();
     buildHTML();
     bindEvents();
 
     setTimeout(function () { addMessage('bot', t('welcome')); }, 500);
 
-    // Proactive message after 30s if user hasn't interacted at all
+    // Proactive message after 30s if user hasn't interacted
     setTimeout(function () {
-      if (!STATE.hasInteracted && STATE.messages.length <= 1 && !STATE.isOpen) {
+      if (STATE.messages.length <= 1 && !STATE.isOpen) {
         notifyNewMessage();
       }
     }, PROACTIVE_DELAY);
 
-    // Stop polling on page unload to prevent background requests
+    // Stop polling on page unload
     window.addEventListener('beforeunload', function () {
       stopPolling();
       stopAgentPolling();
-    });
-    // Pause/resume agent polling on tab visibility
-    document.addEventListener('visibilitychange', function () {
-      if (document.hidden) {
-        if (STATE.agentPollTimer) { stopAgentPolling(); }
-      } else {
-        // Reconnect polling when tab becomes visible again
-        if (STATE.phase === 'LIVE_AGENT' && STATE.ticketId && !STATE.agentPollTimer) {
-          startAgentPolling(STATE.ticketId);
-        }
-      }
     });
 
     // Add file input for live agent mode
@@ -1758,7 +1497,7 @@ function apiVerify(playerId) {
     });
     document.getElementById('__beton_widget__').appendChild(fileBtn);
 
-    console.log('[BetonWin Support] v4.0.0 ready — session:', STATE.sessionId, 'lang:', lang);
+    console.log('[BetonWin Support] v3.0.0 ready — lang:', lang);
   }
 
   if (document.readyState === 'loading') {
