@@ -312,17 +312,8 @@
   }
 
   // ============================================================
-  // ESCALATION KEYWORDS
+  // ESCALATION — Legal = immediate, Human = AI-detected after 3x
   // ============================================================
-  var HUMAN_KEYWORDS = [
-    'hablar con agente','hablar con humano','hablar con persona','operador real','agente real',
-    'persona real','agente humano','quiero un humano','quiero hablar con',
-    'talk to human','talk to agent','real person','real agent','human agent','speak to someone',
-    'parlare con operatore','parlare con persona','operatore reale','persona reale','voglio un umano',
-    'parlare con un umano','voglio parlare con',
-    'falar com agente','falar com humano','pessoa real','quero um humano','falar com pessoa'
-  ];
-
   var LEGAL_KEYWORDS = [
     'denuncio','denunciar','denuncia','vie legali','abogado','abogados','demanda judicial',
     'demanda legal','accion legal','acción legal','los voy a demandar',
@@ -331,18 +322,43 @@
     'advogado','tribunal','processo judicial','ação legal','vou processar'
   ];
 
-  function detectEscalation(text) {
+  function detectLegalThreat(text) {
     var lower = text.toLowerCase();
     for (var i = 0; i < LEGAL_KEYWORDS.length; i++) {
-      if (lower.indexOf(LEGAL_KEYWORDS[i]) !== -1) { return 'LEGAL'; }
+      if (lower.indexOf(LEGAL_KEYWORDS[i]) !== -1) { return true; }
     }
-    for (var j = 0; j < HUMAN_KEYWORDS.length; j++) {
-      if (lower.indexOf(HUMAN_KEYWORDS[j]) !== -1) {
-        STATE.humanRequestCount++;
-        return STATE.humanRequestCount >= HUMAN_REQUEST_THRESHOLD ? 'HUMAN_THRESHOLD' : 'HUMAN_REQUEST';
-      }
+    return false;
+  }
+
+  // AI-based detection: check if AI response acknowledges a human request
+  var HUMAN_RESPONSE_SIGNALS = [
+    'prefer to speak','preferisca parlare','prefieres hablar','prefere falar',
+    'human agent','agente humano','operatore','persona real','persona reale',
+    'not available','non disponibile','no disponible','não disponível',
+    'non posso metterti','no puedo conectarte','no puedo transferirte','cannot connect',
+    'capisco che','entiendo que','entendo que','understand you',
+    'parlare con una persona','hablar con una persona','falar com uma pessoa',
+    'speak with someone','talk to someone','speak to a','talk to a',
+    'frustración','frustrazione','frustration','frustraci'
+  ];
+
+  function aiDetectsHumanRequest(aiResponse) {
+    var lower = aiResponse.toLowerCase();
+    for (var i = 0; i < HUMAN_RESPONSE_SIGNALS.length; i++) {
+      if (lower.indexOf(HUMAN_RESPONSE_SIGNALS[i]) !== -1) { return true; }
     }
-    return null;
+    return false;
+  }
+
+  function handleWantsHuman(botMessage) {
+    STATE.humanRequestCount++;
+    if (STATE.humanRequestCount >= HUMAN_REQUEST_THRESHOLD) {
+      addMessage('bot', t('human_escalate'));
+      startEscalation('human_request');
+    } else {
+      // AI already responded — show its message
+      addMessage('bot', botMessage);
+    }
   }
 
   // ============================================================
@@ -999,6 +1015,7 @@ function apiVerify(playerId) {
       showTyping(false);
       addMessage('bot', t('err_generic') + '\n\nEmail: **ayuda@beton.win**');
       STATE.phase = 'CHAT';
+      STATE.humanRequestCount = 0;
       setInputDisabled(false);
     });
   }
@@ -1138,21 +1155,13 @@ function apiVerify(playerId) {
       STATE.busy = false;
     }
 
-    // 0. Detect escalation (legal threat or repeated human request)
-    var escalation = detectEscalation(text);
-    if (escalation === 'LEGAL' || escalation === 'HUMAN_THRESHOLD') {
+    // 0. Legal threats → immediate escalation (no AI needed)
+    if (detectLegalThreat(text)) {
       showTyping(false);
       addMessage('bot', t('human_escalate'));
       clearTimeout(safetyTimer);
       STATE.busy = false;
-      startEscalation(escalation === 'LEGAL' ? 'legal_threat' : 'human_request');
-      return;
-    }
-    if (escalation === 'HUMAN_REQUEST') {
-      // Not at threshold yet — acknowledge but continue with AI
-      showTyping(false);
-      addMessage('bot', t('human_noted'));
-      unlockInput();
+      startEscalation('legal_threat');
       return;
     }
 
@@ -1234,6 +1243,13 @@ function apiVerify(playerId) {
               addMessage('bot', t('no_results'));
               unlockInput();
             });
+          return;
+        }
+        // AI-based human request detection:
+        // If AI response acknowledges the user wants a human → count it
+        if (aiDetectsHumanRequest(raw)) {
+          handleWantsHuman(raw);
+          unlockInput();
           return;
         }
         addMessage('bot', raw);
