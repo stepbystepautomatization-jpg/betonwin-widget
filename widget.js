@@ -1036,6 +1036,7 @@ function apiVerify(playerId) {
   // In LIVE_AGENT mode: send user messages to Zendesk as ticket comments
   function sendToAgent(text) {
     if (!STATE.ticketId) return;
+    if (!text || text === 'undefined') return;
     addMessage('user', text);
     document.getElementById('bw-input').value = '';
     document.getElementById('bw-input').style.height = 'auto';
@@ -1061,7 +1062,8 @@ function apiVerify(playerId) {
   // Poll Zendesk for new agent replies
   function startAgentPolling(ticketId) {
     var pollCount = 0;
-    var lastCommentTs = Date.now();
+    // Start 30s in the past to catch any agent reply that came during escalation
+    var lastCommentTs = Date.now() - 30000;
     clearInterval(STATE.agentPollTimer);
 
     STATE.agentPollTimer = setInterval(function () {
@@ -1335,10 +1337,11 @@ function apiVerify(playerId) {
     document.getElementById('bw-newchat').addEventListener('click', resetChat);
 
     document.getElementById('bw-send').addEventListener('click', function () {
-      handleChatMessage(document.getElementById('bw-input').value);
+      var val = document.getElementById('bw-input').value;
+      if (val && val !== 'undefined') handleChatMessage(val);
     });
     document.getElementById('bw-input').addEventListener('keydown', function (e) {
-      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleChatMessage(this.value); }
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); if (this.value && this.value !== 'undefined') handleChatMessage(this.value); }
     });
     document.getElementById('bw-input').addEventListener('input', function () {
       this.style.height = 'auto';
