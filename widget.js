@@ -520,6 +520,17 @@
       '#bw-send:disabled{opacity:.15;cursor:default;transform:none;box-shadow:none}',
       '#bw-send svg{width:16px;height:16px;fill:#fff}',
 
+      /* Emoji picker */
+      '#bw-emoji-btn{width:40px;height:40px;background:transparent;border:1px solid rgba(45,236,118,0.08);border-radius:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;outline:none;font-size:18px;color:'+C.textMuted+'}',
+      '#bw-emoji-btn:hover{background:rgba(45,236,118,0.06);border-color:rgba(45,236,118,0.2)}',
+      '#bw-emoji-panel{display:none;position:absolute;bottom:70px;left:16px;right:16px;background:'+C.bg+';border:1px solid rgba(45,236,118,0.12);border-radius:14px;padding:10px;max-height:180px;overflow-y:auto;z-index:10;box-shadow:0 -8px 32px rgba(0,0,0,0.5)}',
+      '#bw-emoji-panel.show{display:grid;grid-template-columns:repeat(8,1fr);gap:4px}',
+      '.bw-emo{width:100%;aspect-ratio:1;border:none;background:transparent;border-radius:8px;cursor:pointer;font-size:20px;display:flex;align-items:center;justify-content:center;transition:all .15s}',
+      '.bw-emo:hover{background:rgba(45,236,118,0.08);transform:scale(1.15)}',
+
+      /* Fullscreen mode */
+      '#bw-window.bw-fullscreen{position:fixed;inset:0;width:100%;height:100%;max-height:100%;border-radius:0;bottom:0;right:0;z-index:2147483647}',
+
       /* Footer */
       '#bw-footer{text-align:center;padding:8px;color:rgba(45,236,118,0.12);font-size:10px;border-top:1px solid rgba(45,236,118,0.04);flex-shrink:0;letter-spacing:.3px;font-weight:500}',
 
@@ -531,7 +542,7 @@
       '@keyframes bw-ring{0%,100%{transform:scale(1);opacity:.4}50%{transform:scale(1.15);opacity:0}}',
 
       /* Mobile */
-      '@media(max-width:440px){#__beton_widget__{bottom:16px;right:12px;left:12px}#bw-window{width:100%;right:0;left:0;bottom:74px;height:calc(100dvh - 94px);max-height:620px;border-radius:18px;transform-origin:bottom center}#bw-trigger{width:52px;height:52px;border-radius:14px}#bw-trigger svg{width:22px;height:22px}}'
+      '@media(max-width:440px){#__beton_widget__{bottom:16px;right:12px;left:12px}#bw-window{width:100%;right:0;left:0;bottom:74px;height:calc(100dvh - 94px);max-height:620px;border-radius:18px;transform-origin:bottom center}#bw-trigger{width:52px;height:52px;border-radius:14px}#bw-trigger svg{width:22px;height:22px}#bw-emoji-panel.show{grid-template-columns:repeat(7,1fr)}}'
     ].join('');
     document.head.appendChild(s);
   }
@@ -559,6 +570,9 @@
             '<div id="bw-status"><span id="bw-statusdot"></span><span>' + t('online') + '</span></div>' +
           '</div>' +
           '<div id="bw-hbtns">' +
+            '<button class="bw-hbtn" id="bw-fullscreen" title="Fullscreen">' +
+              '<svg viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>' +
+            '</button>' +
             '<button class="bw-hbtn" id="bw-newchat" title="' + t('new_chat') + '">' +
               '<svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>' +
             '</button>' +
@@ -585,7 +599,9 @@
           '<div id="bw-uhint">' + t('upload_hint') + '</div>' +
           '<div id="bw-uprog"><div id="bw-uprogbar"></div></div>' +
         '</div>' +
+        '<div id="bw-emoji-panel"></div>' +
         '<div id="bw-inputarea">' +
+          '<button id="bw-emoji-btn" title="Emoji">😊</button>' +
           '<textarea id="bw-input" placeholder="' + t('placeholder') + '" rows="1"></textarea>' +
           '<button id="bw-send">' +
             '<svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>' +
@@ -683,10 +699,16 @@
     return div;
   }
 
-  function showTyping(show) {
+  function showTyping(show, writerName) {
     var el = document.getElementById('bw-typing');
+    var label = document.getElementById('bw-tlabel');
     el.classList.toggle('show', show);
-    if (show) { var m = document.getElementById('bw-msgs'); m.scrollTop = m.scrollHeight; }
+    if (show) {
+      // Show who is writing: "BetonWin AI is writing" or "María is writing"
+      var name = writerName || 'BetonWin AI';
+      label.textContent = name + ' ' + t('typing').toLowerCase();
+      var m = document.getElementById('bw-msgs'); m.scrollTop = m.scrollHeight;
+    }
   }
 
   function showPlayerIdForm(show) {
@@ -931,7 +953,7 @@ function apiVerify(playerId) {
     STATE.phase = 'ESCALATING';
     showQuickActions(false);
     addMessage('bot', t('escalating'));
-    showTyping(true);
+    showTyping(true, 'BetonWin AI');
     trackEvent('escalation', { reason: reason });
     setInputDisabled(true);
 
@@ -987,7 +1009,7 @@ function apiVerify(playerId) {
     addMessage('user', text);
     document.getElementById('bw-input').value = '';
     document.getElementById('bw-input').style.height = 'auto';
-    showTyping(true);
+    showTyping(true, STATE._agentName || t('live_agent'));
     setInputDisabled(true);
 
     n8nCall(CONFIG.ENDPOINTS.AGENT_REPLY, {
@@ -1024,12 +1046,19 @@ function apiVerify(playerId) {
       n8nCall(CONFIG.ENDPOINTS.AGENT_POLL, { ticket_id: ticketId, since: lastCommentTs })
         .then(function (res) {
           if (res.comments && res.comments.length > 0) {
+            showTyping(false);
             res.comments.forEach(function (c) {
-              addAgentMessage(c.author || t('live_agent'), c.body);
+              var agentName = c.author || t('live_agent');
+              addAgentMessage(agentName, c.body);
+              // Update header with real agent name
+              document.getElementById('bw-botname').textContent = agentName;
+              // Remember agent name for typing indicator
+              STATE._agentName = agentName;
             });
             lastCommentTs = Date.now();
           }
-          if (res.status === 'closed' || res.status === 'solved') {
+          // Only close on truly closed — NOT on pending/solved/open
+          if (res.status === 'closed') {
             stopAgentPolling();
             addAgentMessage(t('live_agent'), t('agent_closed'));
             STATE.phase = 'AGENT_CLOSED';
@@ -1090,7 +1119,7 @@ function apiVerify(playerId) {
     trackEvent('message_sent', { length: text.length });
     document.getElementById('bw-input').value = '';
     document.getElementById('bw-input').style.height = 'auto';
-    showTyping(true);
+    showTyping(true, 'BetonWin AI');
     setInputDisabled(true);
 
     // Safety: auto-recover if stuck for 30s (network hang, unhandled error)
@@ -1238,7 +1267,7 @@ function apiVerify(playerId) {
     addMessage('user', id);
     setInputDisabled(true);
     addMessage('bot', t('deposit_checking'));
-    showTyping(true);
+    showTyping(true, 'BetonWin AI');
     STATE.phase = 'DEPOSIT_CHECKING';
 
     apiVerify(id)
@@ -1285,6 +1314,39 @@ function apiVerify(playerId) {
     document.getElementById('bw-input').addEventListener('input', function () {
       this.style.height = 'auto';
       this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+    });
+
+    // Fullscreen toggle
+    var isFullscreen = false;
+    document.getElementById('bw-fullscreen').addEventListener('click', function () {
+      isFullscreen = !isFullscreen;
+      document.getElementById('bw-window').classList.toggle('bw-fullscreen', isFullscreen);
+      this.innerHTML = isFullscreen
+        ? '<svg viewBox="0 0 24 24"><path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"/></svg>'
+        : '<svg viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>';
+    });
+
+    // Emoji picker
+    var emojiPanel = document.getElementById('bw-emoji-panel');
+    var EMOJIS = ['👍','👎','😊','😂','😢','😡','🙏','❤️','🔥','⭐','✅','❌','💰','🎰','🎲','💳','🏦','📧','📞','⏳','🤔','👋','🎁','🍀'];
+    emojiPanel.innerHTML = EMOJIS.map(function (e) {
+      return '<button class="bw-emo" data-e="' + e + '">' + e + '</button>';
+    }).join('');
+    document.getElementById('bw-emoji-btn').addEventListener('click', function () {
+      emojiPanel.classList.toggle('show');
+    });
+    emojiPanel.addEventListener('click', function (e) {
+      var btn = e.target.closest('.bw-emo');
+      if (!btn) return;
+      var input = document.getElementById('bw-input');
+      input.value += btn.getAttribute('data-e');
+      input.focus();
+      emojiPanel.classList.remove('show');
+    });
+    document.addEventListener('click', function (e) {
+      if (!e.target.closest('#bw-emoji-panel') && !e.target.closest('#bw-emoji-btn')) {
+        emojiPanel.classList.remove('show');
+      }
     });
 
     // Quick deposit button
@@ -1434,7 +1496,7 @@ function apiVerify(playerId) {
     if (CONFIG.ACCEPTED_TYPES.indexOf(file.type) === -1) { addMessage('bot', t('err_file_type')); return; }
 
     addMessage('user', '📎 ' + file.name);
-    showTyping(true);
+    showTyping(true, STATE._agentName || t('live_agent'));
 
     // Upload via presigned URL then notify agent
     n8nCall(CONFIG.ENDPOINTS.PRESIGNED, {
