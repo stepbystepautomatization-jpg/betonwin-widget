@@ -240,8 +240,17 @@
     lastSendTs: 0,
     humanRequestCount: 0,     // track "talk to human" requests
     ticketId:   null,         // Zendesk ticket ID for live agent
-    agentPollTimer: null      // polling for agent replies
+    agentPollTimer: null,     // polling for agent replies
+    sessionId: null           // UUID for analytics correlation
   };
+
+  function generateUUID() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+      var r = Math.random() * 16 | 0;
+      return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+    });
+  }
+
   var MAX_MSG_LENGTH = 1000;
   var MAX_MESSAGES   = 100;
   var SEND_COOLDOWN  = 1000;
@@ -837,7 +846,11 @@
     method = method || 'POST';
     var url  = CONFIG.N8N_BASE + endpoint;
     var opts = { method: method, headers: { 'Content-Type': 'application/json' } };
-    if (method !== 'GET') { opts.body = JSON.stringify(body); }
+    if (method !== 'GET') {
+      var payload = body || {};
+      if (STATE.sessionId) { payload.session_id = STATE.sessionId; }
+      opts.body = JSON.stringify(payload);
+    }
     return fetch(url, opts).then(function (r) {
       if (!r.ok) { throw new Error('n8n HTTP ' + r.status); }
       return r.json();
@@ -1544,6 +1557,7 @@ function apiVerify(playerId) {
   // INIT
   // ============================================================
   function init() {
+    STATE.sessionId = generateUUID();
     injectCSS();
     buildHTML();
     bindEvents();
