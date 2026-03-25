@@ -1077,6 +1077,7 @@ function apiVerify(playerId) {
       }
       n8nCall(CONFIG.ENDPOINTS.AGENT_POLL, { ticket_id: ticketId, since: lastCommentTs })
         .then(function (res) {
+          console.log('[BetonWin] poll #' + pollCount + ':', res.status, 'comments:', (res.comments||[]).length);
           if (res.comments && res.comments.length > 0) {
             showTyping(false);
             res.comments.forEach(function (c) {
@@ -1102,7 +1103,7 @@ function apiVerify(playerId) {
             setTimeout(function () { showCSAT(); }, 1000);
           }
         })
-        .catch(function () { /* silently retry next interval */ });
+        .catch(function (err) { console.warn('[BetonWin] poll error:', err.message); });
     }, AGENT_POLL_INTERVAL);
   }
 
