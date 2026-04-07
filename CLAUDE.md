@@ -38,6 +38,35 @@ WIDGET (frontend)  →  n8n (backend AI)  →  Pinecone (KB vettoriale)  →  Go
 - **CDN**: `https://cdn.jsdelivr.net/gh/stepbystepautomatization-jpg/betonwin-widget@main/widget.js`
 - **Purge cache dopo push**: `https://purge.jsdelivr.net/gh/stepbystepautomatization-jpg/betonwin-widget@main/widget.js`
 
+### Deploy via Google Tag Manager (GTM)
+Il widget viene iniettato nei siti tramite GTM con tag HTML personalizzato.
+Usa `@main` nel CDN URL → si aggiorna automaticamente dopo push + purge CDN.
+
+**Tag HTML (uguale per tutti i brand):**
+```html
+<script>
+(function() {
+  if (document.getElementById('__beton_widget__')) return;
+  var d = document.createElement('div');
+  d.id = '__beton_widget__';
+  document.body.appendChild(d);
+  var s = document.createElement('script');
+  s.src = 'https://cdn.jsdelivr.net/gh/stepbystepautomatization-jpg/betonwin-widget@main/widget.js';
+  document.body.appendChild(s);
+})();
+</script>
+```
+**Attivatore**: All Pages — Visualizzazione di pagina
+
+**Brand deployati:**
+| Brand | GTM Container | Stato |
+|---|---|---|
+| BetonWin (beton.win) | `https://tagmanager.google.com/#/container/accounts/6321145514/containers/233651952/workspaces/7` | ATTIVO |
+| Brand 2 (da configurare) | TBD | DA CONFIGURARE |
+
+**IMPORTANTE**: Mai usare `@COMMIT_HASH` nel tag — usare sempre `@main` per auto-update.
+**IMPORTANTE**: Dopo ogni `git push`, fare sempre `purge CDN` per aggiornare il widget su tutti i brand.
+
 ### Configurazione (CONFIG)
 ```
 N8N_BASE: https://n8nbeton.online
@@ -83,6 +112,40 @@ CHAT → ESCALATING → LIVE_AGENT → AGENT_CLOSED
 - **Session UUID** (v4) per analytics correlation
 - **Auto-detect Player ID** da: localStorage, cookies, DOM, `window.__USER__`
 
+### Design e Brand
+**Theme**: Dark teal con accent verde neon
+**Font**: Inter (caricato async via preload)
+
+**Palette colori (variabile `C` in widget.js):**
+| Variabile | Valore | Uso |
+|---|---|---|
+| `bg` | `#03242D` | Background pagina |
+| `widget` | `#042a33` | Background widget panel |
+| `header` | `#03242D` | Header widget |
+| `green` | `#2DEC76` | Primary accent (bottoni, link, badge) |
+| `greenDark` | `#25cc65` | Hover state |
+| `greenGlow` | `rgba(45,236,118,0.08)` | Glow leggero |
+| `greenGlowB` | `rgba(45,236,118,0.18)` | Glow forte |
+| `text` | `#e8f0f2` | Testo principale |
+| `textMuted` | `#6b8f9a` | Testo secondario |
+| `userBubble` | `#0a3d2a` | Bubble messaggio utente (verde scuro) |
+| `botBubble` | `#042e38` | Bubble messaggio bot (teal scuro) |
+| `input` | `#042a33` | Background input field |
+| `danger` | `#f87171` | Errori |
+| `warning` | `#fbbf24` | Warning |
+
+**Componenti UI:**
+- Trigger button: cerchio 60x60px in basso a destra, icona chat SVG, pulse animation verde
+- Chat panel: 400x600px (desktop), fullscreen (mobile), border-radius 20px, shadow con glow verde
+- Header: logo + nome bot + status "Online" + bottoni fullscreen/close
+- Message bubbles: border-radius 16px, max-width 85%, markdown rendering (bold, links, lists)
+- Input: textarea auto-resize, bottone invio verde, emoji picker toggle
+- Typing indicator: 3 dot bounce animation con nome agente
+- Upload area: drag & drop zone, progress bar verde
+- CSAT: 5 stelle cliccabili dopo chiusura ticket
+- Notification badge: cerchio rosso con contatore
+- Fullscreen: expande a 100vw x 100vh
+
 ### Sicurezza widget
 - Rate limit: 1 msg/sec, max 1000 chars
 - Max 100 messaggi per sessione
@@ -102,10 +165,13 @@ CHAT → ESCALATING → LIVE_AGENT → AGENT_CLOSED
 Webhook → Extract Query → Router (categorizza + rileva lingua) → Category Switch → Agente specializzato → Format Response → Respond
 ```
 
-### Router
-Il Router analizza il messaggio e determina:
-1. **Lingua** (en/es/it/pt) — basato su phrase matching
-2. **Categoria** — basato su keyword scoring con priority rules
+### Router (AI-Powered — Aprile 2026)
+Il Router usa un **LLM (Gemini 2.0 Flash via OpenRouter)** per classificare ogni messaggio:
+1. **Lingua** (en/es/it/pt) — rilevata dal testo reale, NON dal campo `lang` del widget
+2. **Categoria** — classificata da AI (deposits/withdrawals/bonuses/verification/account/technical/sports/casino/balance/general)
+3. **Fallback keyword** — se il LLM fallisce, usa keyword matching come backup
+- Il Router AI ignora il parametro `lang` del widget e analizza il testo → 100% accurato anche con cambio lingua mid-conversation
+- Modello: `google/gemini-2.0-flash-001` (~200ms, costo minimo)
 
 ### 10 Agenti specializzati
 Ogni agente ha: LLM (OpenRouter), Memory (buffer window), Pinecone KB (namespace specifico), System Prompt con REGLAS.

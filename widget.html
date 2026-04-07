@@ -1,33 +1,166 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BetonBot Widget — Standalone Demo</title>
+  <title>BetonWin — Demo Widget v4.0</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       background: #03242D;
       color: #e8f0f2;
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       min-height: 100vh;
+      overflow-x: hidden;
+    }
+    .hero {
+      min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
       flex-direction: column;
-      gap: 16px;
+      gap: 24px;
+      padding: 40px 20px;
+      position: relative;
     }
-    h1 { font-size: 24px; font-weight: 700; color: #2DEC76; }
-    p  { color: #6b8f9a; font-size: 14px; }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle at 50% 50%, rgba(45,236,118,0.03) 0%, transparent 50%);
+      animation: pulse 8s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 0.5; }
+      50% { transform: scale(1.1); opacity: 1; }
+    }
+    .logo { width: 80px; height: 80px; position: relative; z-index: 1; }
+    h1 {
+      font-size: 32px;
+      font-weight: 700;
+      color: #2DEC76;
+      position: relative;
+      z-index: 1;
+      text-align: center;
+    }
+    .version {
+      font-size: 13px;
+      color: #6b8f9a;
+      background: rgba(45,236,118,0.08);
+      padding: 4px 12px;
+      border-radius: 20px;
+      border: 1px solid rgba(45,236,118,0.15);
+      position: relative;
+      z-index: 1;
+    }
+    .subtitle {
+      color: #6b8f9a;
+      font-size: 15px;
+      text-align: center;
+      max-width: 400px;
+      line-height: 1.6;
+      position: relative;
+      z-index: 1;
+    }
+    .test-section {
+      position: relative;
+      z-index: 1;
+      margin-top: 20px;
+      background: rgba(45,236,118,0.04);
+      border: 1px solid rgba(45,236,118,0.1);
+      border-radius: 16px;
+      padding: 24px;
+      max-width: 480px;
+      width: 100%;
+    }
+    .test-section h3 {
+      font-size: 14px;
+      color: #2DEC76;
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
+    .test-btn {
+      display: block;
+      width: 100%;
+      padding: 10px 16px;
+      margin-bottom: 8px;
+      background: rgba(45,236,118,0.06);
+      border: 1px solid rgba(45,236,118,0.12);
+      border-radius: 10px;
+      color: #c8e0e6;
+      font-size: 13px;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.2s;
+    }
+    .test-btn:hover {
+      background: rgba(45,236,118,0.12);
+      border-color: rgba(45,236,118,0.25);
+      color: #e8f0f2;
+    }
+    .test-btn:last-child { margin-bottom: 0; }
+    .arrow { float: right; color: #2DEC76; opacity: 0.5; }
+    .footer {
+      position: relative;
+      z-index: 1;
+      margin-top: 32px;
+      font-size: 12px;
+      color: #4a6d78;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
-  <h1>BetonWin Support v2.0</h1>
-  <p>Click the button in the bottom right corner to start</p>
+  <div class="hero">
+    <img src="logo-160.png" alt="BetonWin" class="logo" onerror="this.style.display='none'">
+    <h1>BetonWin Support</h1>
+    <span class="version">v4.0 — AI + Live Agent</span>
+    <p class="subtitle">Click the button in the bottom right corner to start chatting, or try one of the test questions below.</p>
 
-  <!-- Widget container -->
+    <div class="test-section">
+      <h3>Test Questions</h3>
+      <button class="test-btn" onclick="sendTest('What are BetonWin privacy policies?')">What are BetonWin privacy policies? <span class="arrow">EN</span></button>
+      <button class="test-btn" onclick="sendTest('Is this a scam? Are the games manipulated?')">Is this a scam? Are the games manipulated? <span class="arrow">EN</span></button>
+      <button class="test-btn" onclick="sendTest('I am a Streamer and I want to collaborate.')">I am a Streamer and I want to collaborate <span class="arrow">EN</span></button>
+      <button class="test-btn" onclick="sendTest('Me descontaron mi plata! donde está?')">Me descontaron mi plata! <span class="arrow">ES</span></button>
+      <button class="test-btn" onclick="sendTest('Puedo cambiar mi nombre de perfil?')">Puedo cambiar mi nombre? <span class="arrow">ES</span></button>
+      <button class="test-btn" onclick="sendTest('Soy de Argentina, deposité hace 2 horas y no aparece')">Deposité hace 2 horas y no aparece <span class="arrow">ES</span></button>
+      <button class="test-btn" onclick="sendTest('Como funciona el programa de fidelidad?')">Programa de fidelidad? <span class="arrow">ES</span></button>
+      <button class="test-btn" onclick="sendTest('Soy VIP y mañana es mi cumpleaños, quiero mi bono')">Soy VIP, quiero mi bono de cumpleaños <span class="arrow">ES</span></button>
+      <button class="test-btn" onclick="sendTest('Ciao, come posso fare un deposito?')">Come posso fare un deposito? <span class="arrow">IT</span></button>
+    </div>
+
+    <p class="footer">BetonWin Support Widget v4.0 — 10 AI Agents — 9 Pinecone Namespaces — 172K chars KB</p>
+  </div>
+
   <div id="__beton_widget__"></div>
-
-  <!-- Widget script -->
   <script src="widget.js"></script>
+  <script>
+    function sendTest(msg) {
+      // Open widget if closed
+      var trigger = document.getElementById('bw-trigger');
+      var panel = document.getElementById('bw-panel');
+      if (trigger && panel && panel.style.display !== 'flex') {
+        trigger.click();
+      }
+      // Wait for widget to open, then type and send
+      setTimeout(function() {
+        var input = document.getElementById('bw-input');
+        if (input) {
+          input.value = msg;
+          input.dispatchEvent(new Event('input'));
+          // Find and click send button
+          var sendBtn = document.getElementById('bw-send');
+          if (sendBtn) sendBtn.click();
+        }
+      }, 300);
+    }
+  </script>
 </body>
 </html>

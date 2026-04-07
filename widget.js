@@ -949,7 +949,12 @@
     es: ['hola','gracias','buenos','retiro','retirar','también','quiero','cuánto','cuándo',
          'dinero','ayuda','cuenta','no he recibido','no ha llegado','por favor',
          'cómo','estoy','tengo','puedo','dónde','puedo ver','no puedo','necesito','quisiera',
-         'como funciona','cuanto tarda','cuanto cuesta','como hago','que es','quiero saber'],
+         'como funciona','cuanto tarda','cuanto cuesta','como hago','que es','quiero saber',
+         'cambiar','nombre','perfil','plata','descontaron','deposité','deposite',
+         'retiro','bono','juego','pagina','celular','contraseña','saldo','cumpleaños',
+         'porque','cuando','donde','como','mi cuenta','no me deja','que paso',
+         'mañana','congelo','funciona','aparece','pendiente','cancelado','rechazado',
+         'verificar','verificacion','documento','cerrar','abrir','soy vip','el sitio'],
     pt: ['olá','ola','obrigado','obrigada','saque','sacar','também','quero','quanto',
          'dinheiro','não recebi','não chegou',
          'como posso','estou','tenho','onde posso','não consigo','preciso de',
@@ -1398,7 +1403,9 @@ function apiVerify(playerId) {
         // Detect language rejection from n8n and retry in Spanish as fallback
         var rejectPatterns = ['non offriamo supporto', 'no ofrecemos soporte', 'no ofrezco soporte',
           'do not offer support', 'não oferecemos suporte', 'riformulare', 'reformule',
-          'not offer assistance', 'currently not available in', 'parlo solo'];
+          'not offer assistance', 'currently not available in', 'parlo solo',
+          'can only answer in', 'solo puedo responder en', 'posso rispondere solo in',
+          'only answer in spanish', 'only respond in spanish'];
         var isRejected = rejectPatterns.some(function (p) { return raw.toLowerCase().indexOf(p) !== -1; });
         if (isRejected) {
           // Retry with Spanish-wrapped message so n8n AI accepts it
