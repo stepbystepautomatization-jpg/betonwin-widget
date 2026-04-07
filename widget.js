@@ -766,8 +766,123 @@
   // 8. KNOWLEDGE BASE — Direct Google Drive search (no n8n)
   // ============================================================
 
+  // Keyword translation map: EN/IT/PT → Spanish equivalents for KB search
+  // KB content is primarily in Spanish, so we translate queries to match
+  var KB_TRANSLATE = {
+    // EN → ES
+    'privacy policy': 'seguridad proteccion datos informacion personal privacidad',
+    'privacy': 'seguridad proteccion datos informacion personal privacidad',
+    'personal data': 'datos personales seguridad proteccion informacion',
+    'my information': 'seguridad proteccion datos informacion personal',
+    'my data': 'datos personales seguridad proteccion informacion',
+    'register': 'registrarse registro cuenta',
+    'registration': 'registro registrarse cuenta',
+    'sign up': 'registrarse registro',
+    'create account': 'crear cuenta registro',
+    'refund': 'reembolso devolucion retiro rechazado dinero',
+    'refund timeframes': 'reembolso devolucion retiro tiempo plazo dinero',
+    'withdraw': 'retiro retirar',
+    'withdrawal': 'retiro retirar',
+    'deposit': 'deposito depositar',
+    'bonus': 'bono bonos promocion',
+    'terms and conditions': 'terminos condiciones',
+    'terms': 'terminos condiciones',
+    'change language': 'cambiar idioma',
+    'language': 'idioma',
+    'scam': 'estafa casino regulacion licencia juego justo seguridad',
+    'manipulated': 'manipulados casino regulacion licencia juego justo RNG',
+    'fair play': 'juego justo RNG casino regulacion licencia',
+    'rigged': 'manipulados estafa casino regulacion RNG juego justo',
+    'rng': 'RNG generador numeros aleatorios juego justo casino regulacion',
+    'collaborate': 'colaboracion partnership afiliado programa',
+    'collaboration': 'colaboracion partnership afiliado programa',
+    'streamer': 'streamer colaboracion partnership afiliado programa',
+    'partnership': 'partnership colaboracion afiliado programa',
+    'sponsor': 'patrocinio colaboracion partnership afiliado programa',
+    'password': 'contraseña clave',
+    'forgot password': 'olvide contraseña recuperar clave',
+    'reset password': 'restablecer contraseña recuperar clave',
+    'login': 'iniciar sesion acceder cuenta',
+    'log in': 'iniciar sesion acceder cuenta',
+    'verification': 'verificacion KYC identidad',
+    'kyc': 'verificacion KYC identidad documento',
+    'identity': 'identidad verificacion KYC',
+    'payment': 'pago metodo deposito',
+    'payment method': 'metodo de pago depositar',
+    'crypto': 'criptomonedas crypto bitcoin',
+    'bitcoin': 'bitcoin criptomonedas crypto',
+    'bet': 'apuesta apostar',
+    'sports betting': 'apuestas deportivas',
+    'casino': 'casino juegos',
+    'slots': 'tragamonedas slots casino',
+    'live dealer': 'crupier en vivo casino',
+    'responsible gambling': 'juego responsable limites',
+    'self-exclusion': 'autoexclusion juego responsable',
+    'limit': 'limite limites juego responsable',
+    'close account': 'cerrar cuenta cierre',
+    'delete account': 'eliminar cuenta cierre datos',
+    // IT → ES
+    'politica sulla privacy': 'seguridad proteccion datos informacion personal privacidad',
+    'dati personali': 'datos personales seguridad proteccion informacion',
+    'le mie informazioni': 'seguridad proteccion datos informacion personal',
+    'registrazione': 'registro registrarse cuenta',
+    'come registrarsi': 'registrarse registro cuenta',
+    'rimborso': 'reembolso devolucion retiro rechazado dinero',
+    'prelievo': 'retiro retirar',
+    'deposito': 'deposito depositar',
+    'bonus': 'bono bonos promocion',
+    'termini e condizioni': 'terminos condiciones',
+    'cambiare lingua': 'cambiar idioma',
+    'truffa': 'estafa casino regulacion licencia juego justo seguridad',
+    'giochi manipolati': 'manipulados casino regulacion licencia juego justo RNG',
+    'collaborazione': 'colaboracion partnership afiliado programa',
+    'password dimenticata': 'olvide contraseña recuperar clave',
+    'verifica': 'verificacion KYC identidad',
+    'metodo di pagamento': 'metodo de pago depositar',
+    'scommesse sportive': 'apuestas deportivas',
+    'gioco responsabile': 'juego responsable limites',
+    'chiudere account': 'cerrar cuenta cierre',
+    // PT → ES
+    'politica de privacidade': 'seguridad proteccion datos informacion personal privacidad',
+    'dados pessoais': 'datos personales seguridad proteccion informacion',
+    'minhas informacoes': 'seguridad proteccion datos informacion personal',
+    'cadastro': 'registro registrarse cuenta',
+    'como me cadastrar': 'registrarse registro cuenta',
+    'reembolso': 'reembolso devolucion',
+    'saque': 'retiro retirar',
+    'deposito': 'deposito depositar',
+    'termos e condicoes': 'terminos condiciones',
+    'mudar idioma': 'cambiar idioma',
+    'golpe': 'estafa casino regulacion licencia juego justo seguridad',
+    'jogos manipulados': 'manipulados casino regulacion licencia juego justo RNG',
+    'colaboracao': 'colaboracion partnership afiliado programa',
+    'esqueci a senha': 'olvide contraseña recuperar clave',
+    'verificacao': 'verificacion KYC identidad',
+    'metodo de pagamento': 'metodo de pago depositar',
+    'apostas esportivas': 'apuestas deportivas',
+    'jogo responsavel': 'juego responsable limites',
+    'fechar conta': 'cerrar cuenta cierre'
+  };
+
+  // Translate a user query into Spanish keywords for KB search
+  function translateQueryForKB(query) {
+    var lower = query.toLowerCase();
+    var translations = [];
+    // Check longest phrases first (sort by length descending)
+    var keys = Object.keys(KB_TRANSLATE).sort(function (a, b) { return b.length - a.length; });
+    keys.forEach(function (key) {
+      if (lower.indexOf(key) !== -1) {
+        translations.push(KB_TRANSLATE[key]);
+      }
+    });
+    if (translations.length > 0) {
+      return translations.join(' ');
+    }
+    return null; // no translation found, use original
+  }
+
   // GET request to Apps Script / mock KB (CORS-friendly — no preflight triggered)
-  function searchKB(query) {
+  function searchKBRaw(query) {
     var url = CONFIG.KB_URL + '?q=' + encodeURIComponent(query) + '&lang=' + lang + '&max=3';
     return fetch(url, { redirect: 'follow' }).then(function (r) {
       if (!r.ok) { throw new Error('KB ' + r.status); }
@@ -775,9 +890,54 @@
     });
   }
 
+  // Smart KB search: original query + translated Spanish query + FAQ fallback, merged & deduplicated
+  function searchKB(query) {
+    var translated = translateQueryForKB(query);
+    var searches = [];
+
+    // Always search with original query
+    searches.push(searchKBRaw(query).catch(function () { return { results: [] }; }));
+
+    // If we have a translation, search with translated keywords too
+    if (translated) {
+      searches.push(searchKBRaw(translated).catch(function () { return { results: [] }; }));
+    }
+
+    // Always include a FAQ fallback search to ensure the main FAQ doc is found
+    searches.push(searchKBRaw('FAQ preguntas frecuentes atencion cliente').catch(function () { return { results: [] }; }));
+
+    return Promise.all(searches).then(function (results) {
+      var seen = {};
+      var merged = [];
+      // Priority: translated results first, then original, then FAQ fallback
+      var allResults = [];
+      // translated results (index 1 if exists)
+      if (translated && results[1]) { allResults = allResults.concat((results[1].results) || []); }
+      // original results (index 0)
+      allResults = allResults.concat((results[0].results) || []);
+      // FAQ fallback (last index)
+      var faqResults = (results[results.length - 1].results) || [];
+      allResults = allResults.concat(faqResults);
+
+      allResults.forEach(function (r) {
+        if (!seen[r.name]) {
+          seen[r.name] = true;
+          merged.push(r);
+        }
+      });
+      return { results: merged.slice(0, 5), query: query, count: merged.length };
+    });
+  }
+
   // Language words for auto-detecting language from typed text
   // IMPORTANT: avoid shared words between languages to prevent false positives
   var LANG_WORDS = {
+    en: ['hello','please','thank you','thanks','how do i','how can i','what is','where is',
+         'i want','i need','help me','my account','my deposit','my withdrawal','my bonus',
+         'password','register','sign up','refund','privacy','scam','manipulated','rigged',
+         'collaborate','streamer','language','withdraw','payment','verify','verification',
+         'fair play','terms and conditions','responsible gambling','close account','delete',
+         'what happens','how to','can i','is this','are the','i can\'t','doesn\'t work'],
     it: ['ciao','grazie','buongiorno','buonasera','prelievo','prelevare','perché','perche','voglio',
          'questo','questa','subito','ancora','sono','mia','aiuto',
          'depositi','soldi','conto','non ho ricevuto','non è arrivato',
@@ -799,7 +959,7 @@
   // Auto-detect language from user message text (overrides browser lang when confident)
   function detectLangFromText(text) {
     var lower = text.toLowerCase();
-    var scores = { it: 0, es: 0, pt: 0 };
+    var scores = { en: 0, it: 0, es: 0, pt: 0 };
     Object.keys(scores).forEach(function (l) {
       LANG_WORDS[l].forEach(function (w) {
         if (lower.indexOf(w) !== -1) { scores[l]++; }
