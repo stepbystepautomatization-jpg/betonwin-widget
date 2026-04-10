@@ -482,12 +482,8 @@
       addMessage('bot', t('human_escalate'));
       startEscalation(STATE.urgency === 'high' ? 'T-07_frustrated_human_request' : 'T-06_human_request_x2');
     } else {
-      // T-05: First request → interactive message with choice
-      var choiceMsg = lang === 'en' ? 'All agents are currently busy. I\'ll try to help, but if you prefer, I can connect you to a live agent. Would you like to continue with me or switch to an agent?' :
-        lang === 'it' ? 'Tutti gli agenti sono occupati. Posso provare ad aiutarti, ma se preferisci posso collegarti con un agente. Vuoi continuare con me o preferisci un agente?' :
-        lang === 'pt' ? 'Todos os agentes estão ocupados. Posso tentar ajudar, mas se preferir, posso conectá-lo a um agente. Quer continuar comigo ou prefere um agente?' :
-        'Todos los agentes están ocupados. Puedo intentar ayudarte, pero si prefieres, puedo conectarte con un agente. ¿Quieres continuar conmigo o prefieres un agente?';
-      addMessage('bot', choiceMsg);
+      // T-05: First request → bot tries to help, acknowledges the request
+      addMessage('bot', botMessage);
     }
   }
 
