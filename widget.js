@@ -238,10 +238,15 @@
     messages:   [],
     busy:       false,
     lastSendTs: 0,
-    humanRequestCount: 0,     // track "talk to human" requests
+    humanRequestCount: 0,     // T-05/T-06: track "talk to human" requests
     ticketId:   null,         // Zendesk ticket ID for live agent
     agentPollTimer: null,     // polling for agent replies
-    sessionId: null           // UUID for analytics correlation
+    sessionId: null,          // UUID for analytics correlation
+    sessionStartTime: null,   // T-19: session start timestamp
+    urgency: 'low',           // T-07: sentiment urgency (low/high)
+    inactivityTimer: null,    // T-17: inactivity timeout
+    inactivityReminded: false, // T-17: already sent reminder
+    unhappyCount: 0           // T-18: "wrong answer" counter
   };
 
   function generateUUID() {
@@ -254,10 +259,13 @@
   var MAX_MSG_LENGTH = 1000;
   var MAX_MESSAGES   = 100;
   var SEND_COOLDOWN  = 1000;
-  var HUMAN_REQUEST_THRESHOLD = 3;
+  var HUMAN_REQUEST_THRESHOLD = 2;    // T-06: escalate after 2 requests (was 3)
   var AGENT_POLL_INTERVAL = 5000;
   var AGENT_POLL_MAX = 360;
   var PROACTIVE_DELAY = 30000;    // show proactive message after 30s
+  var INACTIVITY_REMINDER_MS = 120000;  // T-17: remind after 120s
+  var INACTIVITY_CLOSE_MS = 240000;     // T-17: close after 240s
+  var SESSION_MAX_MS = 600000;          // T-19: 10 minutes max session
   var NOTIF_SOUND_URL = 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1bZ3N9gnqEi46Oj4uFfnRoW1BFQkVOXG53goqRlZeSjIOAd21kXFhYXWRveoaOk5aXlI6HgXpya2VfXWBka3aBipKXmZiVkIqEfnhybGhjY2dsdoGKkpiamJaTjoiCfHZwamZlZ2tygIqSmJqYlpKNh4F8dnBqZmVnaHCBi5OYmpeTkI2Kh4N+eXRua2lrbXN+iJCWmJaTkI2KiIWBfHdybm1sb3R7hIySlZaTkI6MioiFgnx4dHFvcHJ2fIWNkpWUk5COjIqIhYJ/e3d0cnF0eH2EjJGUlJKQjouKiIaEgn55dnRzdHd7gIaPk5WUkpCOjIqJh4WCf3x5d3Z2eXyBh42Sk5OSkI6MioiGhIF+e3l3dnd5fIKHjZGTkpKQjo2LiYeFgn98enl4eXt+goiNkZOSkI+NjIuJh4WDgH17enl5e32Bg4iNkJKRkI6NjIuJh4WDgH58e3p6e32AhIiNkJGRj46NjIqJh4aDgX98fHt7fH6BhYmNkJGQj46NjIqIh4WDgX9+fHx8fX+ChomMj5CQj46NjIqIhoWDgYB+fXx9fn+ChomMj5CQj46Mi4qIhoWDgX9+fXx9fn+Bg4eLjo+Pj46NjIqIhoWDgX9+fXx8fX6AgoWIi46Pj4+OjYuKiIaFg4GAfn18fH1+gIKFiIuOj4+Pjo2LioiGhYOBgH5+fX1+f4GDhomLjo+Pj46Ni4qIhoWDgYB+fn19fn+BgoWIi42Oj4+OjYuKiIaFg4F/fn19fX5/gYOFiIuNjo6Ojo2LioiGhIOBf35+fX1+f4GDhYiLjY6Ojo2Mi4mIhoSDgX9+fn19fn+BgoSHioyNjo6NjYuKiIaEg4F/fn59fX5/gIKEh4qMjY6OjY2LioiGhIOBf35+fX1+f4CCBIeKjI2NjY2Ni4qIhoSDgX9+fn19fn+AgoSHioyNjY2NjIuJiIaEg4GAf35+fX5/gIKEh4qMjY2NjIyLiYiGhIOBgH9+fn1+f4CCBIeKjI2NjYyMi4mIhoSDgYB/fn5+fn+AgoSHiouNjY2MjIuJiIaEg4GAfn5+fn5/gIKEhomLjI2NjIyLiYiGhIOBgH5+fn5+f4CChIaJi4yNjYyMi4mIhoSDgYB+fn5+fn+AgoSGiYuMjI2MjIuJiIaEg4GAfn5+fn5/gIKEhomLjIyNjIuLiYiGhIOBgH5+fn5+f4CChIaJi4yMjIyLi4mIhoSEgYB/fn5+fn+AgoSGiYuMjIyMi4uJiIaEg4GAfn5+fn5/gIKEhomLjIyMi4uLiYiGhISDgYB/fn5+f3+AgoSGiYuMjIyLi4uJiIaFhIKBf35+fn5/gIGDhYiKi4yMjIuLi4mIhoWEgoF/fn5+fn9/gYOFiIqLjIyMi4uLiYiHhYSCgX9+fn5+f4CBg4WIiouMjIyLi4qJiIeFhIKBf35+fn5/f4GDhYeKi4uMjIuLi4mIh4WEgoF/fn5+fn9/gYOFh4qLi4yLi4uKiYeGhYSCgX9+fn5+f3+Bg4WHiouLjIuLi4qJh4aFhIKBf39+fn5/f4GDhYeJi4uLi4uLiomHhoWEgoGAf35+fn9/gIKDhYeJi4uLi4uLiomHhoWEgoGAf35+fn9/gIKDhYeJi4uLi4uLiomIhoWEgoGAf39+fn9/gIKDhYeJiouLi4uKiomIhoWEgoGAf39+fn9/gIKDhYeJiouLi4uKiomIhoWEg4KBf39+fn9/gIKDhYeJiouLi4uKiomIhoaFg4KBf39+fn9/gIGDBQ==';
 
   // Stubs for removed features (persistence/analytics)
@@ -321,22 +329,128 @@
   }
 
   // ============================================================
-  // ESCALATION — Legal = immediate, Human = AI-detected after 3x
+  // ESCALATION — Multi-trigger system (T-01 to T-19)
   // ============================================================
+
+  // T-01: Legal threats → CRITICAL (immediate escalation)
   var LEGAL_KEYWORDS = [
     'denuncio','denunciar','denuncia','vie legali','abogado','abogados','demanda judicial',
     'demanda legal','accion legal','acción legal','los voy a demandar',
     'lawyer','legal action','sue you','take legal','court','lawsuit','attorney',
     'avvocato','tribunale','querela','azione legale','vi denuncio',
-    'advogado','tribunal','processo judicial','ação legal','vou processar'
+    'advogado','tribunal','processo judicial','ação legal','vou processar',
+    // T-03: Regulator mentions → CRITICAL
+    'sernac','defensa del consumidor','regulador','authorities','autorità',
+    'agcm','procon','órgão competente','regulatory','autoridades'
   ];
 
+  // T-02: Fraud/scam accusations → CRITICAL (immediate escalation)
+  var FRAUD_KEYWORDS = [
+    'fraude','estafa','me estafaron','esto es un fraude','están estafando','empresa fraudulenta','sitio falso',
+    'fraud','scam','i\'ve been scammed','this is fraud','you\'re scamming','fraudulent company','fake site',
+    'frode','truffa','mi hanno truffato','questa è una frode','state truffando','azienda fraudolenta','sito falso',
+    'golpe','fui enganado','isso é fraude','estão enganando','empresa fraudulenta','site falso'
+  ];
+
+  // T-07: Frustration/negative sentiment keywords
+  var FRUSTRATION_KEYWORDS = [
+    // ES
+    'inútil','no sirve','basura','robo','ladrones','mentirosos','ridículo','una mierda',
+    'están robando','vergüenza','peor servicio','nunca más','quiero mi dinero',
+    // EN
+    'useless','garbage','theft','thieves','liars','ridiculous','bullshit',
+    'you\'re stealing','shame','worst service','never again','i want my money','terrible','pathetic',
+    // IT
+    'inutile','spazzatura','furto','ladri','bugiardi','ridicolo','schifezza',
+    'state rubando','vergogna','peggior servizio','mai più','rivoglio i miei soldi',
+    // PT
+    'lixo','roubo','ladrões','mentirosos','ridículo','uma merda',
+    'estão roubando','vergonha','pior serviço','nunca mais','quero meu dinheiro'
+  ];
+
+  // T-18: Client unhappy with bot answer
+  var UNHAPPY_KEYWORDS = [
+    'esto no es correcto','no es correcto','estás equivocado','respuesta incorrecta','eso no es verdad','no me sirve',
+    'this is wrong','you\'re wrong','you are wrong','that\'s incorrect','that is incorrect','not correct','doesn\'t help','does not help','useless answer',
+    'non è corretto','è sbagliato','risposta sbagliata','non è vero','non mi serve',
+    'isso não está certo','está errado','resposta errada','não está correto','não me ajuda'
+  ];
+
+  // T-01 + T-03: Detect legal threats and regulator mentions
   function detectLegalThreat(text) {
     var lower = text.toLowerCase();
     for (var i = 0; i < LEGAL_KEYWORDS.length; i++) {
-      if (lower.indexOf(LEGAL_KEYWORDS[i]) !== -1) { return true; }
+      if (lower.indexOf(LEGAL_KEYWORDS[i]) !== -1) { return 'legal_threat'; }
     }
     return false;
+  }
+
+  // T-02: Detect fraud/scam accusations
+  function detectFraudAccusation(text) {
+    var lower = text.toLowerCase();
+    for (var i = 0; i < FRAUD_KEYWORDS.length; i++) {
+      if (lower.indexOf(FRAUD_KEYWORDS[i]) !== -1) { return 'fraud_accusation'; }
+    }
+    return false;
+  }
+
+  // T-07: Detect frustration/negative sentiment
+  function detectFrustration(text) {
+    var lower = text.toLowerCase();
+    var signals = 0;
+    // Check keywords
+    for (var i = 0; i < FRUSTRATION_KEYWORDS.length; i++) {
+      if (lower.indexOf(FRUSTRATION_KEYWORDS[i]) !== -1) { signals++; }
+    }
+    // Check CAPS (more than 50% uppercase and length > 10)
+    if (text.length > 10 && text.replace(/[^A-Z]/g, '').length > text.length * 0.5) { signals += 2; }
+    // Check excessive punctuation (!!! or ???)
+    if ((text.match(/[!?]{3,}/g) || []).length > 0) { signals++; }
+    return signals >= 1;
+  }
+
+  // T-18: Detect client unhappy with answer
+  function detectUnhappy(text) {
+    var lower = text.toLowerCase();
+    for (var i = 0; i < UNHAPPY_KEYWORDS.length; i++) {
+      if (lower.indexOf(UNHAPPY_KEYWORDS[i]) !== -1) { return true; }
+    }
+    return false;
+  }
+
+  // T-17: Reset inactivity timer on every user action
+  function resetInactivityTimer() {
+    if (STATE.inactivityTimer) { clearTimeout(STATE.inactivityTimer); }
+    if (STATE.phase !== 'CHAT' && STATE.phase !== 'LIVE_AGENT') return;
+    STATE.inactivityReminded = false;
+    STATE.inactivityTimer = setTimeout(function () {
+      if (STATE.phase === 'CHAT' || STATE.phase === 'LIVE_AGENT') {
+        if (!STATE.inactivityReminded) {
+          STATE.inactivityReminded = true;
+          addMessage('bot', lang === 'en' ? 'Are you still there? Let me know if you need anything else.' :
+            lang === 'it' ? 'Sei ancora lì? Fammi sapere se hai bisogno di altro.' :
+            lang === 'pt' ? 'Você ainda está aí? Me avise se precisar de algo mais.' :
+            '¿Sigues ahí? Avísame si necesitas algo más.');
+          // Set close timer
+          STATE.inactivityTimer = setTimeout(function () {
+            if (STATE.phase === 'CHAT') {
+              addMessage('bot', lang === 'en' ? 'Chat closed due to inactivity. Click **New chat** to start again.' :
+                lang === 'it' ? 'Chat chiusa per inattività. Clicca **Nuova conversazione** per ricominciare.' :
+                lang === 'pt' ? 'Chat encerrado por inatividade. Clique em **Nova conversa** para recomeçar.' :
+                'Chat cerrado por inactividad. Haz clic en **Nueva conversación** para volver a empezar.');
+              STATE.phase = 'AGENT_CLOSED';
+              setInputDisabled(true);
+            }
+          }, INACTIVITY_CLOSE_MS - INACTIVITY_REMINDER_MS);
+        }
+      }
+    }, INACTIVITY_REMINDER_MS);
+  }
+
+  // T-19: Check session duration
+  function checkSessionDuration() {
+    if (!STATE.sessionStartTime) return false;
+    return (Date.now() - STATE.sessionStartTime) > SESSION_MAX_MS;
   }
 
   // AI-based detection: check if AI response acknowledges a human request
@@ -361,12 +475,19 @@
 
   function handleWantsHuman(botMessage) {
     STATE.humanRequestCount++;
-    if (STATE.humanRequestCount >= HUMAN_REQUEST_THRESHOLD) {
+    // T-07: If frustrated, threshold drops to 1 (immediate escalation on first human request)
+    var threshold = STATE.urgency === 'high' ? 1 : HUMAN_REQUEST_THRESHOLD;
+    if (STATE.humanRequestCount >= threshold) {
+      // T-06 (or T-07 fast-track): Escalate immediately
       addMessage('bot', t('human_escalate'));
-      startEscalation('human_request');
+      startEscalation(STATE.urgency === 'high' ? 'T-07_frustrated_human_request' : 'T-06_human_request_x2');
     } else {
-      // AI already responded — show its message
-      addMessage('bot', botMessage);
+      // T-05: First request → interactive message with choice
+      var choiceMsg = lang === 'en' ? 'All agents are currently busy. I\'ll try to help, but if you prefer, I can connect you to a live agent. Would you like to continue with me or switch to an agent?' :
+        lang === 'it' ? 'Tutti gli agenti sono occupati. Posso provare ad aiutarti, ma se preferisci posso collegarti con un agente. Vuoi continuare con me o preferisci un agente?' :
+        lang === 'pt' ? 'Todos os agentes estão ocupados. Posso tentar ajudar, mas se preferir, posso conectá-lo a um agente. Quer continuar comigo ou prefere um agente?' :
+        'Todos los agentes están ocupados. Puedo intentar ayudarte, pero si prefieres, puedo conectarte con un agente. ¿Quieres continuar conmigo o prefieres un agente?';
+      addMessage('bot', choiceMsg);
     }
   }
 
@@ -1161,13 +1282,20 @@ function apiVerify(playerId) {
     var playerName = playerInfo.username || null;
     var playerEmail = playerInfo.email || null;
 
+    // Calculate session duration
+    var sessionDuration = STATE.sessionStartTime ? Math.floor((Date.now() - STATE.sessionStartTime) / 1000) : 0;
+
     n8nCall(CONFIG.ENDPOINTS.ESCALATE, {
       reason: reason,
+      priority: reason.startsWith('T-01') || reason.startsWith('T-02') || reason.startsWith('T-03') ? 'CRITICAL' :
+               reason.startsWith('T-07') || reason.startsWith('T-06') ? 'HIGH' : 'MEDIUM',
       language: lang,
       conversation_history: history,
       player_id: playerId,
       player_name: playerName,
-      player_email: playerEmail
+      player_email: playerEmail,
+      urgency: STATE.urgency,
+      session_duration_seconds: sessionDuration
     })
     .then(function (res) {
       showTyping(false);
@@ -1318,6 +1446,33 @@ function apiVerify(playerId) {
     showTyping(true, 'BetonWin AI');
     setInputDisabled(true);
 
+    // T-17: Reset inactivity timer on user message
+    resetInactivityTimer();
+
+    // T-19: Track session start
+    if (!STATE.sessionStartTime) { STATE.sessionStartTime = Date.now(); }
+
+    // T-07: Check frustration → increase urgency
+    if (detectFrustration(text)) {
+      STATE.urgency = 'high';
+    }
+
+    // T-18: Check if client is unhappy with previous answer
+    if (detectUnhappy(text)) {
+      STATE.unhappyCount++;
+      if (STATE.unhappyCount >= 2) {
+        // Second time unhappy → propose agent
+        showTyping(false);
+        var proposeMsg = lang === 'en' ? 'I see my answer didn\'t help. Would you like me to connect you with a support agent?' :
+          lang === 'it' ? 'Vedo che la mia risposta non è stata utile. Vuoi che ti colleghi con un agente?' :
+          lang === 'pt' ? 'Vejo que minha resposta não ajudou. Quer que eu conecte você com um agente?' :
+          'Veo que mi respuesta no te ayudó. ¿Quieres que te conecte con un agente de soporte?';
+        addMessage('bot', proposeMsg);
+        STATE.busy = false;
+        return;
+      }
+    }
+
     // Safety: auto-recover if stuck for 30s (network hang, unhandled error)
     var safetyTimer = setTimeout(function () {
       if (STATE.busy) {
@@ -1334,14 +1489,29 @@ function apiVerify(playerId) {
       STATE.busy = false;
     }
 
-    // 0. Legal threats → immediate escalation (no AI needed)
+    // T-01/T-03: Legal threats + regulator → CRITICAL immediate escalation
     if (detectLegalThreat(text)) {
       showTyping(false);
       addMessage('bot', t('human_escalate'));
       clearTimeout(safetyTimer);
       STATE.busy = false;
-      startEscalation('legal_threat');
+      startEscalation('T-01_legal_threat');
       return;
+    }
+
+    // T-02: Fraud/scam accusations → CRITICAL immediate escalation
+    if (detectFraudAccusation(text)) {
+      showTyping(false);
+      addMessage('bot', t('human_escalate'));
+      clearTimeout(safetyTimer);
+      STATE.busy = false;
+      startEscalation('T-02_fraud_accusation');
+      return;
+    }
+
+    // T-07: If high urgency from frustration → reduce human request threshold to 1
+    if (STATE.urgency === 'high' && STATE.humanRequestCount === 0) {
+      // Don't escalate yet, but any human request signal will trigger immediately
     }
 
     // 1. Detect deposit problem → start verification flow
@@ -1434,6 +1604,17 @@ function apiVerify(playerId) {
           return;
         }
         addMessage('bot', raw);
+
+        // T-19: Check if session exceeded 10 minutes
+        if (checkSessionDuration()) {
+          var sessionMsg = lang === 'en' ? 'I see this is taking a while. Would you like me to connect you with a support agent for faster help?' :
+            lang === 'it' ? 'Vedo che ci sta mettendo un po\'. Vuoi che ti colleghi con un agente per un aiuto più rapido?' :
+            lang === 'pt' ? 'Vejo que está demorando. Quer que eu conecte você com um agente para ajuda mais rápida?' :
+            'Veo que esto está tomando un poco más de tiempo. ¿Quieres que te conecte con un agente para ayuda más rápida?';
+          addMessage('bot', sessionMsg);
+          STATE.sessionStartTime = null; // reset so we don't repeat
+        }
+
         unlockInput();
       })
       .catch(function () {
@@ -1604,6 +1785,10 @@ function apiVerify(playerId) {
     STATE.messages = []; STATE.jobId = null; STATE.playerId = null; STATE.phase = 'CHAT';
     STATE.busy = false; STATE.lastSendTs = 0;
     STATE.humanRequestCount = 0; STATE.ticketId = null;
+    STATE.urgency = 'low'; STATE.unhappyCount = 0;
+    STATE.sessionStartTime = Date.now();
+    STATE.inactivityReminded = false;
+    if (STATE.inactivityTimer) { clearTimeout(STATE.inactivityTimer); STATE.inactivityTimer = null; }
     clearSavedChat();
     // Restore bot header
     document.getElementById('bw-botname').textContent = CONFIG.BOT_NAME;
@@ -1727,6 +1912,7 @@ function apiVerify(playerId) {
   // ============================================================
   function init() {
     STATE.sessionId = generateUUID();
+    STATE.sessionStartTime = Date.now(); // T-19: track session start
     injectCSS();
     buildHTML();
     bindEvents();
