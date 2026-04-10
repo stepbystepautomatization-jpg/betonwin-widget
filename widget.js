@@ -346,8 +346,8 @@
 
   // T-02: Fraud/scam accusations → CRITICAL (immediate escalation)
   var FRAUD_KEYWORDS = [
-    'fraude','estafa','me estafaron','esto es un fraude','están estafando','empresa fraudulenta','sitio falso',
-    'fraud','scam','i\'ve been scammed','this is fraud','you\'re scamming','fraudulent company','fake site',
+    'fraude','estafa','me estafaron','esto es un fraude','están estafando','empresa fraudulenta','sitio falso','es falso',
+    'fraud','scam','scammed','i\'ve been scammed','this is fraud','you\'re scamming','fraudulent company','fake site',
     'frode','truffa','mi hanno truffato','questa è una frode','state truffando','azienda fraudolenta','sito falso',
     'golpe','fui enganado','isso é fraude','estão enganando','empresa fraudulenta','site falso'
   ];
