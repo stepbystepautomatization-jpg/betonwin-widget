@@ -12,10 +12,11 @@
       VERIFY:      '/webhook/verify-deposit',
       STATUS:      '/webhook/status',
       PRESIGNED:   '/webhook/presigned-url',
-      ANALYZE:     '/webhook/analyze',
+      ANALYZE:     '/webhook/deposit-screening',
       ESCALATE:    '/webhook/escalate',
       AGENT_POLL:  '/webhook/agent-poll',
-      AGENT_REPLY: '/webhook/agent-reply'
+      AGENT_REPLY: '/webhook/agent-reply',
+      GR8:         '/webhook/99a8f6ae-cde7-4767-8bcc-0149a0fc8fa0'
     },
     POLL_INTERVAL_MS: 3000,
     POLL_MAX:         80,
@@ -260,6 +261,7 @@
     isOpen:     false,
     phase:      'CHAT',       // CHAT | DEPOSIT_ASK_ID | ... | LIVE_AGENT | AGENT_CLOSED
     playerId:   null,
+    playerData: null,         // GR8 player profile: {playerId, email, firstName, lastName, country, currency, isBlocked, ...}
     jobId:      null,
     pollTimer:  null,
     pollCount:  0,
@@ -587,6 +589,111 @@
     // Convert any numeric ID to string
     if (info.playerId) { info.playerId = String(info.playerId); }
     return info;
+  }
+
+  // ============================================================
+  // 4b. GR8 PLAYER DATA — query player profile via n8n → gr8 API
+  // ============================================================
+  function gr8Query(query, variables) {
+    var payload = { query: query };
+    if (variables) { payload.variables = variables; }
+    return n8nCall(CONFIG.ENDPOINTS.GR8, {
+      path: '/v1/data-api/business-objects',
+      brand: 'BOW',
+      payload: payload
+    }).then(function (res) {
+      // n8n returns {body: {data: ...}, statusCode: ...}
+      if (res.body && res.body.data) { return res.body.data; }
+      if (res.data) { return res.data; }
+      throw new Error('GR8 empty response');
+    });
+  }
+
+  // Fetch player profile by playerId
+  function fetchPlayerById(playerId) {
+    return gr8Query(
+      '{ businessObjects { playerProfile(first:1, condition:{playerId:"' + playerId + '"}) { edges { node { playerId brand profileData { firstName lastName country currency } playerContacts { email phone } regData { registrationDate } isBlocked riskLevel } } } } }'
+    ).then(function (data) {
+      var edges = ((data.businessObjects || {}).playerProfile || {}).edges || [];
+      return edges.length > 0 ? edges[0].node : null;
+    });
+  }
+
+  // Fetch player profile by email
+  function fetchPlayerByEmail(email) {
+    return gr8Query(
+      '{ businessObjects { playerProfile(first:1, filters:{playerContacts:{email:{eq:"' + email + '"}}}) { edges { node { playerId brand profileData { firstName lastName country currency } playerContacts { email phone } regData { registrationDate } isBlocked riskLevel } } } } }'
+    ).then(function (data) {
+      var edges = ((data.businessObjects || {}).playerProfile || {}).edges || [];
+      return edges.length > 0 ? edges[0].node : null;
+    });
+  }
+
+  // Fetch payment transactions for a player
+  function fetchPlayerTransactions(playerId, limit) {
+    return gr8Query(
+      '{ businessObjects { paymentTransactionV2(first:' + (limit || 5) + ', condition:{playerId:"' + playerId + '"}, orderBy:{messageTime:DESC}) { edges { node { playerId amount currency status paymentMethod direction messageTime } } } } }'
+    ).then(function (data) {
+      var edges = ((data.businessObjects || {}).paymentTransactionV2 || {}).edges || [];
+      return edges.map(function (e) { return e.node; });
+    });
+  }
+
+  // Auto-detect and load player data on widget init
+  function loadPlayerData() {
+    var info = getPlayerInfo();
+    if (info.playerId) {
+      STATE.playerId = info.playerId;
+      fetchPlayerById(info.playerId)
+        .then(function (player) {
+          if (player) {
+            STATE.playerData = player;
+            STATE.playerId = player.playerId;
+            trackEvent('player_identified', { playerId: player.playerId, source: 'auto' });
+          }
+        })
+        .catch(function () { /* silent — player lookup failed, continue without */ });
+    } else if (info.email) {
+      fetchPlayerByEmail(info.email)
+        .then(function (player) {
+          if (player) {
+            STATE.playerData = player;
+            STATE.playerId = player.playerId;
+            trackEvent('player_identified', { playerId: player.playerId, source: 'email_auto' });
+          }
+        })
+        .catch(function () { /* silent */ });
+    }
+  }
+
+  // Identify player manually (when not logged in) — called when user provides email
+  function identifyPlayer(emailOrId) {
+    var isEmail = emailOrId.indexOf('@') !== -1;
+    var lookup = isEmail ? fetchPlayerByEmail(emailOrId) : fetchPlayerById(emailOrId);
+    return lookup.then(function (player) {
+      if (player) {
+        STATE.playerData = player;
+        STATE.playerId = player.playerId;
+        return player;
+      }
+      return null;
+    });
+  }
+
+  // Get player context string for AI (injected into chat payload)
+  function getPlayerContext() {
+    if (!STATE.playerData) return '';
+    var p = STATE.playerData;
+    var pd = p.profileData || {};
+    var pc = p.playerContacts || {};
+    var parts = ['Player ID: ' + p.playerId];
+    if (pd.firstName) parts.push('Name: ' + pd.firstName + ' ' + (pd.lastName || ''));
+    if (pd.country) parts.push('Country: ' + pd.country);
+    if (pd.currency) parts.push('Currency: ' + pd.currency);
+    if (pc.email) parts.push('Email: ' + pc.email);
+    if (p.isBlocked) parts.push('STATUS: BLOCKED');
+    if (p.riskLevel) parts.push('Risk: ' + p.riskLevel);
+    return '\n[PLAYER DATA]\n' + parts.join('\n');
   }
 
   // ============================================================
@@ -1452,12 +1559,12 @@
   var DEPOSIT_KEYWORDS = [
     'not received','not arrived','deposit missing','missing deposit',
     'deposit failed','deposit problem','check my deposit','verify deposit',
-    'deposit not','my deposit',
+    'deposit not','my deposit','proof of deposit','payment proof',
     'no recibido','no llegó','deposito faltante','verificar deposito',
-    'deposito no','mi deposito','problema deposito',
+    'deposito no','mi deposito','problema deposito','comprobante de pago','prueba de pago',
     'non ricevuto','non arrivato','deposito mancante','verifica deposito',
-    'deposito non','mio deposito',
-    'não recebi','não chegou','depósito não','meu depósito','verificar depósito'
+    'deposito non','mio deposito','prova di pagamento',
+    'não recebi','não chegou','depósito não','meu depósito','verificar depósito','comprovante de pagamento'
   ];
 
   function detectIntent(msg) {
@@ -1539,24 +1646,100 @@ function apiVerify(playerId) {
   // 11. FILE UPLOAD — presigned URL → direct S3
   // ============================================================
   function handleFile(file) {
-    // Allow during UPLOAD_REQUIRED (deposit) OR LIVE_AGENT (file sharing)
-    if (STATE.phase === 'LIVE_AGENT' && STATE.ticketId) {
-      sendFileToAgent(file);
-      return;
-    }
-    if (STATE.phase !== 'UPLOAD_REQUIRED') return;
-    if (!STATE.playerId) return;
     if (!file || file.size === 0) { addMessage('bot', t('err_file_type')); return; }
     if (file.size > CONFIG.MAX_FILE_MB * 1024 * 1024) { addMessage('bot', t('err_file_size')); return; }
     if (CONFIG.ACCEPTED_TYPES.indexOf(file.type) === -1) { addMessage('bot', t('err_file_type')); return; }
 
-    STATE.phase = 'UPLOADING';
-    STATE._uploadFile = file;
-    STATE._uploadRetries = 0;
-    showUpload(false);
-    addMessage('bot', t('uploading'));
-    setProgress(0);
-    performUpload(file);
+    // LIVE_AGENT → send to Zendesk agent
+    if (STATE.phase === 'LIVE_AGENT' && STATE.ticketId) {
+      sendFileToAgent(file);
+      return;
+    }
+
+    // UPLOAD_REQUIRED (deposit proof) → upload to S3 + AI screening
+    if (STATE.phase === 'UPLOAD_REQUIRED') {
+      STATE.phase = 'UPLOADING';
+      showUpload(false);
+      showFilePreview(file);
+      addMessage('bot', DEPOSIT_SCREENING_MSG[lang] || DEPOSIT_SCREENING_MSG.en);
+      showTyping(true, 'BetonWin AI');
+      setInputDisabled(true);
+
+      var pid = STATE.playerId || 'deposit_check';
+      apiPresignedUrl(pid, file.name, file.type)
+        .then(function (data) {
+          return uploadToS3(data.presigned_url, file, setProgress).then(function () { return data.s3_url; });
+        })
+        .then(function (s3Url) {
+          // Send to n8n for AI screening with full player context
+          STATE.phase = 'ANALYZING';
+          var pd = STATE.playerData || {};
+          var pdc = pd.profileData || {};
+          var pcc = pd.playerContacts || {};
+          return n8nCall(CONFIG.ENDPOINTS.ANALYZE, {
+            player_id: STATE.playerId || pid,
+            player_name: pdc.firstName ? pdc.firstName + ' ' + (pdc.lastName || '') : null,
+            player_email: pcc.email || null,
+            player_country: pdc.country || null,
+            player_currency: pdc.currency || null,
+            s3_url: s3Url,
+            file_name: file.name,
+            file_type: file.type,
+            job_id: STATE.jobId || null,
+            language: lang,
+            session_id: STATE.sessionId
+          });
+        })
+        .then(function (res) {
+          showTyping(false);
+          setInputDisabled(false);
+          setProgress(0);
+          if (res.job_id && res.status === 'PENDING') {
+            // Async processing — poll for result
+            startPolling(res.job_id, handleFinalResult);
+          } else {
+            handleFinalResult(res);
+          }
+        })
+        .catch(function () {
+          showTyping(false);
+          setInputDisabled(false);
+          addMessage('bot', t('err_generic'));
+          STATE.phase = 'UPLOAD_REQUIRED';
+          showUpload(true);
+        });
+      return;
+    }
+
+    // CHAT (general) → upload file and show preview in chat
+    showFilePreview(file);
+    var pid = STATE.playerId || 'chat_upload';
+    apiPresignedUrl(pid, file.name, file.type)
+      .then(function (data) {
+        return uploadToS3(data.presigned_url, file, function(){}).then(function () { return data.s3_url; });
+      })
+      .then(function (s3Url) {
+        // Send the file URL to AI as context
+        var fileMsg = '📎 ' + file.name + '\nURL: ' + s3Url;
+        handleChatMessage(fileMsg);
+      })
+      .catch(function () {
+        addMessage('bot', t('err_generic'));
+      });
+  }
+
+  // Show file preview in chat (image thumbnail or file name)
+  function showFilePreview(file) {
+    var isImage = file.type.indexOf('image/') === 0;
+    if (isImage) {
+      var reader = new FileReader();
+      reader.onload = function (e) {
+        addMessage('user', '![' + file.name + '](' + e.target.result + ')');
+      };
+      reader.readAsDataURL(file);
+    } else {
+      addMessage('user', '📎 ' + file.name);
+    }
   }
 
   function performUpload(file) {
@@ -1642,11 +1825,16 @@ function apiVerify(playerId) {
       return { role: m.role, content: m.content, ts: m.ts };
     });
 
-    // Auto-detect player info from site
+    // Player data: prefer GR8 profile, fallback to site detection
     var playerInfo = getPlayerInfo();
+    var pd = STATE.playerData || {};
+    var pdc = pd.profileData || {};
+    var pcc = pd.playerContacts || {};
     var playerId = STATE.playerId || playerInfo.playerId || 'unknown';
-    var playerName = playerInfo.username || null;
-    var playerEmail = playerInfo.email || null;
+    var playerName = (pdc.firstName ? pdc.firstName + ' ' + (pdc.lastName || '') : null) || playerInfo.username || null;
+    var playerEmail = pcc.email || playerInfo.email || null;
+    var playerCountry = pdc.country || null;
+    var playerCurrency = pdc.currency || null;
 
     n8nCall(CONFIG.ENDPOINTS.ESCALATE, {
       reason: reason,
@@ -1654,7 +1842,11 @@ function apiVerify(playerId) {
       conversation_history: history,
       player_id: playerId,
       player_name: playerName,
-      player_email: playerEmail
+      player_email: playerEmail,
+      player_country: playerCountry,
+      player_currency: playerCurrency,
+      player_blocked: pd.isBlocked || false,
+      player_risk: pd.riskLevel || null
     })
     .then(function (res) {
       showTyping(false);
@@ -1982,7 +2174,8 @@ function apiVerify(playerId) {
         var msgWithLang = lang !== 'es'
           ? '[Reply ONLY in ' + (LANG_NAMES[lang] || 'Spanish') + '] ' + text
           : text;
-        var payload = { message: msgWithLang, kb_content: langInstruction + kbContent, lang: lang, history: history };
+        var playerCtx = getPlayerContext();
+        var payload = { message: msgWithLang, kb_content: langInstruction + kbContent + playerCtx, lang: lang, history: history, player_id: STATE.playerId || null };
         return Promise.race([
           n8nCall(CONFIG.ENDPOINTS.CHAT, payload),
           aiTimeout
@@ -2047,53 +2240,132 @@ function apiVerify(playerId) {
       });
   }
 
+  // ── DEPOSIT VERIFICATION FLOW (v2) ──
+  // 1. Detect deposit intent (keyword + AI)
+  // 2. Check if player is known (gr8 auto-detect) → if not, ask email/ID
+  // 3. Greet player by name, show last transactions from gr8
+  // 4. Ask for payment proof (file upload)
+  // 5. Upload proof to S3
+  // 6. Send to n8n for AI screening
+  // 7. Show result (future: send to Telegram)
+
+  var DEPOSIT_PROOF_MSG = {
+    en: "To verify your deposit, please **attach your payment proof** (screenshot or bank receipt).\n\nAccepted formats: JPG, PNG, PDF — max 10MB.",
+    es: "Para verificar tu depósito, por favor **adjunta tu comprobante de pago** (captura de pantalla o recibo bancario).\n\nFormatos aceptados: JPG, PNG, PDF — máx 10MB.",
+    it: "Per verificare il tuo deposito, per favore **allega la prova di pagamento** (screenshot o ricevuta bancaria).\n\nFormati accettati: JPG, PNG, PDF — max 10MB.",
+    pt: "Para verificar seu depósito, por favor **anexe seu comprovante de pagamento** (captura de tela ou recibo bancário).\n\nFormatos aceitos: JPG, PNG, PDF — máx 10MB."
+  };
+
+  var DEPOSIT_ASK_EMAIL_MSG = {
+    en: "I'd like to help you verify your deposit. Please enter your **email** or **Player ID** so I can find your account:",
+    es: "Me gustaría ayudarte a verificar tu depósito. Por favor, ingresa tu **email** o **Player ID** para encontrar tu cuenta:",
+    it: "Vorrei aiutarti a verificare il tuo deposito. Per favore, inserisci la tua **email** o il tuo **Player ID** per trovare il tuo account:",
+    pt: "Gostaria de ajudá-lo a verificar seu depósito. Por favor, digite seu **email** ou **Player ID** para encontrar sua conta:"
+  };
+
+  var DEPOSIT_PLAYER_FOUND_MSG = {
+    en: function(p) { var pd = p.profileData||{}; return "I found your account" + (pd.firstName ? " (**" + pd.firstName + "**)" : "") + ", currency: **" + (pd.currency||'?') + "**.\n\n"; },
+    es: function(p) { var pd = p.profileData||{}; return "Encontré tu cuenta" + (pd.firstName ? " (**" + pd.firstName + "**)" : "") + ", moneda: **" + (pd.currency||'?') + "**.\n\n"; },
+    it: function(p) { var pd = p.profileData||{}; return "Ho trovato il tuo account" + (pd.firstName ? " (**" + pd.firstName + "**)" : "") + ", valuta: **" + (pd.currency||'?') + "**.\n\n"; },
+    pt: function(p) { var pd = p.profileData||{}; return "Encontrei sua conta" + (pd.firstName ? " (**" + pd.firstName + "**)" : "") + ", moeda: **" + (pd.currency||'?') + "**.\n\n"; }
+  };
+
+  var DEPOSIT_NOT_FOUND_MSG = {
+    en: "I couldn't find an account with that information. Please check and try again, or contact support.",
+    es: "No pude encontrar una cuenta con esa información. Por favor verifica e intenta de nuevo, o contacta soporte.",
+    it: "Non ho trovato un account con queste informazioni. Per favore verifica e riprova, o contatta il supporto.",
+    pt: "Não encontrei uma conta com essas informações. Por favor verifique e tente novamente, ou entre em contato com o suporte."
+  };
+
+  var DEPOSIT_SCREENING_MSG = {
+    en: "Uploading and analyzing your payment proof... 🔍",
+    es: "Subiendo y analizando tu comprobante de pago... 🔍",
+    it: "Caricamento e analisi della prova di pagamento... 🔍",
+    pt: "Enviando e analisando seu comprovante de pagamento... 🔍"
+  };
+
   function startDepositFlow() {
-    STATE.phase = 'DEPOSIT_ASK_ID';
     showQuickActions(false);
+
+    // If we already have player data from gr8 → skip ID request, go straight to proof
+    if (STATE.playerData) {
+      var greetMsg = (DEPOSIT_PLAYER_FOUND_MSG[lang] || DEPOSIT_PLAYER_FOUND_MSG.en)(STATE.playerData);
+      addMessage('bot', greetMsg + (DEPOSIT_PROOF_MSG[lang] || DEPOSIT_PROOF_MSG.en));
+      STATE.phase = 'UPLOAD_REQUIRED';
+      showUpload(true);
+      return;
+    }
+
+    // If we have playerId but no full data → try gr8 lookup first
+    if (STATE.playerId) {
+      showTyping(true, 'BetonWin AI');
+      fetchPlayerById(STATE.playerId)
+        .then(function (player) {
+          showTyping(false);
+          if (player) {
+            STATE.playerData = player;
+            var greetMsg = (DEPOSIT_PLAYER_FOUND_MSG[lang] || DEPOSIT_PLAYER_FOUND_MSG.en)(player);
+            addMessage('bot', greetMsg + (DEPOSIT_PROOF_MSG[lang] || DEPOSIT_PROOF_MSG.en));
+            STATE.phase = 'UPLOAD_REQUIRED';
+            showUpload(true);
+          } else {
+            // Player ID not found in gr8 — ask for email
+            addMessage('bot', DEPOSIT_ASK_EMAIL_MSG[lang] || DEPOSIT_ASK_EMAIL_MSG.en);
+            STATE.phase = 'DEPOSIT_ASK_ID';
+            showPlayerIdForm(true);
+          }
+        })
+        .catch(function () {
+          showTyping(false);
+          addMessage('bot', DEPOSIT_ASK_EMAIL_MSG[lang] || DEPOSIT_ASK_EMAIL_MSG.en);
+          STATE.phase = 'DEPOSIT_ASK_ID';
+          showPlayerIdForm(true);
+        });
+      return;
+    }
+
+    // No player data at all → ask for email/ID
+    STATE.phase = 'DEPOSIT_ASK_ID';
     setTimeout(function () {
-      addMessage('bot', t('deposit_ask_id'));
+      addMessage('bot', DEPOSIT_ASK_EMAIL_MSG[lang] || DEPOSIT_ASK_EMAIL_MSG.en);
       showPlayerIdForm(true);
     }, 350);
   }
 
-  function handlePlayerIdSubmit(id) {
-    id = (id || '').trim();
-    if (!id) return;
-    if (STATE.phase !== 'DEPOSIT_ASK_ID') return; // only accept during deposit flow
-    // Sanitize: alphanumeric + dash/underscore only, max 50 chars
-    id = id.replace(/[^a-zA-Z0-9_\-]/g, '').slice(0, 50);
-    if (!id) return;
-    STATE.playerId = id;
-    showPlayerIdForm(false);
-    addMessage('user', id);
-    setInputDisabled(true);
-    addMessage('bot', t('deposit_checking'));
-    showTyping(true, 'BetonWin AI');
-    STATE.phase = 'DEPOSIT_CHECKING';
+  function handlePlayerIdSubmit(input) {
+    input = (input || '').trim();
+    if (!input) return;
+    if (STATE.phase !== 'DEPOSIT_ASK_ID') return;
 
-    apiVerify(id)
-      .then(function (res) {
+    showPlayerIdForm(false);
+    addMessage('user', input);
+    showTyping(true, 'BetonWin AI');
+    setInputDisabled(true);
+
+    // Lookup player on gr8 by email or ID
+    identifyPlayer(input)
+      .then(function (player) {
         showTyping(false);
-        if (res.status === 'PROCESSING') {
-          addMessage('bot', t('deposit_proc'));
-          STATE.phase = 'CHAT';
-          setInputDisabled(false);
-          showQuickActions(true);
-        } else if (res.status === 'NEED_UPLOAD') {
-          if (res.job_id) { STATE.jobId = res.job_id; }
-          addMessage('bot', t('upload_required'));
-          showUpload(true);
+        if (player) {
+          STATE.playerData = player;
+          STATE.playerId = player.playerId;
+          var greetMsg = (DEPOSIT_PLAYER_FOUND_MSG[lang] || DEPOSIT_PLAYER_FOUND_MSG.en)(player);
+          addMessage('bot', greetMsg + (DEPOSIT_PROOF_MSG[lang] || DEPOSIT_PROOF_MSG.en));
           STATE.phase = 'UPLOAD_REQUIRED';
-        } else if (res.status === 'PENDING' && res.job_id) {
-          startPolling(res.job_id, handleFinalResult);
+          showUpload(true);
+          setInputDisabled(false);
         } else {
-          handleFinalResult(res);
+          addMessage('bot', DEPOSIT_NOT_FOUND_MSG[lang] || DEPOSIT_NOT_FOUND_MSG.en);
+          STATE.phase = 'DEPOSIT_ASK_ID';
+          showPlayerIdForm(true);
+          setInputDisabled(false);
         }
       })
       .catch(function () {
         showTyping(false);
         addMessage('bot', t('err_generic'));
-        STATE.phase = 'CHAT';
+        STATE.phase = 'DEPOSIT_ASK_ID';
+        showPlayerIdForm(true);
         setInputDisabled(false);
       });
   }
@@ -2252,14 +2524,6 @@ function apiVerify(playerId) {
       }
     });
 
-    // Quick deposit button
-    document.getElementById('bw-qactions').innerHTML =
-      '<button class="bw-qbtn" id="bw-qdep">' + t('quick_deposit') + '</button>';
-    document.getElementById('bw-qdep').addEventListener('click', function () {
-      showQuickActions(false);
-      startDepositFlow();
-    });
-
     document.getElementById('bw-idconfirm').addEventListener('click', function () {
       handlePlayerIdSubmit(document.getElementById('bw-idinput').value);
     });
@@ -2390,14 +2654,7 @@ function apiVerify(playerId) {
       '</div>';
     showPlayerIdForm(false); showUpload(false); setProgress(0);
     document.getElementById('bw-ufile').value = '';
-    // Re-create quick deposit button and show
-    document.getElementById('bw-qactions').innerHTML =
-      '<button class="bw-qbtn" id="bw-qdep">' + t('quick_deposit') + '</button>';
-    document.getElementById('bw-qdep').addEventListener('click', function () {
-      showQuickActions(false);
-      startDepositFlow();
-    });
-    showQuickActions(true);
+    showQuickActions(false);
     setInputDisabled(false); setProgress(0);
     document.getElementById('bw-idinput').value = '';
     document.getElementById('bw-input').value   = '';
@@ -2468,7 +2725,7 @@ function apiVerify(playerId) {
     if (file.size > CONFIG.MAX_FILE_MB * 1024 * 1024) { addMessage('bot', t('err_file_size')); return; }
     if (CONFIG.ACCEPTED_TYPES.indexOf(file.type) === -1) { addMessage('bot', t('err_file_type')); return; }
 
-    addMessage('user', '📎 ' + file.name);
+    showFilePreview(file);
     showTyping(true, STATE._agentName || t('live_agent'));
 
     // Upload via presigned URL then notify agent
@@ -2506,6 +2763,9 @@ function apiVerify(playerId) {
     injectCSS();
     buildHTML();
     bindEvents();
+
+    // Auto-detect logged-in player from site and fetch GR8 profile
+    loadPlayerData();
 
     setTimeout(function () { addMessage('bot', t('welcome')); }, 500);
 

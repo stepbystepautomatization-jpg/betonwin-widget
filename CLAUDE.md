@@ -384,7 +384,66 @@ curl "https://n8nbeton.online/api/v1/workflows/[WORKFLOW_ID]" -H "X-N8N-API-KEY:
 
 ---
 
-## 12. STORICO MODIFICHE
+## 12. GR8 DATA API — Integrazione Player Data
+
+### Architettura
+```
+Widget → n8n webhook (GR8) → OAuth token → apg-s2s.com GraphQL → player data
+```
+
+### Endpoint
+- **n8n Webhook**: `POST /webhook/99a8f6ae-cde7-4767-8bcc-0149a0fc8fa0`
+- **GR8 GraphQL**: `https://apg-s2s.com/v1/data-api/business-objects`
+- **Auth**: OAuth2 client_credentials → `S2S_BTH_DataAPI_GraphQL_DC0_Prod_Client`
+- **Brand**: BOW (BetonWin), Operator: BTH
+
+### Permessi API (dal JWT)
+- `DataAPI:GraphQL:PlayerProfile` — profilo giocatore
+- `DataAPI:GraphQL:PaymentsTransaction` — transazioni pagamento
+- `DataAPI:GraphQL:PaymentsOrder` — ordini pagamento
+
+### Business Objects disponibili
+| Object | Uso |
+|---|---|
+| `playerProfile` | ID, nome, email, paese, valuta, KYC, blocco, rischio |
+| `paymentTransactionV2` | Depositi/prelievi: stato, importo, metodo, data |
+| `paymentOrder` | Ordini di pagamento |
+| `playerDocument` | Documenti KYC |
+| `walletProxyTransaction` | Transazioni wallet |
+| `playerLogin` | Log accessi |
+| `sportBet` | Scommesse sportive |
+| `casinoRound` | Sessioni casino |
+
+### Funzioni nel Widget
+| Funzione | Descrizione |
+|---|---|
+| `gr8Query(query)` | Chiama GraphQL via n8n webhook |
+| `fetchPlayerById(id)` | Profilo per Player ID |
+| `fetchPlayerByEmail(email)` | Profilo per email |
+| `fetchPlayerTransactions(id)` | Ultime transazioni |
+| `loadPlayerData()` | Auto-detect utente dal sito → carica profilo (init) |
+| `identifyPlayer(emailOrId)` | Lookup manuale per utenti non loggati |
+| `getPlayerContext()` | Stringa dati player per AI context |
+
+### Flusso
+1. **Utente loggato**: `loadPlayerData()` → rileva playerId dal sito → `fetchPlayerById()` → salva in `STATE.playerData`
+2. **Utente non loggato**: quando serve, chiede email → `identifyPlayer()` → carica profilo
+3. **Chat AI**: ogni messaggio include `[PLAYER DATA]` nel context → AI sa chi è l'utente
+4. **Escalation Zendesk**: manda `player_id`, `player_name`, `player_email`, `player_country`, `player_currency`, `player_blocked`, `player_risk`
+5. **Deposit flow**: se playerId noto → salta form "Enter Player ID"
+
+---
+
+## 13. STORICO MODIFICHE
+
+### v5.0 (Aprile 2026)
+- Merge design premium + trigger system (T-01→T-19)
+- GR8 Data API integration: player profile, transazioni, auto-detect
+- Modern UI: borderless bot text, green user pills, slide animations
+- Mobile: floating card 65vh, WhatsApp-style keyboard handling
+- KB Translation: 88 EN/IT/PT→ES keyword mappings + smart dedup search
+- Media rendering: immagini e video inline nei messaggi
+- 2679 righe, 170KB
 
 ### v4.0 (Aprile 2026)
 - Ristrutturazione completa KB: da 1 file monolitico a 63 file in 9 cartelle
