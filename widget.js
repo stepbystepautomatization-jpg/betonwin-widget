@@ -688,6 +688,13 @@
       '.bw-msg.bot+.bw-msg.bot{padding-top:2px}',
       '.bw-msg.bot+.bw-msg.user,.bw-msg.user+.bw-msg.bot{margin-top:8px}',
 
+      /* Media — images & videos inline */
+      '.bw-media{margin:6px 0;border-radius:12px;overflow:hidden;max-width:100%}',
+      '.bw-media img{display:block;max-width:100%;height:auto;border-radius:12px;cursor:pointer;transition:opacity .2s}',
+      '.bw-media img:hover{opacity:.9}',
+      '.bw-media video{display:block;max-width:100%;height:auto;border-radius:12px;outline:none;background:#000}',
+      '.bw-msg.user .bw-media img,.bw-msg.user .bw-media video{max-width:200px}',
+
       /* Agent messages — warm gold accent, glass surface */
       '.bw-msg.agent{max-width:100%}',
       '.bw-msg.agent .bw-mavatar{display:flex}',
@@ -1063,28 +1070,77 @@
       .replace(/'/g, '&#39;');
   }
 
+  var IMG_EXT = /\.(jpg|jpeg|png|gif|webp|svg|bmp)(\?[^\s]*)?$/i;
+  var VID_EXT = /\.(mp4|webm|mov|ogg)(\?[^\s]*)?$/i;
+
   function parseMarkdown(txt) {
-    // Extract links BEFORE escaping so URLs keep their & chars intact
+    // 1. Extract media URLs BEFORE escaping — images and videos rendered inline
+    var media = [];
+    // Markdown images: ![alt](url)
+    txt = txt.replace(/!\[(.*?)\]\((https?:\/\/[^\s)]+)\)/g, function (_, alt, url) {
+      var idx = media.length;
+      media.push({ type: 'img', url: url, alt: alt });
+      return '%%MEDIA' + idx + '%%';
+    });
+    // Raw image URLs on their own line
+    txt = txt.replace(/^(https?:\/\/[^\s]+(?:\.(?:jpg|jpeg|png|gif|webp|svg|bmp))(?:\?[^\s]*)?)$/gim, function (_, url) {
+      var idx = media.length;
+      media.push({ type: 'img', url: url, alt: '' });
+      return '%%MEDIA' + idx + '%%';
+    });
+    // Raw video URLs on their own line
+    txt = txt.replace(/^(https?:\/\/[^\s]+(?:\.(?:mp4|webm|mov|ogg))(?:\?[^\s]*)?)$/gim, function (_, url) {
+      var idx = media.length;
+      media.push({ type: 'vid', url: url });
+      return '%%MEDIA' + idx + '%%';
+    });
+
+    // 2. Extract markdown links BEFORE escaping
     var links = [];
     txt = txt.replace(/\[(.*?)\]\((https?:\/\/[^\s)]+)\)/g, function (_, text, url) {
       var idx = links.length;
+      // If link points to image/video, render as media instead
+      if (IMG_EXT.test(url)) {
+        var mIdx = media.length;
+        media.push({ type: 'img', url: url, alt: text });
+        return '%%MEDIA' + mIdx + '%%';
+      }
+      if (VID_EXT.test(url)) {
+        var mIdx = media.length;
+        media.push({ type: 'vid', url: url });
+        return '%%MEDIA' + mIdx + '%%';
+      }
       links.push({ text: text, url: url });
       return '%%LINK' + idx + '%%';
     });
+
+    // 3. Escape HTML + apply markdown formatting
     var out = escapeHTML(txt)
       .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-      // Bullet lists: lines starting with * or - or • followed by space → green dash
       .replace(/^[•*\-]\s+(.+)$/gm, '<span style="display:flex;align-items:flex-start;gap:10px;padding:4px 0"><span style="color:rgba(69,205,152,0.5);font-size:16px;line-height:1;flex-shrink:0;margin-top:2px">&#8226;</span><span style="flex:1">$1</span></span>')
-      // Numbered lists: lines starting with 1. 2. etc → green number
       .replace(/^(\d+)\.\s+(.+)$/gm, '<span style="display:flex;align-items:flex-start;gap:10px;padding:4px 0"><span style="color:rgba(69,205,152,0.55);font-weight:600;font-size:13px;min-width:16px;flex-shrink:0;font-variant-numeric:tabular-nums">$1.</span><span style="flex:1">$2</span></span>')
       .replace(/\*(.*?)\*/g, '<em>$1</em>')
       .replace(/^---$/gm, '<hr>');
-    // Restore links with safe escaped text and sanitized URL
+
+    // 4. Restore links
     links.forEach(function (link, i) {
       var safeUrl = link.url.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
       out = out.replace('%%LINK' + i + '%%',
         '<a href="' + safeUrl + '" target="_blank" rel="noopener">' + escapeHTML(link.text) + '</a>');
     });
+
+    // 5. Restore media (images + videos)
+    media.forEach(function (m, i) {
+      var safeUrl = m.url.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+      var html;
+      if (m.type === 'img') {
+        html = '<div class="bw-media"><img src="' + safeUrl + '" alt="' + escapeHTML(m.alt || '') + '" loading="lazy" onclick="window.open(this.src,\'_blank\')"></div>';
+      } else {
+        html = '<div class="bw-media"><video src="' + safeUrl + '" controls playsinline preload="metadata"></video></div>';
+      }
+      out = out.replace('%%MEDIA' + i + '%%', html);
+    });
+
     return out;
   }
 
