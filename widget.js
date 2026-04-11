@@ -859,19 +859,17 @@
       /* ═══ MOBILE — WhatsApp-style: fixed fullscreen, keyboard-aware ═══ */
       '@media(max-width:440px){'+
 
-        /* FAB — bottom-right, thumb-friendly */
+        /* FAB — logo only, no label on mobile */
         '#__beton_widget__{bottom:20px;right:14px;left:auto}'+
-        '#bw-trigger{height:44px;padding:0 14px 0 4px;border-radius:22px}'+
-        '#bw-fab-logo{width:36px;height:36px}'+
-        '#bw-fab-label{font-size:11.5px}'+
+        '#bw-trigger{width:48px;height:48px;padding:0;border-radius:50%;justify-content:center}'+
+        '#bw-fab-logo{width:42px;height:42px}'+
+        '#bw-fab-label{display:none}'+
 
-        /* ── Window: inset:0, NO height — top+bottom define the size ── */
-        /* WhatsApp pattern: top:0 bottom:0 = browser calculates height */
-        /* When keyboard opens, JS changes bottom to keyboard height → widget shrinks */
-        '#bw-window{position:fixed;top:0;left:0;right:0;bottom:0;width:auto;height:auto;max-height:none;border-radius:0;border:none;transform-origin:bottom center;transition:transform .35s cubic-bezier(.32,1,.22,1),opacity .2s ease}'+
+        /* ── Window: bottom-anchored, 75% height, rounded top ── */
+        '#bw-window{position:fixed;left:0;right:0;bottom:0;top:auto;width:auto;height:75vh;max-height:75vh;border-radius:18px 18px 0 0;border:none;border-top:1px solid rgba(69,205,152,0.1);transform-origin:bottom center;transition:transform .35s cubic-bezier(.32,1,.22,1),opacity .2s ease}'+
 
-        /* ── Header: safe-area for notch/dynamic island ── */
-        '#bw-header{padding:calc(10px + env(safe-area-inset-top,0px)) 14px 10px;gap:10px}'+
+        /* ── Header ── */
+        '#bw-header{padding:12px 14px 10px;gap:10px}'+
         '#bw-avatar{width:32px;height:32px}'+
         '#bw-avatar::after{inset:-2px}'+  /* smaller ring */
         '#bw-botname{font-size:13px}'+
@@ -913,7 +911,7 @@
         '.bw-lang-opt{padding:12px 16px;font-size:13px}'+
 
         /* ── Exit overlay ── */
-        '#bw-exit-overlay{border-radius:0}'+
+        '#bw-exit-overlay{border-radius:18px 18px 0 0}'+
         '#bw-exit-panel{padding:28px 20px}'+
         '#bw-exit-title{font-size:20px;margin-bottom:24px}'+
         '#bw-exit-options{gap:22px}'+
@@ -922,7 +920,7 @@
         '.bw-exit-star{font-size:34px;padding:4px}'+
 
         /* ── Splash ── */
-        '#bw-splash{border-radius:0}'+
+        '#bw-splash{border-radius:18px 18px 0 0}'+
         '#bw-splash-logo{width:100px;height:100px}'+
         '#bw-splash-text{margin-top:20px}'+
         '#bw-splash-line1{font-size:13px}'+
@@ -937,8 +935,8 @@
         '#bw-idinput{padding:11px 14px;font-size:14px;border-radius:14px}'+
         '#bw-idconfirm{padding:11px 18px;font-size:14px;border-radius:14px}'+
 
-        /* ── Fullscreen toggle (same on mobile) ── */
-        '#bw-window.bw-fullscreen{top:0;left:0;right:0;bottom:0;width:100%;height:100%;border-radius:0}'+
+        /* ── Fullscreen toggle ── */
+        '#bw-window.bw-fullscreen{top:0;height:100vh;max-height:100vh;border-radius:0}'+
 
         /* ── Logo watermark ── */
         '#bw-logo-bg img{width:80px;height:80px}'+
