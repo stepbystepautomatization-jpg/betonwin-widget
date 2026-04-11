@@ -849,47 +849,92 @@
       '@keyframes bw-avatar-buzz{0%{transform:translateX(0)}15%{transform:translateX(-1.5px) rotate(-.5deg)}30%{transform:translateX(1.5px) rotate(.5deg)}45%{transform:translateX(-1px) rotate(-.3deg)}60%{transform:translateX(1px) rotate(.3deg)}75%{transform:translateX(-.5px)}100%{transform:translateX(0)}}',
       '@keyframes bw-avatar-ring{0%,100%{opacity:.4;transform:scale(1)}50%{opacity:.8;transform:scale(1.08)}}',
 
-      /* Mobile */
+      /* ═══ MOBILE — WhatsApp-style: fixed fullscreen, keyboard-aware ═══ */
       '@media(max-width:440px){'+
-        '#__beton_widget__{bottom:80px;right:16px;left:auto}'+
-        /* Widget fullscreen mobile */
-        '#bw-window{position:fixed;width:100%;right:0;left:0;bottom:0;height:100dvh;max-height:none;border-radius:0;transform-origin:bottom right}'+
-        /* Header compact */
-        '#bw-header{padding:10px 14px;gap:10px}'+
-        '#bw-avatar{width:34px;height:34px}'+
-        '#bw-botname{font-size:12.5px}'+
+
+        /* FAB — bottom-right, thumb-friendly */
+        '#__beton_widget__{bottom:20px;right:14px;left:auto}'+
+        '#bw-trigger{height:44px;padding:0 14px 0 4px;border-radius:22px}'+
+        '#bw-fab-logo{width:36px;height:36px}'+
+        '#bw-fab-label{font-size:11.5px}'+
+
+        /* ── Window: inset:0, NO height — top+bottom define the size ── */
+        /* WhatsApp pattern: top:0 bottom:0 = browser calculates height */
+        /* When keyboard opens, JS changes bottom to keyboard height → widget shrinks */
+        '#bw-window{position:fixed;top:0;left:0;right:0;bottom:0;width:auto;height:auto;max-height:none;border-radius:0;border:none;transform-origin:bottom center;transition:transform .35s cubic-bezier(.32,1,.22,1),opacity .2s ease}'+
+
+        /* ── Header: safe-area for notch/dynamic island ── */
+        '#bw-header{padding:calc(10px + env(safe-area-inset-top,0px)) 14px 10px;gap:10px}'+
+        '#bw-avatar{width:32px;height:32px}'+
+        '#bw-avatar::after{inset:-2px}'+  /* smaller ring */
+        '#bw-botname{font-size:13px}'+
         '#bw-status span:last-child{font-size:9.5px}'+
-        '.bw-hbtn{width:28px;height:28px}'+
-        '.bw-hbtn svg{width:12px;height:12px}'+
-        /* Messages compact */
-        '#bw-msgs{padding:14px 14px;gap:4px}'+
+        '.bw-hbtn{width:36px;height:36px;min-width:36px}'+
+        '.bw-hbtn svg{width:14px;height:14px}'+
+
+        /* ── Messages: flex:1 fills available space between header and input ── */
+        '#bw-msgs{padding:10px 14px;gap:4px}'+
         '.bw-msg.bot{max-width:100%}'+
-        '.bw-msg.user{max-width:88%}'+
-        '.bw-bubble{font-size:14px}'+
-        /* Input compact */
-        '#bw-inputarea{padding:8px 10px 10px}'+
-        '#bw-input{font-size:16px;padding:8px 12px 2px;min-height:32px}'+  /* 16px prevents iOS zoom on focus */
+        '.bw-msg.user{max-width:85%}'+
+        '.bw-bubble{font-size:14px;line-height:1.7}'+
+        '.bw-msg.user .bw-bubble{padding:9px 16px;border-radius:18px!important;border-bottom-right-radius:6px!important}'+
+
+        /* ── Input: anchored at bottom, keyboard pushes it up naturally ── */
+        '#bw-inputarea{padding:6px 10px calc(6px + env(safe-area-inset-bottom,0px));border-top:1px solid rgba(255,255,255,0.05)}'+
+        '#bw-input-wrap{border-radius:20px}'+
+        '#bw-input{font-size:16px;padding:8px 14px 2px;min-height:34px}'+
+        '#bw-input::placeholder{font-size:14px}'+
         '#bw-input-toolbar{padding:2px 6px 4px}'+
-        '.bw-toolbar-btn{width:26px;height:26px;font-size:14px}'+
-        '.bw-toolbar-btn svg{width:13px;height:13px}'+
-        '#bw-send{width:30px;height:30px}'+
-        '#bw-send svg{width:13px;height:13px}'+
-        /* FAB compact */
-        '#bw-trigger{height:40px;padding:0 14px 0 3px;border-radius:20px}'+
-        '#bw-fab-logo{width:34px;height:34px}'+
-        '#bw-fab-label{font-size:11px}'+
-        /* Emoji grid */
+        '.bw-toolbar-btn{width:30px;height:30px;font-size:15px}'+
+        '.bw-toolbar-btn svg{width:14px;height:14px}'+
+        '#bw-send{width:32px;height:32px}'+
+        '#bw-send svg{width:14px;height:14px}'+
+
+        /* ── Footer: minimal, safe-area ── */
+        '#bw-footer{padding:4px 8px calc(4px + env(safe-area-inset-bottom,0px));font-size:9px}'+
+
+        /* ── Upload ── */
+        '#bw-upload{margin:4px 14px 8px;padding:16px 14px}'+
+
+        /* ── Emoji: bigger targets ── */
+        '#bw-emoji-panel{left:6px;right:6px;bottom:58px;padding:10px}'+
         '#bw-emoji-panel.show{grid-template-columns:repeat(7,1fr)}'+
-        '#bw-emoji-panel{left:8px;right:8px;bottom:60px}'+
-        /* Exit overlay compact */
-        '#bw-exit-panel{padding:24px 20px}'+
-        '#bw-exit-title{font-size:18px;margin-bottom:20px}'+
-        '.bw-exit-circle{width:48px;height:48px;font-size:20px}'+
-        '#bw-exit-options{gap:20px}'+
-        /* Splash */
-        '#bw-splash-logo{width:120px;height:120px}'+
-        /* Lang popup */
-        '#bw-lang-popup{right:8px;left:8px}'+
+        '.bw-emo{font-size:22px}'+
+
+        /* ── Language popup ── */
+        '#bw-lang-popup{right:6px;left:6px;bottom:58px}'+
+        '.bw-lang-opt{padding:12px 16px;font-size:13px}'+
+
+        /* ── Exit overlay ── */
+        '#bw-exit-overlay{border-radius:0}'+
+        '#bw-exit-panel{padding:28px 20px}'+
+        '#bw-exit-title{font-size:20px;margin-bottom:24px}'+
+        '#bw-exit-options{gap:22px}'+
+        '.bw-exit-circle{width:50px;height:50px;font-size:21px}'+
+        '.bw-exit-label{font-size:11.5px}'+
+        '.bw-exit-star{font-size:34px;padding:4px}'+
+
+        /* ── Splash ── */
+        '#bw-splash{border-radius:0}'+
+        '#bw-splash-logo{width:100px;height:100px}'+
+        '#bw-splash-text{margin-top:20px}'+
+        '#bw-splash-line1{font-size:13px}'+
+        '#bw-splash-line2{font-size:10px}'+
+
+        /* ── Quick actions ── */
+        '#bw-qactions{padding:4px 14px 8px}'+
+        '.bw-qbtn{padding:10px 18px;font-size:13px}'+
+
+        /* ── ID form ── */
+        '#bw-idform{padding:4px 14px 8px}'+
+        '#bw-idinput{padding:11px 14px;font-size:14px;border-radius:14px}'+
+        '#bw-idconfirm{padding:11px 18px;font-size:14px;border-radius:14px}'+
+
+        /* ── Fullscreen toggle (same on mobile) ── */
+        '#bw-window.bw-fullscreen{top:0;left:0;right:0;bottom:0;width:100%;height:100%;border-radius:0}'+
+
+        /* ── Logo watermark ── */
+        '#bw-logo-bg img{width:80px;height:80px}'+
       '}'
     ].join('');
     document.head.appendChild(s);
@@ -2206,6 +2251,11 @@ function apiVerify(playerId) {
     STATE.isOpen = open;
     document.getElementById('bw-trigger').classList.toggle('bw-open', open);
     document.getElementById('bw-window').classList.toggle('bw-open', open);
+    // Mobile: hide page scroll when widget is open
+    if (window.innerWidth <= 440) {
+      document.documentElement.style.overflow = open ? 'hidden' : '';
+      document.body.style.overflow = open ? 'hidden' : '';
+    }
     if (open) {
       // Splash screen on first open only
       if (!splashShown) {
@@ -2418,24 +2468,13 @@ function apiVerify(playerId) {
       stopAgentPolling();
     });
 
-    // Mobile keyboard: resize widget to fit visible viewport
-    if (window.visualViewport) {
-      var bwWindow = null;
-      function adjustForKeyboard() {
-        if (!bwWindow) bwWindow = document.getElementById('bw-window');
-        if (!bwWindow || window.innerWidth > 440) return;
-        var vp = window.visualViewport;
-        var h = vp.height;
-        bwWindow.style.height = (h - 16) + 'px';
-        bwWindow.style.bottom = (vp.offsetTop + 8) + 'px';
-        // Scroll input into view
-        if (STATE.isOpen) {
-          var msgs = document.getElementById('bw-msgs');
-          if (msgs) msgs.scrollTop = msgs.scrollHeight;
-        }
-      }
-      window.visualViewport.addEventListener('resize', adjustForKeyboard);
-      window.visualViewport.addEventListener('scroll', adjustForKeyboard);
+    // Mobile: scroll messages when keyboard opens
+    if (window.visualViewport && window.innerWidth <= 440) {
+      window.visualViewport.addEventListener('resize', function() {
+        if (!STATE.isOpen) return;
+        var m = document.getElementById('bw-msgs');
+        if (m) m.scrollTop = m.scrollHeight;
+      });
     }
 
     // Add file input for live agent mode
