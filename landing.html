@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>BetonWin - Apuestas Deportivas</title>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" onload="this.rel='stylesheet'">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',system-ui,sans-serif;background:#060b14;color:#fff;min-height:100vh;min-height:100dvh;overflow-x:hidden}
+
+/* ===== HERO ===== */
+.hero{
+  position:relative;
+  width:100%;
+  min-height:100vh;min-height:100dvh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  overflow:hidden;
+}
+
+/* Stadium atmosphere layers */
+.hero::before{
+  content:'';position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% 35%, rgba(57,211,83,0.10) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 40% at 20% 50%, rgba(57,211,83,0.04) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 50%, rgba(57,211,83,0.04) 0%, transparent 60%),
+    linear-gradient(180deg, #0a1628 0%, #071020 50%, #060b14 100%);
+  z-index:0;
+}
+
+/* Diagonal energy lines */
+.hero::after{
+  content:'';position:absolute;inset:0;z-index:1;opacity:0.4;
+  background:
+    linear-gradient(135deg, transparent 0%, transparent 20%, rgba(57,211,83,0.06) 20.5%, transparent 21%),
+    linear-gradient(-135deg, transparent 0%, transparent 20%, rgba(57,211,83,0.06) 20.5%, transparent 21%),
+    linear-gradient(135deg, transparent 45%, rgba(57,211,83,0.03) 45.5%, transparent 46%),
+    linear-gradient(-135deg, transparent 45%, rgba(57,211,83,0.03) 45.5%, transparent 46%);
+}
+
+/* ===== BONUS STRIP ===== */
+.bonus{
+  position:relative;z-index:10;width:100%;
+  padding:14px 20px;
+  background:linear-gradient(90deg,#2ab847,#39d353,#2ab847);
+  text-align:center;
+  font-size:13px;font-weight:700;color:#060b14;
+  letter-spacing:0.8px;text-transform:uppercase;
+  line-height:1.4;
+}
+.bonus strong{font-size:17px;font-weight:900;display:block;margin-top:1px}
+
+/* ===== MATCH VISUAL BLOCK ===== */
+.match-block{
+  position:relative;z-index:10;
+  width:100%;max-width:520px;
+  margin-top:clamp(20px,5vh,40px);
+  padding:0 16px;
+  display:flex;flex-direction:column;align-items:center;
+}
+
+/* Date/time badge */
+.match-time{
+  font-size:12px;font-weight:600;
+  color:rgba(255,255,255,0.45);
+  letter-spacing:1.5px;text-transform:uppercase;
+  margin-bottom:16px;
+}
+
+/* Confrontation area */
+.confrontation{
+  position:relative;
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:0;
+  padding:20px 0;
+}
+
+/* Each team side */
+.team-side{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:10px;
+  position:relative;
+}
+
+/* Team crest — the hero visual */
+.team-crest{
+  width:clamp(100px,22vw,140px);
+  height:clamp(100px,22vw,140px);
+  object-fit:contain;
+  filter:drop-shadow(0 0 40px rgba(57,211,83,0.15)) drop-shadow(0 8px 30px rgba(0,0,0,0.6));
+  transition:transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+}
+.team-side:hover .team-crest{transform:scale(1.06)}
+
+/* Glow ring behind crest */
+.team-side::before{
+  content:'';position:absolute;
+  top:50%;left:50%;
+  width:clamp(120px,25vw,160px);height:clamp(120px,25vw,160px);
+  transform:translate(-50%,-55%);
+  border-radius:50%;
+  background:radial-gradient(circle, rgba(57,211,83,0.08) 0%, transparent 70%);
+  z-index:-1;
+}
+
+.team-label{
+  font-size:clamp(16px,4vw,22px);
+  font-weight:900;
+  text-transform:uppercase;
+  letter-spacing:0.5px;
+  text-align:center;
+  line-height:1.15;
+  max-width:160px;
+}
+
+/* Rank badge */
+.rank{
+  font-size:10px;font-weight:700;
+  color:#39d353;letter-spacing:1px;
+  text-transform:uppercase;
+  opacity:0.8;
+}
+
+/* Center VS divider */
+.vs-divider{
+  display:flex;flex-direction:column;align-items:center;
+  gap:6px;padding:0 8px;
+  flex-shrink:0;
+}
+.vs-line{width:1px;height:30px;background:linear-gradient(180deg,transparent,rgba(57,211,83,0.3),transparent)}
+.vs-badge{
+  width:42px;height:42px;
+  border-radius:50%;
+  border:2px solid rgba(57,211,83,0.3);
+  background:rgba(57,211,83,0.06);
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:900;
+  color:rgba(255,255,255,0.4);
+  letter-spacing:2px;
+}
+
+/* ===== STAR PLAYERS ===== */
+.stars{
+  position:relative;z-index:10;
+  width:100%;max-width:520px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:16px;
+  margin-top:16px;
+  padding:0 16px;
+}
+
+.star-player{
+  flex:1;
+  display:flex;align-items:center;gap:10px;
+  padding:10px 12px;
+  background:rgba(255,255,255,0.04);
+  border:1px solid rgba(255,255,255,0.06);
+  border-radius:12px;
+  transition:border-color 0.3s;
+}
+.star-player:hover{border-color:rgba(57,211,83,0.2)}
+
+/* Player photo — small circle */
+.star-photo{
+  width:40px;height:40px;
+  border-radius:50%;
+  object-fit:cover;
+  border:2px solid rgba(57,211,83,0.3);
+  flex-shrink:0;
+}
+.star-info{display:flex;flex-direction:column;gap:1px;min-width:0}
+.star-name{font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.star-stat{font-size:10px;color:#39d353;font-weight:600;letter-spacing:0.5px}
+
+/* ===== ODDS BAR ===== */
+.odds{
+  position:relative;z-index:10;
+  display:flex;align-items:stretch;
+  margin-top:clamp(20px,4vh,32px);
+  border-radius:14px;
+  overflow:hidden;
+  border:2px solid rgba(57,211,83,0.5);
+  background:rgba(6,11,20,0.9);
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+}
+.odds-cell{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:14px clamp(24px,6vw,40px);
+  min-width:clamp(80px,18vw,110px);
+  cursor:pointer;
+  transition:background 0.2s;
+}
+.odds-cell:hover{background:rgba(57,211,83,0.08)}
+.odds-cell:not(:last-child){border-right:1px solid rgba(57,211,83,0.2)}
+.odds-label{font-size:12px;font-weight:800;color:#39d353;margin-bottom:4px}
+.odds-value{font-size:clamp(18px,4.5vw,24px);font-weight:900}
+
+/* ===== CTA ===== */
+.cta-wrap{
+  position:relative;z-index:10;
+  display:flex;flex-direction:column;align-items:center;
+  gap:10px;
+  margin-top:clamp(24px,5vh,40px);
+  padding:0 16px clamp(24px,5vh,40px);
+}
+.cta{
+  display:inline-flex;align-items:center;justify-content:center;
+  padding:18px clamp(40px,10vw,72px);
+  background:linear-gradient(135deg,#39d353,#2ab847);
+  color:#060b14;
+  font-size:clamp(17px,4vw,21px);font-weight:900;
+  text-transform:uppercase;letter-spacing:2px;
+  border-radius:14px;
+  text-decoration:none;
+  border:none;cursor:pointer;
+  box-shadow:0 0 40px rgba(57,211,83,0.35),0 8px 30px rgba(0,0,0,0.4);
+  transition:transform 0.25s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.25s;
+}
+.cta:hover{
+  transform:translateY(-3px) scale(1.02);
+  box-shadow:0 0 60px rgba(57,211,83,0.5),0 14px 40px rgba(0,0,0,0.5);
+}
+.cta-note{font-size:11px;color:rgba(255,255,255,0.3);text-align:center}
+
+/* ===== LOADING ===== */
+.is-loading{display:flex;align-items:center;justify-content:center;min-height:100vh;gap:12px}
+.is-loading .dot{width:8px;height:8px;border-radius:50%;background:#39d353;animation:bounce 1.2s ease-in-out infinite}
+.is-loading .dot:nth-child(2){animation-delay:0.15s}
+.is-loading .dot:nth-child(3){animation-delay:0.3s}
+@keyframes bounce{0%,80%,100%{transform:scale(0.6);opacity:0.4}40%{transform:scale(1);opacity:1}}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:400px){
+  .team-label{font-size:14px;max-width:120px}
+  .star-player{padding:8px 10px}
+  .star-photo{width:34px;height:34px}
+  .star-name{font-size:11px}
+  .confrontation{padding:10px 0}
+}
+</style>
+</head>
+<body>
+
+<div id="app" class="is-loading">
+  <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+</div>
+
+<script>
+const WEBHOOK_URL = "https://n8nbeton.online/webhook/landing-match";
+const REG_URL = "https://beton.win/es/regtel/4";
+
+async function loadMatch() {
+  try {
+    const res = await fetch(WEBHOOK_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ league: 128, season: 2026 })
+    });
+    const data = await res.json();
+    render(data);
+  } catch (e) {
+    document.getElementById("app").innerHTML = '<p style="text-align:center;padding:40px;color:#39d353">Error cargando datos</p>';
+  }
+}
+
+function fmtDate(iso) {
+  const d = new Date(iso);
+  const days = ["DOM","LUN","MAR","MIÉ","JUE","VIE","SÁB"];
+  const months = ["ENE","FEB","MAR","ABR","MAY","JUN","JUL","AGO","SEP","OCT","NOV","DIC"];
+  return `${days[d.getDay()]} ${d.getDate()} ${months[d.getMonth()]} · ${d.getHours().toString().padStart(2,"0")}:${d.getMinutes().toString().padStart(2,"0")}HS`;
+}
+
+function statLine(p) {
+  if (!p) return "";
+  const g = p.goals || 0, a = p.assists || 0;
+  const parts = [];
+  if (g) parts.push(g + " GOL" + (g > 1 ? "ES" : ""));
+  if (a) parts.push(a + " ASIST.");
+  return parts.join(" · ") || "ESTRELLA";
+}
+
+function render(d) {
+  const hp = (d.home_players || [])[0] || {};
+  const ap = (d.away_players || [])[0] || {};
+  const o = d.odds || {};
+
+  document.getElementById("app").className = "";
+  document.getElementById("app").innerHTML = `
+<div class="hero">
+  <div class="bonus">
+    ¡Bono de Bienvenida Deportes!
+    <strong>700% + $30.000 en apuestas gratis</strong>
+  </div>
+
+  <div class="match-block">
+    <div class="match-time">${fmtDate(d.date)}</div>
+
+    <div class="confrontation">
+      <div class="team-side">
+        <img class="team-crest" src="${d.home_logo}" alt="${d.home_name}">
+        <div class="team-label">${d.home_name}</div>
+        ${d.home_rank ? `<div class="rank">#${d.home_rank} en la tabla</div>` : ""}
+      </div>
+
+      <div class="vs-divider">
+        <div class="vs-line"></div>
+        <div class="vs-badge">VS</div>
+        <div class="vs-line"></div>
+      </div>
+
+      <div class="team-side">
+        <img class="team-crest" src="${d.away_logo}" alt="${d.away_name}">
+        <div class="team-label">${d.away_name}</div>
+        ${d.away_rank ? `<div class="rank">#${d.away_rank} en la tabla</div>` : ""}
+      </div>
+    </div>
+  </div>
+
+  <div class="stars">
+    <div class="star-player">
+      ${hp.photo ? `<img class="star-photo" src="${hp.photo}" alt="${hp.name}" onerror="this.style.display='none'">` : ""}
+      <div class="star-info">
+        <div class="star-name">${hp.name || "—"}</div>
+        <div class="star-stat">${statLine(hp)}</div>
+      </div>
+    </div>
+    <div class="star-player">
+      ${ap.photo ? `<img class="star-photo" src="${ap.photo}" alt="${ap.name}" onerror="this.style.display='none'">` : ""}
+      <div class="star-info">
+        <div class="star-name">${ap.name || "—"}</div>
+        <div class="star-stat">${statLine(ap)}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="odds">
+    <div class="odds-cell">
+      <div class="odds-label">1</div>
+      <div class="odds-value">${o.home?.toFixed(2) || "—"}</div>
+    </div>
+    <div class="odds-cell">
+      <div class="odds-label">X</div>
+      <div class="odds-value">${o.draw?.toFixed(2) || "—"}</div>
+    </div>
+    <div class="odds-cell">
+      <div class="odds-label">2</div>
+      <div class="odds-value">${o.away?.toFixed(2) || "—"}</div>
+    </div>
+  </div>
+
+  <div class="cta-wrap">
+    <a href="${REG_URL}" class="cta" target="_blank">APOSTAR AHORA</a>
+    <div class="cta-note">Regístrate y obtén tu bono de bienvenida</div>
+  </div>
+</div>`;
+}
+
+loadMatch();
+</script>
+</body>
+</html>

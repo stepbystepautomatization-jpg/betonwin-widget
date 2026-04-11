@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html><head><style>body{background:#111;display:flex;gap:20px;align-items:center;justify-content:center;height:100vh;margin:0}</style></head>
+<body>
+<!-- Reference at 48px -->
+<div style="text-align:center;color:#666;font-family:sans-serif">
+  <img src="favicon1.png" width="80" style="border-radius:50%">
+  <div>Original 48px</div>
+</div>
+
+<!-- SVG recreation at 80px -->
+<div style="text-align:center;color:#666;font-family:sans-serif">
+<svg width="80" height="80" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0a3d3d"/>
+      <stop offset="100%" stop-color="#03242D"/>
+    </linearGradient>
+  </defs>
+  <circle cx="100" cy="100" r="100" fill="url(#bg)"/>
+  <text x="100" y="72" text-anchor="middle" font-family="Inter,Helvetica,Arial,sans-serif" font-size="32" font-weight="700" fill="#ffffff" letter-spacing="3">BET</text>
+  <text x="100" y="128" text-anchor="middle" font-family="Inter,Helvetica,Arial,sans-serif" font-size="62" font-weight="800" fill="#45cd98" letter-spacing="2">ON</text>
+  <text x="100" y="168" text-anchor="middle" font-family="Inter,Helvetica,Arial,sans-serif" font-size="32" font-weight="700" fill="#ffffff" letter-spacing="3">WIN</text>
+</svg>
+<div>SVG 80px</div>
+</div>
+
+<!-- SVG at 120px -->
+<div style="text-align:center;color:#666;font-family:sans-serif">
+<svg width="120" height="120" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0a3d3d"/>
+      <stop offset="100%" stop-color="#03242D"/>
+    </linearGradient>
+  </defs>
+  <circle cx="100" cy="100" r="100" fill="url(#bg2)"/>
+  <text x="100" y="72" text-anchor="middle" font-family="Inter,Helvetica,Arial,sans-serif" font-size="32" font-weight="700" fill="#ffffff" letter-spacing="3">BET</text>
+  <text x="100" y="128" text-anchor="middle" font-family="Inter,Helvetica,Arial,sans-serif" font-size="62" font-weight="800" fill="#45cd98" letter-spacing="2">ON</text>
+  <text x="100" y="168" text-anchor="middle" font-family="Inter,Helvetica,Arial,sans-serif" font-size="32" font-weight="700" fill="#ffffff" letter-spacing="3">WIN</text>
+</svg>
+<div>SVG 120px</div>
+</div>
+</body></html>

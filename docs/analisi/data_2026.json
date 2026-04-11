@@ -1,0 +1,68 @@
+{
+  "total": 9000,
+  "monthly_volume": {
+    "2026-01": 5000,
+    "2026-02": 4000
+  },
+  "topic_counts": {
+    "Account / Login Issues": 151,
+    "Greeting Only (no question)": 3258,
+    "Bonus / Promotions": 864,
+    "Balance / Account Info": 114,
+    "Casino / Games / Bets": 621,
+    "Bank Transfer / Comprobante": 1253,
+    "Deposit Not Credited": 549,
+    "How to Withdraw": 388,
+    "Technical / App / Website": 637,
+    "KYC / Verification": 780,
+    "Recarga / Top-up": 80,
+    "Complaint / Dissatisfaction": 77,
+    "How to Deposit": 55,
+    "Withdrawal Pending / Delay": 6,
+    "Deposit Processing Delay": 26,
+    "Uncategorized": 110,
+    "Deposit Failed / Declined": 27,
+    "Withdrawal Rejected": 4
+  },
+  "monthly_topic": {
+    "2026-01": {
+      "Account / Login Issues": 96,
+      "Greeting Only (no question)": 1525,
+      "Bonus / Promotions": 562,
+      "Balance / Account Info": 53,
+      "Casino / Games / Bets": 415,
+      "Bank Transfer / Comprobante": 830,
+      "Deposit Not Credited": 378,
+      "How to Withdraw": 146,
+      "Technical / App / Website": 375,
+      "KYC / Verification": 414,
+      "Recarga / Top-up": 54,
+      "Complaint / Dissatisfaction": 41,
+      "How to Deposit": 30,
+      "Withdrawal Pending / Delay": 3,
+      "Deposit Processing Delay": 14,
+      "Uncategorized": 55,
+      "Deposit Failed / Declined": 9
+    },
+    "2026-02": {
+      "Deposit Not Credited": 171,
+      "Greeting Only (no question)": 1733,
+      "Casino / Games / Bets": 206,
+      "Account / Login Issues": 55,
+      "Bonus / Promotions": 302,
+      "Technical / App / Website": 262,
+      "Complaint / Dissatisfaction": 36,
+      "KYC / Verification": 366,
+      "How to Withdraw": 242,
+      "How to Deposit": 25,
+      "Bank Transfer / Comprobante": 423,
+      "Deposit Failed / Declined": 18,
+      "Withdrawal Pending / Delay": 3,
+      "Balance / Account Info": 61,
+      "Withdrawal Rejected": 4,
+      "Recarga / Top-up": 26,
+      "Uncategorized": 55,
+      "Deposit Processing Delay": 12
+    }
+  }
+}

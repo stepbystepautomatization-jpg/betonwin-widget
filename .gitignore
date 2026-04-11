@@ -1,10 +1,12 @@
 # Secrets — NEVER commit
 *.env
-gr8.env
-zendesk.env
+config/*.env
 
 # OS
 .DS_Store
 
-# Analysis docs
-Analisi /
+# Large data files
+*.csv
+
+# Node modules
+node_modules/

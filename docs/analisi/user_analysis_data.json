@@ -1,0 +1,805 @@
+{
+  "total_tickets": 22000,
+  "total_unique_users": 14888,
+  "monthly_volume": {
+    "2025-10": 5000,
+    "2025-11": 4000,
+    "2025-12": 5000,
+    "2026-01": 4000,
+    "2026-02": 4000
+  },
+  "user_buckets": {
+    "exactly_2": 2660,
+    "3_to_5": 1406,
+    "6_to_10": 135,
+    "11_to_20": 13,
+    "20_plus": 1
+  },
+  "multi_ticket_user_count": 4215,
+  "single_ticket_user_count": 10673,
+  "topic_recurring_users": {
+    "Uncategorized": {
+      "total_tickets_from_recurring": 9756,
+      "unique_recurring_users": 3702
+    },
+    "Greeting Only (no question)": {
+      "total_tickets_from_recurring": 613,
+      "unique_recurring_users": 237
+    },
+    "Technical / App / Website": {
+      "total_tickets_from_recurring": 155,
+      "unique_recurring_users": 79
+    },
+    "Casino / Games / Bets": {
+      "total_tickets_from_recurring": 128,
+      "unique_recurring_users": 82
+    },
+    "Bank Transfer / Comprobante": {
+      "total_tickets_from_recurring": 126,
+      "unique_recurring_users": 83
+    },
+    "How to Withdraw": {
+      "total_tickets_from_recurring": 114,
+      "unique_recurring_users": 49
+    },
+    "Bonus / Promotions": {
+      "total_tickets_from_recurring": 110,
+      "unique_recurring_users": 61
+    },
+    "KYC / Verification": {
+      "total_tickets_from_recurring": 95,
+      "unique_recurring_users": 50
+    },
+    "Deposit Not Credited": {
+      "total_tickets_from_recurring": 83,
+      "unique_recurring_users": 35
+    },
+    "Balance / Account Info": {
+      "total_tickets_from_recurring": 59,
+      "unique_recurring_users": 33
+    },
+    "How to Deposit": {
+      "total_tickets_from_recurring": 25,
+      "unique_recurring_users": 6
+    },
+    "Complaint / Dissatisfaction": {
+      "total_tickets_from_recurring": 20,
+      "unique_recurring_users": 12
+    },
+    "Account / Login Issues": {
+      "total_tickets_from_recurring": 17,
+      "unique_recurring_users": 9
+    },
+    "Recarga / Top-up": {
+      "total_tickets_from_recurring": 15,
+      "unique_recurring_users": 7
+    },
+    "Deposit Failed / Declined": {
+      "total_tickets_from_recurring": 8,
+      "unique_recurring_users": 4
+    },
+    "Withdrawal Rejected": {
+      "total_tickets_from_recurring": 2,
+      "unique_recurring_users": 1
+    },
+    "Withdrawal Pending / Delay": {
+      "total_tickets_from_recurring": 1,
+      "unique_recurring_users": 1
+    }
+  },
+  "same_topic_frustration": {
+    "Uncategorized": {
+      "users": 3622,
+      "total_tickets": 9676
+    },
+    "Greeting Only (no question)": {
+      "users": 195,
+      "total_tickets": 571
+    },
+    "Technical / App / Website": {
+      "users": 51,
+      "total_tickets": 127
+    },
+    "How to Withdraw": {
+      "users": 38,
+      "total_tickets": 103
+    },
+    "Casino / Games / Bets": {
+      "users": 34,
+      "total_tickets": 80
+    },
+    "KYC / Verification": {
+      "users": 33,
+      "total_tickets": 78
+    },
+    "Bank Transfer / Comprobante": {
+      "users": 31,
+      "total_tickets": 74
+    },
+    "Bonus / Promotions": {
+      "users": 30,
+      "total_tickets": 79
+    },
+    "Deposit Not Credited": {
+      "users": 27,
+      "total_tickets": 75
+    },
+    "Balance / Account Info": {
+      "users": 21,
+      "total_tickets": 47
+    },
+    "Recarga / Top-up": {
+      "users": 6,
+      "total_tickets": 14
+    },
+    "How to Deposit": {
+      "users": 5,
+      "total_tickets": 24
+    },
+    "Account / Login Issues": {
+      "users": 5,
+      "total_tickets": 13
+    },
+    "Complaint / Dissatisfaction": {
+      "users": 3,
+      "total_tickets": 11
+    },
+    "Deposit Failed / Declined": {
+      "users": 2,
+      "total_tickets": 6
+    },
+    "Withdrawal Rejected": {
+      "users": 1,
+      "total_tickets": 2
+    }
+  },
+  "top_frustrated_users": [
+    {
+      "user_id": "29547546107410",
+      "ticket_count": 37,
+      "topics": {
+        "Uncategorized": 37
+      },
+      "months_active": [
+        "2025-10",
+        "2025-11"
+      ],
+      "first_ticket": "2025-10-09T15:07:36",
+      "last_ticket": "2025-11-06T14:08:53"
+    },
+    {
+      "user_id": "30613096929170",
+      "ticket_count": 20,
+      "topics": {
+        "Uncategorized": 19,
+        "Deposit Failed / Declined": 1
+      },
+      "months_active": [
+        "2025-10",
+        "2025-11"
+      ],
+      "first_ticket": "2025-10-29T01:06:00",
+      "last_ticket": "2025-11-19T22:06:35"
+    },
+    {
+      "user_id": "27922585765522",
+      "ticket_count": 14,
+      "topics": {
+        "Uncategorized": 14
+      },
+      "months_active": [
+        "2025-10",
+        "2025-11"
+      ],
+      "first_ticket": "2025-10-01T03:41:23",
+      "last_ticket": "2025-11-12T19:07:58"
+    },
+    {
+      "user_id": "30133940804882",
+      "ticket_count": 14,
+      "topics": {
+        "Uncategorized": 13,
+        "Bank Transfer / Comprobante": 1
+      },
+      "months_active": [
+        "2025-10",
+        "2025-11",
+        "2025-12"
+      ],
+      "first_ticket": "2025-10-10T17:40:47",
+      "last_ticket": "2025-12-10T17:05:43"
+    },
+    {
+      "user_id": "30683526567314",
+      "ticket_count": 14,
+      "topics": {
+        "Uncategorized": 14
+      },
+      "months_active": [
+        "2025-10",
+        "2025-11",
+        "2025-12"
+      ],
+      "first_ticket": "2025-10-31T11:04:47",
+      "last_ticket": "2025-12-24T00:34:58"
+    },
+    {
+      "user_id": "30432303606034",
+      "ticket_count": 13,
+      "topics": {
+        "Greeting Only (no question)": 13
+      },
+      "months_active": [
+        "2025-10"
+      ],
+      "first_ticket": "2025-10-22T04:42:15",
+      "last_ticket": "2025-10-26T07:41:40"
+    },
+    {
+      "user_id": "30542650398098",
+      "ticket_count": 13,
+      "topics": {
+        "Uncategorized": 13
+      },
+      "months_active": [
+        "2025-10",
+        "2025-11",
+        "2025-12"
+      ],
+      "first_ticket": "2025-10-26T12:53:58",
+      "last_ticket": "2025-12-03T04:07:28"
+    },
+    {
+      "user_id": "28393674997138",
+      "ticket_count": 13,
+      "topics": {
+        "Uncategorized": 13
+      },
+      "months_active": [
+        "2025-10",
+        "2025-12",
+        "2026-01"
+      ],
+      "first_ticket": "2025-10-31T17:16:25",
+      "last_ticket": "2026-01-21T12:12:16"
+    },
+    {
+      "user_id": "31131560923154",
+      "ticket_count": 12,
+      "topics": {
+        "How to Deposit": 12
+      },
+      "months_active": [
+        "2025-12"
+      ],
+      "first_ticket": "2025-12-03T01:01:29",
+      "last_ticket": "2025-12-24T00:08:23"
+    },
+    {
+      "user_id": "30101150841618",
+      "ticket_count": 11,
+      "topics": {
+        "Uncategorized": 11
+      },
+      "months_active": [
+        "2025-10",
+        "2025-11"
+      ],
+      "first_ticket": "2025-10-09T14:12:53",
+      "last_ticket": "2025-11-14T00:09:18"
+    },
+    {
+      "user_id": "30441699806610",
+      "ticket_count": 11,
+      "topics": {
+        "Uncategorized": 10,
+        "Bonus / Promotions": 1
+      },
+      "months_active": [
+        "2025-10"
+      ],
+      "first_ticket": "2025-10-22T10:23:48",
+      "last_ticket": "2025-10-25T17:52:42"
+    },
+    {
+      "user_id": "30614098257170",
+      "ticket_count": 11,
+      "topics": {
+        "Uncategorized": 11
+      },
+      "months_active": [
+        "2025-10",
+        "2025-11"
+      ],
+      "first_ticket": "2025-10-29T03:06:42",
+      "last_ticket": "2025-11-12T15:03:38"
+    },
+    {
+      "user_id": "32247363068818",
+      "ticket_count": 11,
+      "topics": {
+        "Uncategorized": 11
+      },
+      "months_active": [
+        "2026-01"
+      ],
+      "first_ticket": "2026-01-07T00:36:32",
+      "last_ticket": "2026-01-21T09:31:28"
+    },
+    {
+      "user_id": "32527037211154",
+      "ticket_count": 11,
+      "topics": {
+        "Uncategorized": 11
+      },
+      "months_active": [
+        "2026-01"
+      ],
+      "first_ticket": "2026-01-14T00:11:55",
+      "last_ticket": "2026-01-28T02:38:31"
+    },
+    {
+      "user_id": "30092898008466",
+      "ticket_count": 10,
+      "topics": {
+        "Greeting Only (no question)": 10
+      },
+      "months_active": [
+        "2025-10",
+        "2025-12",
+        "2026-01"
+      ],
+      "first_ticket": "2025-10-09T09:51:50",
+      "last_ticket": "2026-01-07T01:51:52"
+    },
+    {
+      "user_id": "30164119913490",
+      "ticket_count": 10,
+      "topics": {
+        "Uncategorized": 10
+      },
+      "months_active": [
+        "2025-10"
+      ],
+      "first_ticket": "2025-10-12T12:23:31",
+      "last_ticket": "2025-10-29T10:39:39"
+    },
+    {
+      "user_id": "28371114117138",
+      "ticket_count": 10,
+      "topics": {
+        "Uncategorized": 10
+      },
+      "months_active": [
+        "2025-10"
+      ],
+      "first_ticket": "2025-10-16T00:23:26",
+      "last_ticket": "2025-10-18T11:12:19"
+    },
+    {
+      "user_id": "31015591105810",
+      "ticket_count": 10,
+      "topics": {
+        "Uncategorized": 10
+      },
+      "months_active": [
+        "2025-11"
+      ],
+      "first_ticket": "2025-11-13T00:38:11",
+      "last_ticket": "2025-11-13T19:13:55"
+    },
+    {
+      "user_id": "31905063033490",
+      "ticket_count": 10,
+      "topics": {
+        "Uncategorized": 10
+      },
+      "months_active": [
+        "2025-12"
+      ],
+      "first_ticket": "2025-12-24T19:45:44",
+      "last_ticket": "2025-12-31T07:23:56"
+    },
+    {
+      "user_id": "29880857530514",
+      "ticket_count": 9,
+      "topics": {
+        "Uncategorized": 9
+      },
+      "months_active": [
+        "2025-10"
+      ],
+      "first_ticket": "2025-10-01T05:01:35",
+      "last_ticket": "2025-10-02T04:31:33"
+    },
+    {
+      "user_id": "29665580590738",
+      "ticket_count": 9,
+      "topics": {
+        "Uncategorized": 9
+      },
+      "months_active": [
+        "2025-10",
+        "2025-12"
+      ],
+      "first_ticket": "2025-10-01T16:43:37",
+      "last_ticket": "2025-12-31T12:50:33"
+    },
+    {
+      "user_id": "29497783716754",
+      "ticket_count": 9,
+      "topics": {
+        "Uncategorized": 9
+      },
+      "months_active": [
+        "2025-10",
+        "2025-11"
+      ],
+      "first_ticket": "2025-10-08T00:17:46",
+      "last_ticket": "2025-11-13T18:36:15"
+    },
+    {
+      "user_id": "30191521058450",
+      "ticket_count": 9,
+      "topics": {
+        "How to Withdraw": 9
+      },
+      "months_active": [
+        "2025-10"
+      ],
+      "first_ticket": "2025-10-16T20:18:38",
+      "last_ticket": "2025-10-24T02:43:48"
+    },
+    {
+      "user_id": "30430944613266",
+      "ticket_count": 9,
+      "topics": {
+        "Uncategorized": 9
+      },
+      "months_active": [
+        "2025-10"
+      ],
+      "first_ticket": "2025-10-22T02:18:19",
+      "last_ticket": "2025-10-24T02:35:05"
+    },
+    {
+      "user_id": "30615744666002",
+      "ticket_count": 9,
+      "topics": {
+        "Greeting Only (no question)": 9
+      },
+      "months_active": [
+        "2025-10"
+      ],
+      "first_ticket": "2025-10-29T05:20:14",
+      "last_ticket": "2025-10-29T20:10:11"
+    },
+    {
+      "user_id": "30814781403154",
+      "ticket_count": 9,
+      "topics": {
+        "Uncategorized": 9
+      },
+      "months_active": [
+        "2025-11",
+        "2025-12"
+      ],
+      "first_ticket": "2025-11-05T12:33:15",
+      "last_ticket": "2025-12-03T16:27:06"
+    },
+    {
+      "user_id": "30718370382098",
+      "ticket_count": 9,
+      "topics": {
+        "Uncategorized": 9
+      },
+      "months_active": [
+        "2025-11",
+        "2025-12"
+      ],
+      "first_ticket": "2025-11-13T02:56:04",
+      "last_ticket": "2025-12-17T15:02:16"
+    },
+    {
+      "user_id": "29578168565010",
+      "ticket_count": 8,
+      "topics": {
+        "Uncategorized": 8
+      },
+      "months_active": [
+        "2025-10"
+      ],
+      "first_ticket": "2025-10-01T17:24:46",
+      "last_ticket": "2025-10-30T02:53:58"
+    },
+    {
+      "user_id": "29626523406354",
+      "ticket_count": 8,
+      "topics": {
+        "Uncategorized": 8
+      },
+      "months_active": [
+        "2025-10"
+      ],
+      "first_ticket": "2025-10-01T19:19:53",
+      "last_ticket": "2025-10-19T03:11:50"
+    },
+    {
+      "user_id": "29847422715794",
+      "ticket_count": 8,
+      "topics": {
+        "Uncategorized": 8
+      },
+      "months_active": [
+        "2025-10"
+      ],
+      "first_ticket": "2025-10-02T02:47:47",
+      "last_ticket": "2025-10-24T02:38:02"
+    },
+    {
+      "user_id": "28898158433810",
+      "ticket_count": 8,
+      "topics": {
+        "Uncategorized": 7,
+        "Bonus / Promotions": 1
+      },
+      "months_active": [
+        "2025-10",
+        "2025-11"
+      ],
+      "first_ticket": "2025-10-11T22:30:20",
+      "last_ticket": "2025-11-26T14:29:09"
+    },
+    {
+      "user_id": "30340722952594",
+      "ticket_count": 8,
+      "topics": {
+        "Uncategorized": 8
+      },
+      "months_active": [
+        "2025-10"
+      ],
+      "first_ticket": "2025-10-19T02:23:36",
+      "last_ticket": "2025-10-30T01:45:48"
+    },
+    {
+      "user_id": "28179489081490",
+      "ticket_count": 8,
+      "topics": {
+        "Uncategorized": 8
+      },
+      "months_active": [
+        "2025-10",
+        "2025-12"
+      ],
+      "first_ticket": "2025-10-31T03:58:16",
+      "last_ticket": "2025-12-03T11:38:05"
+    },
+    {
+      "user_id": "30824711893394",
+      "ticket_count": 8,
+      "topics": {
+        "Uncategorized": 8
+      },
+      "months_active": [
+        "2025-11",
+        "2025-12"
+      ],
+      "first_ticket": "2025-11-05T18:00:10",
+      "last_ticket": "2025-12-17T07:58:53"
+    },
+    {
+      "user_id": "31201584250386",
+      "ticket_count": 8,
+      "topics": {
+        "Uncategorized": 8
+      },
+      "months_active": [
+        "2025-11",
+        "2025-12",
+        "2026-01"
+      ],
+      "first_ticket": "2025-11-20T01:15:46",
+      "last_ticket": "2026-01-07T12:05:49"
+    },
+    {
+      "user_id": "31361638155154",
+      "ticket_count": 8,
+      "topics": {
+        "Uncategorized": 8
+      },
+      "months_active": [
+        "2025-11"
+      ],
+      "first_ticket": "2025-11-26T03:15:11",
+      "last_ticket": "2025-11-26T13:23:12"
+    },
+    {
+      "user_id": "31373095359762",
+      "ticket_count": 8,
+      "topics": {
+        "Uncategorized": 8
+      },
+      "months_active": [
+        "2025-11"
+      ],
+      "first_ticket": "2025-11-26T12:04:09",
+      "last_ticket": "2025-11-26T20:46:42"
+    },
+    {
+      "user_id": "31389585139474",
+      "ticket_count": 8,
+      "topics": {
+        "Uncategorized": 8
+      },
+      "months_active": [
+        "2025-12"
+      ],
+      "first_ticket": "2025-12-03T15:42:48",
+      "last_ticket": "2025-12-31T04:52:53"
+    },
+    {
+      "user_id": "32082841048722",
+      "ticket_count": 8,
+      "topics": {
+        "Greeting Only (no question)": 8
+      },
+      "months_active": [
+        "2025-12",
+        "2026-01"
+      ],
+      "first_ticket": "2025-12-24T12:02:30",
+      "last_ticket": "2026-01-28T09:30:20"
+    },
+    {
+      "user_id": "32086810227986",
+      "ticket_count": 8,
+      "topics": {
+        "Greeting Only (no question)": 8
+      },
+      "months_active": [
+        "2025-12",
+        "2026-01"
+      ],
+      "first_ticket": "2025-12-24T15:13:49",
+      "last_ticket": "2026-01-07T05:57:50"
+    },
+    {
+      "user_id": "32205342342546",
+      "ticket_count": 8,
+      "topics": {
+        "Uncategorized": 8
+      },
+      "months_active": [
+        "2025-12"
+      ],
+      "first_ticket": "2025-12-31T00:06:10",
+      "last_ticket": "2025-12-31T15:30:32"
+    },
+    {
+      "user_id": "32207354628370",
+      "ticket_count": 8,
+      "topics": {
+        "Uncategorized": 8
+      },
+      "months_active": [
+        "2025-12"
+      ],
+      "first_ticket": "2025-12-31T04:39:54",
+      "last_ticket": "2025-12-31T13:37:28"
+    },
+    {
+      "user_id": "32118177086098",
+      "ticket_count": 8,
+      "topics": {
+        "Uncategorized": 8
+      },
+      "months_active": [
+        "2025-12",
+        "2026-01"
+      ],
+      "first_ticket": "2025-12-31T13:07:27",
+      "last_ticket": "2026-01-14T16:44:26"
+    },
+    {
+      "user_id": "29844971896850",
+      "ticket_count": 7,
+      "topics": {
+        "Uncategorized": 7
+      },
+      "months_active": [
+        "2025-10",
+        "2025-12"
+      ],
+      "first_ticket": "2025-10-01T00:26:33",
+      "last_ticket": "2025-12-17T12:40:32"
+    },
+    {
+      "user_id": "29896168265874",
+      "ticket_count": 7,
+      "topics": {
+        "Uncategorized": 7
+      },
+      "months_active": [
+        "2025-10"
+      ],
+      "first_ticket": "2025-10-01T13:50:37",
+      "last_ticket": "2025-10-31T02:11:00"
+    },
+    {
+      "user_id": "28573140565650",
+      "ticket_count": 7,
+      "topics": {
+        "Uncategorized": 7
+      },
+      "months_active": [
+        "2025-10",
+        "2025-11",
+        "2025-12",
+        "2026-02"
+      ],
+      "first_ticket": "2025-10-01T17:06:02",
+      "last_ticket": "2026-02-25T03:22:57"
+    },
+    {
+      "user_id": "29758735463186",
+      "ticket_count": 7,
+      "topics": {
+        "Uncategorized": 2,
+        "Bank Transfer / Comprobante": 1,
+        "Bonus / Promotions": 1,
+        "Technical / App / Website": 1,
+        "Greeting Only (no question)": 1,
+        "Casino / Games / Bets": 1
+      },
+      "months_active": [
+        "2025-10"
+      ],
+      "first_ticket": "2025-10-02T05:49:40",
+      "last_ticket": "2025-10-31T02:43:49"
+    },
+    {
+      "user_id": "29994149737746",
+      "ticket_count": 7,
+      "topics": {
+        "Bonus / Promotions": 7
+      },
+      "months_active": [
+        "2025-10"
+      ],
+      "first_ticket": "2025-10-08T03:45:16",
+      "last_ticket": "2025-10-08T22:05:08"
+    },
+    {
+      "user_id": "28000767398418",
+      "ticket_count": 7,
+      "topics": {
+        "Uncategorized": 7
+      },
+      "months_active": [
+        "2025-10"
+      ],
+      "first_ticket": "2025-10-08T17:41:31",
+      "last_ticket": "2025-10-20T09:18:50"
+    },
+    {
+      "user_id": "28236559425042",
+      "ticket_count": 7,
+      "topics": {
+        "Uncategorized": 7
+      },
+      "months_active": [
+        "2025-10"
+      ],
+      "first_ticket": "2025-10-08T18:05:40",
+      "last_ticket": "2025-10-30T00:37:05"
+    }
+  ],
+  "multi_ticket_users_by_month_span": {
+    "1_month": 3763,
+    "2_months": 413,
+    "3_months": 36,
+    "4_months": 3,
+    "5_months": 0
+  }
+}
