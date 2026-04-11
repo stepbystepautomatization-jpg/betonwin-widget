@@ -859,8 +859,8 @@
       /* ═══ MOBILE — WhatsApp-style: fixed fullscreen, keyboard-aware ═══ */
       '@media(max-width:440px){'+
 
-        /* FAB — logo only, above nav bar */
-        '#__beton_widget__{bottom:70px;right:14px;left:auto}'+
+        /* FAB — logo only, above site nav bar (~60px) */
+        '#__beton_widget__{bottom:110px;right:14px;left:auto}'+
         '#bw-trigger{width:48px;height:48px;padding:0;border-radius:50%;justify-content:center}'+
         '#bw-fab-logo{width:42px;height:42px}'+
         '#bw-fab-label{display:none}'+
